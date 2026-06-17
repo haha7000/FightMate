@@ -22,10 +22,10 @@ export default function BookingsPage() {
       {bookings.length === 0 ? (
         <div className="mt-16 text-center">
           <p className="text-4xl">🎟️</p>
-          <p className="mt-4 text-sm text-neutral-400">아직 예약이 없어요</p>
+          <p className="mt-4 text-sm text-neutral-500">아직 예약이 없어요</p>
           <Link
             href="/"
-            className="mt-6 inline-block rounded-xl bg-red-600 px-6 py-3 font-bold text-white"
+            className="mt-6 inline-block rounded-xl bg-orange-500 px-6 py-3 font-bold text-white"
           >
             체육관 둘러보기
           </Link>
@@ -54,22 +54,22 @@ function BookingCard({ booking }: { booking: Booking }) {
   }
 
   return (
-    <li className="rounded-2xl border border-neutral-800 bg-neutral-900 p-4">
+    <li className="rounded-2xl border border-neutral-200 bg-white p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-semibold">{booking.gymName}</p>
-          <p className="mt-0.5 text-xs text-neutral-400">
+          <p className="mt-0.5 text-xs text-neutral-500">
             {booking.type} · {booking.date} · {booking.name}
           </p>
         </div>
-        <span className="rounded-md bg-red-950 px-2 py-1 text-[11px] font-semibold text-red-300">
+        <span className="rounded-md bg-orange-100 px-2 py-1 text-[11px] font-semibold text-orange-700">
           {booking.status}
         </span>
       </div>
 
       <button
         onClick={toggleQr}
-        className="mt-3 w-full rounded-xl border border-neutral-800 py-2.5 text-sm font-medium text-neutral-300 active:bg-neutral-800"
+        className="mt-3 w-full rounded-xl border border-neutral-200 py-2.5 text-sm font-medium text-neutral-600 active:bg-neutral-100"
       >
         {open ? "QR 접기" : "입장 QR 보기"}
       </button>
@@ -78,7 +78,7 @@ function BookingCard({ booking }: { booking: Booking }) {
         <div className="mt-3 flex flex-col items-center rounded-xl bg-white p-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qr} alt="입장 QR" className="h-44 w-44" />
-          <p className="mt-2 text-xs font-medium text-neutral-500">
+          <p className="mt-2 text-xs font-medium text-neutral-400">
             입장 시 직원에게 보여주세요
           </p>
         </div>

@@ -62,11 +62,11 @@ export default function AdminPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-5 pb-16 pt-8 md:pt-12">
-      <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-200">
+      <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800">
         ← FightMate
       </Link>
       <h1 className="mt-4 text-xl font-bold md:text-2xl">관장님 페이지</h1>
-      <p className="mt-1 text-sm text-neutral-400">{gym.name}</p>
+      <p className="mt-1 text-sm text-neutral-500">{gym.name}</p>
 
       <div className="mt-6 flex gap-2">
         <TabButton active={tab === "bookings"} onClick={() => setTab("bookings")}>
@@ -83,7 +83,7 @@ export default function AdminPage() {
       {tab === "bookings" && (
         <section className="mt-5">
           {bookings.length === 0 ? (
-            <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center text-sm text-neutral-500">
+            <div className="rounded-xl border border-neutral-200 bg-white p-8 text-center text-sm text-neutral-400">
               아직 들어온 신청이 없어요.
               <br />
               <span className="text-xs">
@@ -95,27 +95,27 @@ export default function AdminPage() {
               {bookings.map((b) => (
                 <li
                   key={b.id}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+                  className="rounded-xl border border-neutral-200 bg-white p-4"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">{b.name}</p>
-                    <span className="rounded-md bg-red-950 px-2 py-1 text-[11px] font-semibold text-red-300">
+                    <span className="rounded-md bg-orange-100 px-2 py-1 text-[11px] font-semibold text-orange-700">
                       {b.status}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-neutral-400">
+                  <p className="mt-1 text-xs text-neutral-500">
                     {b.type} 희망일 {b.date} · {b.phone}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <a
                       href={`tel:${b.phone}`}
-                      className="flex-1 rounded-lg bg-neutral-800 py-2 text-center text-sm font-medium"
+                      className="flex-1 rounded-lg bg-neutral-100 py-2 text-center text-sm font-medium"
                     >
                       전화하기
                     </a>
                     <a
                       href={`sms:${b.phone}`}
-                      className="flex-1 rounded-lg bg-neutral-800 py-2 text-center text-sm font-medium"
+                      className="flex-1 rounded-lg bg-neutral-100 py-2 text-center text-sm font-medium"
                     >
                       문자하기
                     </a>
@@ -166,8 +166,8 @@ export default function AdminPage() {
             </Field>
           </div>
           <div>
-            <p className="text-sm font-medium text-neutral-300">사진 관리</p>
-            <p className="mt-1 text-xs text-neutral-500">
+            <p className="text-sm font-medium text-neutral-600">사진 관리</p>
+            <p className="mt-1 text-xs text-neutral-400">
               시설·훈련 사진을 올려주세요. 사진이 있는 체육관은 체험 신청률이 훨씬 높아요.
             </p>
             <div className="mt-2 grid grid-cols-3 gap-2">
@@ -188,12 +188,12 @@ export default function AdminPage() {
                   >
                     ✕
                   </button>
-                  <p className="mt-1 truncate text-center text-[10px] text-neutral-500">
+                  <p className="mt-1 truncate text-center text-[10px] text-neutral-400">
                     {photo.caption}
                   </p>
                 </div>
               ))}
-              <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-neutral-700 text-neutral-500">
+              <label className="flex h-20 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-neutral-300 text-neutral-400">
                 <span className="text-lg">＋</span>
                 <span className="text-[10px]">사진 추가</span>
                 <input
@@ -217,7 +217,7 @@ export default function AdminPage() {
             </div>
           </div>
           <div>
-            <p className="text-sm font-medium text-neutral-300">시설 · 제공 사항</p>
+            <p className="text-sm font-medium text-neutral-600">시설 · 제공 사항</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
               {AMENITIES.map(({ key, emoji }) => {
                 const on = gym.amenities.includes(key);
@@ -228,8 +228,8 @@ export default function AdminPage() {
                     onClick={() => toggleAmenity(key)}
                     className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm ${
                       on
-                        ? "border-red-800 bg-red-950/50 text-neutral-100"
-                        : "border-neutral-800 bg-neutral-900 text-neutral-500"
+                        ? "border-orange-300 bg-orange-100/50 text-neutral-900"
+                        : "border-neutral-200 bg-white text-neutral-400"
                     }`}
                   >
                     {emoji} {key} {on && "✓"}
@@ -240,7 +240,7 @@ export default function AdminPage() {
           </div>
           <button
             onClick={() => setSaved(true)}
-            className="mt-2 rounded-xl bg-red-600 py-3 font-bold text-white active:bg-red-700"
+            className="mt-2 rounded-xl bg-orange-500 py-3 font-bold text-white active:bg-orange-600"
           >
             {saved ? "저장됨 ✓ (데모)" : "저장"}
           </button>
@@ -264,8 +264,8 @@ function TabButton({
       onClick={onClick}
       className={`rounded-full px-4 py-2 text-sm font-medium ${
         active
-          ? "bg-red-600 text-white"
-          : "border border-neutral-800 bg-neutral-900 text-neutral-400"
+          ? "bg-orange-500 text-white"
+          : "border border-neutral-200 bg-white text-neutral-500"
       }`}
     >
       {children}
@@ -282,7 +282,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-neutral-300">{label}</span>
+      <span className="text-sm font-medium text-neutral-600">{label}</span>
       {children}
     </label>
   );
@@ -330,7 +330,7 @@ function EventsTab({
 
   return (
     <section className="mt-5">
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-neutral-400">
         오픈매트·세미나·대회를 올리면 홈 피드와 체육관 페이지에 노출돼요. 신규 방문자 유입에 가장 효과적입니다.
       </p>
 
@@ -339,28 +339,28 @@ function EventsTab({
         {events.map((ev) => (
           <li
             key={ev.id}
-            className="flex items-start justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+            className="flex items-start justify-between rounded-xl border border-neutral-200 bg-white p-4"
           >
             <div className="min-w-0">
-              <p className="text-xs text-neutral-400">
+              <p className="text-xs text-neutral-500">
                 {eventKindEmoji(ev.kind)} {ev.kind} · {formatEventDate(ev.date)} {ev.startTime}
               </p>
               <p className="mt-1 truncate font-semibold">{ev.title}</p>
-              <p className="mt-0.5 text-xs text-neutral-500">
+              <p className="mt-0.5 text-xs text-neutral-400">
                 {formatFee(ev.fee)}
                 {ev.capacity ? ` · 정원 ${ev.capacity}명` : ""}
               </p>
             </div>
             <button
               onClick={() => onRemove(ev.id)}
-              className="ml-3 shrink-0 rounded-lg border border-neutral-800 px-2.5 py-1 text-xs text-neutral-400"
+              className="ml-3 shrink-0 rounded-lg border border-neutral-200 px-2.5 py-1 text-xs text-neutral-500"
             >
               삭제
             </button>
           </li>
         ))}
         {events.length === 0 && (
-          <li className="rounded-xl border border-neutral-800 bg-neutral-900 p-6 text-center text-sm text-neutral-500">
+          <li className="rounded-xl border border-neutral-200 bg-white p-6 text-center text-sm text-neutral-400">
             아직 등록한 이벤트가 없어요
           </li>
         )}
@@ -370,14 +370,14 @@ function EventsTab({
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="mt-4 w-full rounded-xl border border-dashed border-neutral-700 py-3 text-sm font-medium text-neutral-300"
+          className="mt-4 w-full rounded-xl border border-dashed border-neutral-300 py-3 text-sm font-medium text-neutral-600"
         >
           ＋ 이벤트 등록
         </button>
       ) : (
         <form
           onSubmit={submit}
-          className="mt-4 flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+          className="mt-4 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4"
         >
           <div className="flex flex-wrap gap-1.5">
             {EVENT_KINDS.map((k) => (
@@ -387,8 +387,8 @@ function EventsTab({
                 onClick={() => setKind(k.key)}
                 className={`rounded-full px-3 py-1.5 text-sm ${
                   kind === k.key
-                    ? "bg-red-600 text-white"
-                    : "border border-neutral-800 text-neutral-300"
+                    ? "bg-orange-500 text-white"
+                    : "border border-neutral-200 text-neutral-600"
                 }`}
               >
                 {k.emoji} {k.key}
@@ -447,7 +447,7 @@ function EventsTab({
               onChange={(e) => setDescription(e.target.value)}
             />
           </Field>
-          <label className="flex items-center gap-2 text-sm text-neutral-300">
+          <label className="flex items-center gap-2 text-sm text-neutral-600">
             <input
               type="checkbox"
               checked={openToVisitors}
@@ -459,13 +459,13 @@ function EventsTab({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="flex-1 rounded-xl border border-neutral-800 py-3 text-sm font-medium text-neutral-300"
+              className="flex-1 rounded-xl border border-neutral-200 py-3 text-sm font-medium text-neutral-600"
             >
               취소
             </button>
             <button
               type="submit"
-              className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white active:bg-red-700"
+              className="flex-1 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white active:bg-orange-600"
             >
               등록
             </button>

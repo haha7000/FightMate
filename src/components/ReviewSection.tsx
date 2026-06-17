@@ -34,12 +34,12 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
   return (
     <section className="mt-6 px-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-neutral-300">
+        <h2 className="text-sm font-semibold text-neutral-600">
           리뷰 {reviews.length}개
         </h2>
         <button
           onClick={() => setWriting((v) => !v)}
-          className="text-xs font-medium text-red-400"
+          className="text-xs font-medium text-orange-600"
         >
           {writing ? "취소" : "리뷰 쓰기"}
         </button>
@@ -48,7 +48,7 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
       {writing && (
         <form
           onSubmit={submit}
-          className="mt-3 flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+          className="mt-3 flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4"
         >
           <div className="flex gap-1">
             {[1, 2, 3, 4, 5].map((n) => (
@@ -77,7 +77,7 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
           />
           <button
             type="submit"
-            className="rounded-xl bg-red-600 py-2.5 text-sm font-bold text-white active:bg-red-700"
+            className="rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white active:bg-orange-600"
           >
             등록
           </button>
@@ -88,16 +88,16 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
         {reviews.map((r) => (
           <li
             key={r.id}
-            className="rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+            className="rounded-xl border border-neutral-200 bg-white p-4"
           >
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold">{r.author}</p>
-              <p className="text-xs text-neutral-500">{r.date}</p>
+              <p className="text-xs text-neutral-400">{r.date}</p>
             </div>
             <p className="mt-1 text-xs text-yellow-400">
               {"⭐".repeat(r.rating)}
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+            <p className="mt-2 text-sm leading-relaxed text-neutral-600">
               {r.text}
             </p>
           </li>

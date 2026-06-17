@@ -1,15 +1,15 @@
 export type EventKind = "오픈매트" | "세미나" | "대회" | "특별수업" | "행사";
 
 export const EVENT_KINDS: { key: EventKind; emoji: string; color: string }[] = [
-  { key: "오픈매트", emoji: "🤼", color: "text-sky-300 bg-sky-950" },
-  { key: "세미나", emoji: "🎓", color: "text-purple-300 bg-purple-950" },
-  { key: "대회", emoji: "🏆", color: "text-amber-300 bg-amber-950" },
-  { key: "특별수업", emoji: "🔥", color: "text-red-300 bg-red-950" },
-  { key: "행사", emoji: "🎉", color: "text-emerald-300 bg-emerald-950" },
+  { key: "오픈매트", emoji: "🤼", color: "text-sky-700 bg-sky-100" },
+  { key: "세미나", emoji: "🎓", color: "text-purple-700 bg-purple-100" },
+  { key: "대회", emoji: "🏆", color: "text-amber-700 bg-amber-100" },
+  { key: "특별수업", emoji: "🔥", color: "text-orange-700 bg-orange-100" },
+  { key: "행사", emoji: "🎉", color: "text-emerald-700 bg-emerald-100" },
 ];
 
 export function eventKindStyle(kind: EventKind): string {
-  return EVENT_KINDS.find((k) => k.key === kind)?.color ?? "text-neutral-300 bg-neutral-800";
+  return EVENT_KINDS.find((k) => k.key === kind)?.color ?? "text-neutral-600 bg-neutral-100";
 }
 
 export function eventKindEmoji(kind: EventKind): string {

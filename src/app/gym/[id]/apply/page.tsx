@@ -53,20 +53,20 @@ export default function ApplyPage({
       <main className="mx-auto flex min-h-dvh max-w-md flex-col items-center justify-center px-5 text-center">
         <div className="text-5xl">🥊</div>
         <h1 className="mt-5 text-xl font-bold">체험 신청 완료!</h1>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
           {gym.name}에 신청이 전달됐어요.
           <br />
           체육관에서 확인 후 연락드릴 거예요.
         </p>
         <button
           onClick={() => router.push("/bookings")}
-          className="mt-8 w-full rounded-xl bg-red-600 py-3.5 font-bold text-white"
+          className="mt-8 w-full rounded-xl bg-orange-500 py-3.5 font-bold text-white"
         >
           내 예약에서 확인하기
         </button>
         <button
           onClick={() => router.push("/")}
-          className="mt-3 w-full rounded-xl bg-neutral-800 py-3.5 font-bold"
+          className="mt-3 w-full rounded-xl bg-neutral-100 py-3.5 font-bold"
         >
           다른 체육관 둘러보기
         </button>
@@ -76,11 +76,11 @@ export default function ApplyPage({
 
   return (
     <main className="mx-auto max-w-md px-5 pb-16 pt-6 md:pt-10">
-      <Link href={`/gym/${id}`} className="text-sm text-neutral-400">
+      <Link href={`/gym/${id}`} className="text-sm text-neutral-500">
         ← {gym.name}
       </Link>
       <h1 className="mt-5 text-xl font-bold">체험 신청</h1>
-      <p className="mt-1 text-sm text-neutral-400">
+      <p className="mt-1 text-sm text-neutral-500">
         {gym.name} · 체험 {formatPrice(gym.trialPrice)}
       </p>
 
@@ -115,16 +115,16 @@ export default function ApplyPage({
           />
         </Field>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && <p className="text-sm text-orange-600">{error}</p>}
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-xl bg-red-600 py-3.5 font-bold text-white active:bg-red-700 disabled:opacity-50"
+          className="mt-2 rounded-xl bg-orange-500 py-3.5 font-bold text-white active:bg-orange-600 disabled:opacity-50"
         >
           {submitting ? "신청 중..." : "신청하기"}
         </button>
-        <p className="text-center text-xs text-neutral-500">
+        <p className="text-center text-xs text-neutral-400">
           결제는 체험 당일 체육관에서 진행돼요. (온라인 결제 준비 중)
         </p>
       </form>
@@ -141,7 +141,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-neutral-300">{label}</span>
+      <span className="text-sm font-medium text-neutral-600">{label}</span>
       {children}
     </label>
   );

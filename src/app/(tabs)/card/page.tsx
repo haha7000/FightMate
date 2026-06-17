@@ -57,21 +57,21 @@ export default function CardPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-xl font-bold md:text-2xl">내 파이터 카드</h1>
-          <p className="mt-1 text-sm text-neutral-400">
+          <p className="mt-1 text-sm text-neutral-500">
             카드를 만들어 인스타에 공유해보세요
           </p>
         </div>
         {user ? (
           <button
             onClick={signOut}
-            className="shrink-0 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-neutral-400 md:hidden"
+            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs text-neutral-500 md:hidden"
           >
             {user.name}님 · 로그아웃
           </button>
         ) : (
           <Link
             href="/login"
-            className="shrink-0 rounded-lg border border-neutral-800 px-3 py-1.5 text-xs text-neutral-300 md:hidden"
+            className="shrink-0 rounded-lg border border-neutral-200 px-3 py-1.5 text-xs text-neutral-600 md:hidden"
           >
             로그인
           </Link>
@@ -83,13 +83,13 @@ export default function CardPage() {
         <div className="md:sticky md:top-8 md:w-1/2">
           <div
             ref={cardRef}
-            className="relative overflow-hidden rounded-2xl border border-neutral-700 bg-gradient-to-b from-neutral-900 to-black p-6"
+            className="relative overflow-hidden rounded-2xl border border-neutral-800 bg-gradient-to-b from-neutral-900 to-black p-6 text-white"
           >
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold tracking-[0.25em] text-red-500">
+              <p className="text-[10px] font-bold tracking-[0.25em] text-orange-500">
                 FIGHTMATE
               </p>
-              <p className="text-[10px] text-neutral-500">FIGHTER CARD</p>
+              <p className="text-[10px] text-neutral-400">FIGHTER CARD</p>
             </div>
 
             <p className="mt-6 text-3xl font-black italic">
@@ -99,7 +99,7 @@ export default function CardPage() {
               {profile.gymName || "소속 체육관"}
             </p>
 
-            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-neutral-800">
+            <div className="mt-6 grid grid-cols-2 gap-px overflow-hidden rounded-xl bg-neutral-700">
               <CardStat label="종목" value={profile.discipline} />
               <CardStat label="체급" value={profile.weightClass || "—"} />
               <CardStat label="수련" value={profile.years ? `${profile.years}년차` : "—"} />
@@ -109,7 +109,7 @@ export default function CardPage() {
               />
             </div>
 
-            <p className="mt-5 text-center text-[10px] text-neutral-600">
+            <p className="mt-5 text-center text-[10px] text-neutral-400">
               fightmate.kr
             </p>
           </div>
@@ -118,12 +118,12 @@ export default function CardPage() {
             <button
               onClick={downloadCard}
               disabled={!ready}
-              className="flex-1 rounded-xl bg-red-600 py-3 font-bold text-white active:bg-red-700 disabled:opacity-40"
+              className="flex-1 rounded-xl bg-orange-500 py-3 font-bold text-white active:bg-orange-600 disabled:opacity-40"
             >
               이미지로 저장
             </button>
           </div>
-          <p className="mt-2 text-center text-xs text-neutral-600">
+          <p className="mt-2 text-center text-xs text-neutral-400">
             저장한 이미지를 인스타 스토리에 올려보세요 🔥
           </p>
         </div>
@@ -189,7 +189,7 @@ export default function CardPage() {
 
           <button
             onClick={save}
-            className="mt-2 rounded-xl border border-neutral-700 py-3 font-bold text-neutral-200 active:bg-neutral-800"
+            className="mt-2 rounded-xl border border-neutral-300 py-3 font-bold text-neutral-800 active:bg-neutral-100"
           >
             {saved ? "저장됨 ✓" : "프로필 저장"}
           </button>
@@ -202,8 +202,8 @@ export default function CardPage() {
 function CardStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-neutral-900 px-4 py-3">
-      <p className="text-[10px] text-neutral-500">{label}</p>
-      <p className="mt-0.5 text-sm font-bold">{value}</p>
+      <p className="text-[10px] text-neutral-400">{label}</p>
+      <p className="mt-0.5 text-sm font-bold text-white">{value}</p>
     </div>
   );
 }
@@ -217,7 +217,7 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-neutral-300">{label}</span>
+      <span className="text-sm font-medium text-neutral-600">{label}</span>
       {children}
     </label>
   );

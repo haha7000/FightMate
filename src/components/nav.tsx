@@ -17,7 +17,7 @@ function isActive(pathname: string, href: string) {
 export function TabBar() {
   const pathname = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-900 bg-neutral-950/95 backdrop-blur md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-neutral-50/95 backdrop-blur md:hidden">
       <div className="mx-auto flex max-w-md">
         {TABS.map((tab) => {
           const active = isActive(pathname, tab.href);
@@ -26,7 +26,7 @@ export function TabBar() {
               key={tab.href}
               href={tab.href}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
-                active ? "text-red-400" : "text-neutral-500"
+                active ? "text-orange-600" : "text-neutral-400"
               }`}
             >
               <span className="text-lg leading-none">{tab.icon}</span>
@@ -43,9 +43,9 @@ export function TopNav() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
   return (
-    <header className="hidden border-b border-neutral-900 md:block">
+    <header className="hidden border-b border-neutral-200 md:block">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className="text-sm font-bold tracking-widest text-red-500">
+        <Link href="/" className="text-sm font-bold tracking-widest text-orange-600">
           FIGHTMATE
         </Link>
         <nav className="flex items-center gap-6">
@@ -55,8 +55,8 @@ export function TopNav() {
               href={tab.href}
               className={`text-sm font-medium ${
                 isActive(pathname, tab.href)
-                  ? "text-neutral-100"
-                  : "text-neutral-500 hover:text-neutral-300"
+                  ? "text-neutral-900"
+                  : "text-neutral-400 hover:text-neutral-600"
               }`}
             >
               {tab.label}
@@ -64,10 +64,10 @@ export function TopNav() {
           ))}
           {user ? (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-neutral-300">{user.name}님</span>
+              <span className="text-sm text-neutral-600">{user.name}님</span>
               <button
                 onClick={signOut}
-                className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm text-neutral-400 hover:border-neutral-700"
+                className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm text-neutral-500 hover:border-neutral-300"
               >
                 로그아웃
               </button>
@@ -75,7 +75,7 @@ export function TopNav() {
           ) : (
             <Link
               href="/login"
-              className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:border-neutral-700"
+              className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm text-neutral-600 hover:border-neutral-300"
             >
               로그인
             </Link>

@@ -15,7 +15,7 @@ export default function EventFeed({ events }: { events: GymEvent[] }) {
     <section className="mb-2 pt-2">
       <div className="flex items-center justify-between px-5">
         <h2 className="text-base font-bold">🔥 다가오는 이벤트</h2>
-        <span className="text-xs text-neutral-500">{events.length}건</span>
+        <span className="text-xs text-neutral-400">{events.length}건</span>
       </div>
 
       <nav className="mt-3 flex gap-2 overflow-x-auto px-5 pb-1">
@@ -40,7 +40,7 @@ export default function EventFeed({ events }: { events: GymEvent[] }) {
       </ul>
 
       {visible.length === 0 && (
-        <p className="px-5 py-6 text-center text-sm text-neutral-500">
+        <p className="px-5 py-6 text-center text-sm text-neutral-400">
           해당 종류의 이벤트가 없어요
         </p>
       )}
@@ -62,8 +62,8 @@ function Chip({
       onClick={onClick}
       className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
         active
-          ? "bg-white text-neutral-900"
-          : "border border-neutral-800 bg-neutral-900 text-neutral-300"
+          ? "bg-neutral-900 text-white"
+          : "border border-neutral-200 bg-white text-neutral-600"
       }`}
     >
       {label}

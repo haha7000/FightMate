@@ -40,7 +40,7 @@ export default async function GymDetailPage({ params }: Props) {
       <header className="px-5 pt-6 md:pt-10">
         <Link
           href="/"
-          className="text-sm text-neutral-400 hover:text-neutral-200"
+          className="text-sm text-neutral-500 hover:text-neutral-800"
         >
           ← 목록으로
         </Link>
@@ -56,7 +56,7 @@ export default async function GymDetailPage({ params }: Props) {
                     alt={`${gym.name} ${photo.caption}`}
                     className="h-44 w-72 rounded-xl object-cover md:h-56 md:w-[22rem]"
                   />
-                  <figcaption className="mt-1.5 text-center text-xs text-neutral-500">
+                  <figcaption className="mt-1.5 text-center text-xs text-neutral-400">
                     {photo.caption}
                   </figcaption>
                 </figure>
@@ -64,19 +64,19 @@ export default async function GymDetailPage({ params }: Props) {
             </div>
           </div>
         ) : (
-          <div className="mt-5 flex h-40 items-center justify-center rounded-2xl bg-neutral-900 text-6xl md:h-56 md:text-7xl">
+          <div className="mt-5 flex h-40 items-center justify-center rounded-2xl bg-white text-6xl md:h-56 md:text-7xl">
             {gym.emoji}
           </div>
         )}
         <h1 className="mt-5 text-xl font-bold">{gym.name}</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <p className="mt-1 text-sm text-neutral-500">
           {gym.district} · ⭐ {gym.rating} · 리뷰 {gym.reviewCount}개
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {gym.disciplines.map((d) => (
             <span
               key={d}
-              className="rounded-md bg-neutral-800 px-2 py-1 text-xs text-neutral-300"
+              className="rounded-md bg-neutral-100 px-2 py-1 text-xs text-neutral-600"
             >
               {d}
             </span>
@@ -85,17 +85,17 @@ export default async function GymDetailPage({ params }: Props) {
       </header>
 
       <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-300">소개</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+        <h2 className="text-sm font-semibold text-neutral-600">소개</h2>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
           {gym.intro}
         </p>
-        <p className="mt-3 text-xs text-neutral-500">{gym.address}</p>
+        <p className="mt-3 text-xs text-neutral-400">{gym.address}</p>
       </section>
 
       <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-300">시설 · 제공 사항</h2>
+        <h2 className="text-sm font-semibold text-neutral-600">시설 · 제공 사항</h2>
         {isHandsFree(gym) && (
-          <p className="mt-2 inline-block rounded-lg bg-red-950 px-2.5 py-1.5 text-xs font-semibold text-red-300">
+          <p className="mt-2 inline-block rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
             🙌 몸만 가도 OK — 운동복·수건 제공
           </p>
         )}
@@ -107,8 +107,8 @@ export default async function GymDetailPage({ params }: Props) {
                 key={key}
                 className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm ${
                   has
-                    ? "border-neutral-800 bg-neutral-900 text-neutral-200"
-                    : "border-neutral-900 bg-neutral-950 text-neutral-600 line-through"
+                    ? "border-neutral-200 bg-white text-neutral-800"
+                    : "border-neutral-200 bg-neutral-50 text-neutral-400 line-through"
                 }`}
               >
                 <span className={has ? "" : "grayscale opacity-40"}>{emoji}</span>
@@ -118,7 +118,7 @@ export default async function GymDetailPage({ params }: Props) {
           })}
         </ul>
         {!isHandsFree(gym) && (
-          <p className="mt-2 text-xs text-neutral-500">
+          <p className="mt-2 text-xs text-neutral-400">
             {gym.amenities.includes("운동복 대여")
               ? "수건은 직접 챙겨가세요."
               : gym.amenities.includes("수건 제공")
@@ -129,22 +129,22 @@ export default async function GymDetailPage({ params }: Props) {
       </section>
 
       <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-300">가격</h2>
-        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-800">
+        <h2 className="text-sm font-semibold text-neutral-600">가격</h2>
+        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200">
           <PriceRow label="체험 1회" value={formatPrice(gym.trialPrice)} highlight />
           <PriceRow label="1일권 (오픈매트·자유운동)" value={formatPrice(gym.dayPassPrice)} />
           {gym.monthlyPrice && (
             <PriceRow label="정기권 (월)" value={formatPrice(gym.monthlyPrice)} />
           )}
         </div>
-        <p className="mt-2 text-xs text-neutral-500">
+        <p className="mt-2 text-xs text-neutral-400">
           정기권 등록은 체험 후 체육관에서 직접 진행돼요.
         </p>
       </section>
 
       {events.length > 0 && (
         <section className="mt-6 px-5">
-          <h2 className="text-sm font-semibold text-neutral-300">
+          <h2 className="text-sm font-semibold text-neutral-600">
             다가오는 이벤트
           </h2>
           <ul className="mt-3 flex flex-col gap-3">
@@ -160,10 +160,10 @@ export default async function GymDetailPage({ params }: Props) {
       <ReviewSection gymId={gym.id} />
 
       {/* 모바일: 하단 고정 CTA */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-900 bg-neutral-950/95 p-4 backdrop-blur md:hidden">
+      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-neutral-50/95 p-4 backdrop-blur md:hidden">
         <Link
           href={`/gym/${gym.id}/apply`}
-          className="mx-auto block w-full max-w-2xl rounded-xl bg-red-600 py-3.5 text-center font-bold text-white active:bg-red-700"
+          className="mx-auto block w-full max-w-2xl rounded-xl bg-orange-500 py-3.5 text-center font-bold text-white active:bg-orange-600"
         >
           체험 신청하기 · {formatPrice(gym.trialPrice)}
         </Link>
@@ -173,7 +173,7 @@ export default async function GymDetailPage({ params }: Props) {
       <div className="hidden px-5 pt-8 md:block">
         <Link
           href={`/gym/${gym.id}/apply`}
-          className="block w-full rounded-xl bg-red-600 py-3.5 text-center font-bold text-white hover:bg-red-700"
+          className="block w-full rounded-xl bg-orange-500 py-3.5 text-center font-bold text-white hover:bg-orange-600"
         >
           체험 신청하기 · {formatPrice(gym.trialPrice)}
         </Link>
@@ -192,9 +192,9 @@ function PriceRow({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-4 py-3 last:border-b-0">
-      <span className="text-sm text-neutral-300">{label}</span>
-      <span className={`text-sm font-bold ${highlight ? "text-red-400" : ""}`}>
+    <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 last:border-b-0">
+      <span className="text-sm text-neutral-600">{label}</span>
+      <span className={`text-sm font-bold ${highlight ? "text-orange-600" : ""}`}>
         {value}
       </span>
     </div>

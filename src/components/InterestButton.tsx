@@ -25,8 +25,8 @@ export default function InterestButton({ eventId }: { eventId: string }) {
       onClick={toggle}
       className={`w-full rounded-xl py-3.5 text-center font-bold transition-colors ${
         interested
-          ? "bg-neutral-800 text-red-400"
-          : "bg-red-600 text-white active:bg-red-700"
+          ? "bg-neutral-100 text-orange-600"
+          : "bg-orange-500 text-white active:bg-orange-600"
       }`}
     >
       {interested ? "❤️ 관심 등록됨" : "🤍 관심있어요"}

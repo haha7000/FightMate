@@ -18,7 +18,7 @@ export default function EventCard({
   return (
     <Link
       href={`/event/${event.id}`}
-      className="block rounded-2xl border border-neutral-800 bg-neutral-900 p-4 transition-colors hover:border-neutral-700 active:bg-neutral-800"
+      className="block rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md active:bg-neutral-100"
     >
       <div className="flex items-center gap-2">
         <span
@@ -29,11 +29,11 @@ export default function EventCard({
           {eventKindEmoji(event.kind)} {event.kind}
         </span>
         {event.openToVisitors && (
-          <span className="rounded-md bg-neutral-800 px-1.5 py-0.5 text-[11px] text-neutral-300">
+          <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[11px] text-neutral-600">
             방문 환영
           </span>
         )}
-        <span className="ml-auto text-sm font-bold text-neutral-200">
+        <span className="ml-auto text-sm font-bold text-neutral-800">
           {formatEventDate(event.date)}
         </span>
       </div>
@@ -41,13 +41,13 @@ export default function EventCard({
       <h3 className="mt-2 font-semibold leading-snug">{event.title}</h3>
 
       {showGym && (
-        <p className="mt-0.5 text-xs text-neutral-400">{event.gymName}</p>
+        <p className="mt-0.5 text-xs text-neutral-500">{event.gymName}</p>
       )}
 
-      <div className="mt-2 flex items-center gap-2 text-xs text-neutral-400">
+      <div className="mt-2 flex items-center gap-2 text-xs text-neutral-500">
         <span>🕐 {event.startTime}</span>
         <span>·</span>
-        <span className={event.fee === 0 ? "text-red-400" : ""}>
+        <span className={event.fee === 0 ? "text-orange-600" : ""}>
           {formatFee(event.fee)}
         </span>
         {event.capacity && (

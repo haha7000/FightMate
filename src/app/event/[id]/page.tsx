@@ -41,7 +41,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   return (
     <main className="mx-auto max-w-2xl px-5 pb-28 pt-6 md:pb-16 md:pt-10">
-      <Link href="/" className="text-sm text-neutral-400 hover:text-neutral-200">
+      <Link href="/" className="text-sm text-neutral-500 hover:text-neutral-800">
         ← 목록으로
       </Link>
 
@@ -54,7 +54,7 @@ export default async function EventDetailPage({ params }: Props) {
           {eventKindEmoji(event.kind)} {event.kind}
         </span>
         {event.openToVisitors && (
-          <span className="rounded-md bg-neutral-800 px-2 py-1 text-xs text-neutral-300">
+          <span className="rounded-md bg-neutral-100 px-2 py-1 text-xs text-neutral-600">
             타 체육관 방문 환영
           </span>
         )}
@@ -66,12 +66,12 @@ export default async function EventDetailPage({ params }: Props) {
 
       <Link
         href={`/gym/${event.gymId}`}
-        className="mt-2 inline-block text-sm text-red-400"
+        className="mt-2 inline-block text-sm text-orange-600"
       >
         {event.gymName} →
       </Link>
 
-      <dl className="mt-6 overflow-hidden rounded-xl border border-neutral-800">
+      <dl className="mt-6 overflow-hidden rounded-xl border border-neutral-200">
         <Row label="일시" value={`${formatEventDate(event.date)} ${event.startTime}`} />
         <Row label="참가비" value={formatFee(event.fee)} highlight={event.fee === 0} />
         <Row
@@ -82,17 +82,17 @@ export default async function EventDetailPage({ params }: Props) {
       </dl>
 
       <section className="mt-6">
-        <h2 className="text-sm font-semibold text-neutral-300">상세 안내</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+        <h2 className="text-sm font-semibold text-neutral-600">상세 안내</h2>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-600">
           {event.description}
         </p>
       </section>
 
       {/* 모바일: 하단 고정 / 데스크톱: 인라인 */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-900 bg-neutral-950/95 p-4 backdrop-blur md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
+      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-neutral-50/95 p-4 backdrop-blur md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
         <div className="mx-auto max-w-2xl">
           <InterestButton eventId={event.id} />
-          <p className="mt-2 text-center text-xs text-neutral-500 md:mb-0">
+          <p className="mt-2 text-center text-xs text-neutral-400 md:mb-0">
             참가 신청은 체육관에 문의하세요. (온라인 신청 준비 중)
           </p>
         </div>
@@ -111,9 +111,9 @@ function Row({
   highlight?: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-4 py-3 last:border-b-0">
-      <span className="text-sm text-neutral-400">{label}</span>
-      <span className={`text-sm font-medium ${highlight ? "text-red-400" : ""}`}>
+    <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 last:border-b-0">
+      <span className="text-sm text-neutral-500">{label}</span>
+      <span className={`text-sm font-medium ${highlight ? "text-orange-600" : ""}`}>
         {value}
       </span>
     </div>
