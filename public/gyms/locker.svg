@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0%" stop-color="#292524"/><stop offset="100%" stop-color="#1c1917"/>
+</linearGradient></defs>
+<rect width="800" height="500" fill="url(#g)"/>
+<text x="400" y="240" font-size="120" text-anchor="middle">🔐</text>
+<text x="400" y="340" font-size="36" text-anchor="middle" fill="#a3a3a3" font-family="sans-serif" font-weight="bold">락커룸</text>
+<text x="400" y="470" font-size="20" text-anchor="middle" fill="#525252" font-family="sans-serif">체육관 등록 사진 (데모)</text>
+</svg>

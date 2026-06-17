@@ -1,0 +1,87 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+
+const TABS = [
+  { href: "/", label: "홈", icon: "🏠" },
+  { href: "/bookings", label: "내 예약", icon: "🎟️" },
+  { href: "/card", label: "내 카드", icon: "🃏" },
+];
+
+function isActive(pathname: string, href: string) {
+  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+}
+
+export function TabBar() {
+  const pathname = usePathname();
+  return (
+    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-900 bg-neutral-950/95 backdrop-blur md:hidden">
+      <div className="mx-auto flex max-w-md">
+        {TABS.map((tab) => {
+          const active = isActive(pathname, tab.href);
+          return (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
+                active ? "text-red-400" : "text-neutral-500"
+              }`}
+            >
+              <span className="text-lg leading-none">{tab.icon}</span>
+              {tab.label}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+export function TopNav() {
+  const pathname = usePathname();
+  const { user, signOut } = useAuth();
+  return (
+    <header className="hidden border-b border-neutral-900 md:block">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
+        <Link href="/" className="text-sm font-bold tracking-widest text-red-500">
+          FIGHTMATE
+        </Link>
+        <nav className="flex items-center gap-6">
+          {TABS.map((tab) => (
+            <Link
+              key={tab.href}
+              href={tab.href}
+              className={`text-sm font-medium ${
+                isActive(pathname, tab.href)
+                  ? "text-neutral-100"
+                  : "text-neutral-500 hover:text-neutral-300"
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-neutral-300">{user.name}님</span>
+              <button
+                onClick={signOut}
+                className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm text-neutral-400 hover:border-neutral-700"
+              >
+                로그아웃
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm text-neutral-300 hover:border-neutral-700"
+            >
+              로그인
+            </Link>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}
