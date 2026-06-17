@@ -5,20 +5,47 @@ import Link from "next/link";
 import { AMENITIES, MOCK_GYMS, type Amenity, type Gym } from "@/lib/gyms";
 import { type Booking } from "@/lib/store";
 import { fetchBookings } from "@/lib/data.client";
+import {
+  EVENT_KINDS,
+  MOCK_EVENTS,
+  eventKindEmoji,
+  formatEventDate,
+  formatFee,
+  upcoming,
+  type EventKind,
+  type GymEvent,
+} from "@/lib/events";
 
 // 데모: 첫 번째 체육관의 관장이라고 가정.
 // TODO(M1→M2): 로그인한 관장의 체육관을 Supabase에서 로드/저장
 export default function AdminPage() {
   const [gym, setGym] = useState<Gym>(MOCK_GYMS[0]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [events, setEvents] = useState<GymEvent[]>([]);
   const [saved, setSaved] = useState(false);
-  const [tab, setTab] = useState<"info" | "bookings">("bookings");
+  const [tab, setTab] = useState<"info" | "bookings" | "events">("bookings");
 
   useEffect(() => {
     fetchBookings().then((all) =>
       setBookings(all.filter((b) => b.gymId === gym.id))
     );
+    // 데모: 목데이터에서 해당 체육관 이벤트 로드. (실제 저장은 M2 Supabase)
+    setEvents(upcoming(MOCK_EVENTS.filter((e) => e.gymId === gym.id)));
   }, [gym.id]);
+
+  function addEvent(ev: Omit<GymEvent, "id" | "gymId" | "gymName">) {
+    const full: GymEvent = {
+      ...ev,
+      id: `ev-local-${Date.now()}`,
+      gymId: gym.id,
+      gymName: gym.name,
+    };
+    setEvents((list) => upcoming([full, ...list]));
+  }
+
+  function removeEvent(id: string) {
+    setEvents((list) => list.filter((e) => e.id !== id));
+  }
 
   function update(patch: Partial<Gym>) {
     setGym((g) => ({ ...g, ...patch }));
@@ -45,12 +72,15 @@ export default function AdminPage() {
         <TabButton active={tab === "bookings"} onClick={() => setTab("bookings")}>
           신청 목록 {bookings.length > 0 && `(${bookings.length})`}
         </TabButton>
+        <TabButton active={tab === "events"} onClick={() => setTab("events")}>
+          이벤트 {events.length > 0 && `(${events.length})`}
+        </TabButton>
         <TabButton active={tab === "info"} onClick={() => setTab("info")}>
           체육관 정보
         </TabButton>
       </div>
 
-      {tab === "bookings" ? (
+      {tab === "bookings" && (
         <section className="mt-5">
           {bookings.length === 0 ? (
             <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-8 text-center text-sm text-neutral-500">
@@ -95,7 +125,13 @@ export default function AdminPage() {
             </ul>
           )}
         </section>
-      ) : (
+      )}
+
+      {tab === "events" && (
+        <EventsTab events={events} onAdd={addEvent} onRemove={removeEvent} />
+      )}
+
+      {tab === "info" && (
         <section className="mt-5 flex flex-col gap-4">
           <Field label="체육관 이름">
             <input
@@ -249,5 +285,193 @@ function Field({
       <span className="text-sm font-medium text-neutral-300">{label}</span>
       {children}
     </label>
+  );
+}
+
+function EventsTab({
+  events,
+  onAdd,
+  onRemove,
+}: {
+  events: GymEvent[];
+  onAdd: (ev: Omit<GymEvent, "id" | "gymId" | "gymName">) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [kind, setKind] = useState<EventKind>("오픈매트");
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [startTime, setStartTime] = useState("14:00");
+  const [fee, setFee] = useState("0");
+  const [capacity, setCapacity] = useState("");
+  const [description, setDescription] = useState("");
+  const [openToVisitors, setOpenToVisitors] = useState(true);
+  const [open, setOpen] = useState(events.length === 0);
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!title.trim() || !date) return;
+    onAdd({
+      kind,
+      title: title.trim(),
+      date,
+      startTime,
+      fee: Number(fee) || 0,
+      capacity: capacity ? Number(capacity) : null,
+      description: description.trim(),
+      openToVisitors,
+    });
+    setTitle("");
+    setDate("");
+    setFee("0");
+    setCapacity("");
+    setDescription("");
+    setOpen(false);
+  }
+
+  return (
+    <section className="mt-5">
+      <p className="text-xs text-neutral-500">
+        오픈매트·세미나·대회를 올리면 홈 피드와 체육관 페이지에 노출돼요. 신규 방문자 유입에 가장 효과적입니다.
+      </p>
+
+      {/* 등록된 이벤트 목록 */}
+      <ul className="mt-4 flex flex-col gap-3">
+        {events.map((ev) => (
+          <li
+            key={ev.id}
+            className="flex items-start justify-between rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+          >
+            <div className="min-w-0">
+              <p className="text-xs text-neutral-400">
+                {eventKindEmoji(ev.kind)} {ev.kind} · {formatEventDate(ev.date)} {ev.startTime}
+              </p>
+              <p className="mt-1 truncate font-semibold">{ev.title}</p>
+              <p className="mt-0.5 text-xs text-neutral-500">
+                {formatFee(ev.fee)}
+                {ev.capacity ? ` · 정원 ${ev.capacity}명` : ""}
+              </p>
+            </div>
+            <button
+              onClick={() => onRemove(ev.id)}
+              className="ml-3 shrink-0 rounded-lg border border-neutral-800 px-2.5 py-1 text-xs text-neutral-400"
+            >
+              삭제
+            </button>
+          </li>
+        ))}
+        {events.length === 0 && (
+          <li className="rounded-xl border border-neutral-800 bg-neutral-900 p-6 text-center text-sm text-neutral-500">
+            아직 등록한 이벤트가 없어요
+          </li>
+        )}
+      </ul>
+
+      {/* 추가 토글 */}
+      {!open ? (
+        <button
+          onClick={() => setOpen(true)}
+          className="mt-4 w-full rounded-xl border border-dashed border-neutral-700 py-3 text-sm font-medium text-neutral-300"
+        >
+          ＋ 이벤트 등록
+        </button>
+      ) : (
+        <form
+          onSubmit={submit}
+          className="mt-4 flex flex-col gap-3 rounded-xl border border-neutral-800 bg-neutral-900 p-4"
+        >
+          <div className="flex flex-wrap gap-1.5">
+            {EVENT_KINDS.map((k) => (
+              <button
+                key={k.key}
+                type="button"
+                onClick={() => setKind(k.key)}
+                className={`rounded-full px-3 py-1.5 text-sm ${
+                  kind === k.key
+                    ? "bg-red-600 text-white"
+                    : "border border-neutral-800 text-neutral-300"
+                }`}
+              >
+                {k.emoji} {k.key}
+              </button>
+            ))}
+          </div>
+          <input
+            className="input"
+            placeholder="이벤트 제목 (예: 토요 오픈매트)"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="날짜">
+              <input
+                className="input"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+              />
+            </Field>
+            <Field label="시작 시간">
+              <input
+                className="input"
+                type="time"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="참가비 (원, 0=무료)">
+              <input
+                className="input"
+                type="number"
+                min="0"
+                value={fee}
+                onChange={(e) => setFee(e.target.value)}
+              />
+            </Field>
+            <Field label="정원 (빈칸=제한없음)">
+              <input
+                className="input"
+                type="number"
+                min="0"
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+              />
+            </Field>
+          </div>
+          <Field label="상세 안내">
+            <textarea
+              className="input min-h-20 resize-none"
+              placeholder="대상, 준비물, 진행 방식 등을 적어주세요."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </Field>
+          <label className="flex items-center gap-2 text-sm text-neutral-300">
+            <input
+              type="checkbox"
+              checked={openToVisitors}
+              onChange={(e) => setOpenToVisitors(e.target.checked)}
+            />
+            타 체육관·외부인 참가 환영
+          </label>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex-1 rounded-xl border border-neutral-800 py-3 text-sm font-medium text-neutral-300"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="flex-1 rounded-xl bg-red-600 py-3 text-sm font-bold text-white active:bg-red-700"
+            >
+              등록
+            </button>
+          </div>
+        </form>
+      )}
+    </section>
   );
 }

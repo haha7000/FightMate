@@ -2,8 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { AMENITIES, MOCK_GYMS, formatPrice, isHandsFree } from "@/lib/gyms";
-import { getGymById } from "@/lib/data.server";
+import { getEventsByGym, getGymById } from "@/lib/data.server";
 import ReviewSection from "@/components/ReviewSection";
+import EventCard from "@/components/EventCard";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -32,6 +33,7 @@ export default async function GymDetailPage({ params }: Props) {
   const { id } = await params;
   const gym = await getGymById(id);
   if (!gym) notFound();
+  const events = await getEventsByGym(id);
 
   return (
     <main className="mx-auto max-w-2xl pb-28 md:pb-16">
@@ -139,6 +141,21 @@ export default async function GymDetailPage({ params }: Props) {
           정기권 등록은 체험 후 체육관에서 직접 진행돼요.
         </p>
       </section>
+
+      {events.length > 0 && (
+        <section className="mt-6 px-5">
+          <h2 className="text-sm font-semibold text-neutral-300">
+            다가오는 이벤트
+          </h2>
+          <ul className="mt-3 flex flex-col gap-3">
+            {events.map((ev) => (
+              <li key={ev.id}>
+                <EventCard event={ev} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <ReviewSection gymId={gym.id} />
 

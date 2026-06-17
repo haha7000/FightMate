@@ -1,8 +1,9 @@
 import GymList from "@/components/GymList";
-import { getGyms } from "@/lib/data.server";
+import EventFeed from "@/components/EventFeed";
+import { getGyms, getUpcomingEvents } from "@/lib/data.server";
 
 export default async function HomePage() {
-  const gyms = await getGyms();
+  const [gyms, events] = await Promise.all([getGyms(), getUpcomingEvents()]);
 
   return (
     <main className="mx-auto max-w-6xl pb-16">
@@ -19,6 +20,9 @@ export default async function HomePage() {
         </p>
       </header>
 
+      <EventFeed events={events} />
+
+      <h2 className="px-5 pt-4 pb-1 text-base font-bold">체육관 둘러보기</h2>
       <GymList gyms={gyms} />
     </main>
   );

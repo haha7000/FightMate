@@ -68,6 +68,27 @@ create table if not exists reviews (
 );
 
 -- ──────────────────────────────────────────────
+-- 5. 이벤트 (오픈매트·세미나·대회 등)
+-- ──────────────────────────────────────────────
+create table if not exists events (
+  id               text primary key,
+  gym_id           text not null references gyms(id),
+  gym_name         text not null,
+  kind             text not null default '오픈매트',  -- 오픈매트|세미나|대회|특별수업|행사
+  title            text not null,
+  date             date not null,
+  start_time       text not null default '14:00',
+  fee              integer not null default 0,
+  capacity         integer,
+  description      text not null default '',
+  open_to_visitors boolean not null default true,
+  created_at       timestamptz not null default now()
+);
+
+create index if not exists events_date_idx on events (date);
+create index if not exists events_gym_idx on events (gym_id);
+
+-- ──────────────────────────────────────────────
 -- RLS (Row Level Security)
 -- anon 키는 공개되므로 반드시 켠다.
 -- ──────────────────────────────────────────────
@@ -75,6 +96,7 @@ alter table gyms     enable row level security;
 alter table profiles enable row level security;
 alter table bookings enable row level security;
 alter table reviews  enable row level security;
+alter table events   enable row level security;
 
 -- 체육관: 누구나 조회, 소유 관장만 수정
 drop policy if exists "gyms_public_read" on gyms;
@@ -104,6 +126,14 @@ drop policy if exists "reviews_public_read" on reviews;
 create policy "reviews_public_read" on reviews for select using (true);
 drop policy if exists "reviews_insert" on reviews;
 create policy "reviews_insert" on reviews for insert with check (true);
+
+-- 이벤트: 누구나 조회, 해당 체육관 관장만 등록/수정/삭제
+drop policy if exists "events_public_read" on events;
+create policy "events_public_read" on events for select using (true);
+drop policy if exists "events_owner_write" on events;
+create policy "events_owner_write" on events for all using (
+  auth.uid() = (select owner_id from gyms where gyms.id = events.gym_id)
+);
 
 -- ──────────────────────────────────────────────
 -- 프로필 생성 정책
