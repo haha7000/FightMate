@@ -68,15 +68,15 @@ export default async function GymDetailPage({ params }: Props) {
             {gym.emoji}
           </div>
         )}
-        <h1 className="mt-5 text-xl font-bold">{gym.name}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="display mt-6 text-3xl md:text-4xl">{gym.name}</h1>
+        <p className="mt-2 text-sm text-neutral-500">
           {gym.district} · ⭐ {gym.rating} · 리뷰 {gym.reviewCount}개
         </p>
         <div className="mt-3 flex flex-wrap gap-1.5">
           {gym.disciplines.map((d) => (
             <span
               key={d}
-              className="rounded-md bg-neutral-100 px-2 py-1 text-xs text-neutral-600"
+              className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700"
             >
               {d}
             </span>

@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   DISCIPLINES,
-  formatPrice,
   isHandsFree,
   type Discipline,
   type Gym,
@@ -35,56 +34,63 @@ export default function GymList({ gyms }: { gyms: Gym[] }) {
         ))}
       </nav>
 
-      <ul className="grid grid-cols-1 gap-3 px-5 md:grid-cols-2 md:gap-4 lg:grid-cols-3">
+      <ul className="grid grid-cols-1 gap-5 px-5 sm:grid-cols-2 md:gap-6 lg:grid-cols-3">
         {visible.map((gym) => (
           <li key={gym.id}>
             <Link
               href={`/gym/${gym.id}`}
-              className="block h-full rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md active:bg-neutral-100"
+              className="group block overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl"
             >
-              <div className="flex items-start gap-3">
+              {/* 큰 이미지 */}
+              <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
                 {gym.photos.length > 0 ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={gym.photos[0].src}
                     alt={gym.name}
-                    className="h-12 w-12 shrink-0 rounded-xl object-cover"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-2xl">
+                  <div className="flex h-full w-full items-center justify-center text-5xl">
                     {gym.emoji}
                   </div>
                 )}
-                <div className="min-w-0 flex-1">
-                  <h2 className="truncate font-semibold">{gym.name}</h2>
-                  <p className="mt-0.5 text-xs text-neutral-500">
-                    {gym.district} · ⭐ {gym.rating} ({gym.reviewCount})
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {gym.disciplines.map((d) => (
-                      <span
-                        key={d}
-                        className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[11px] text-neutral-600"
-                      >
-                        {d}
-                      </span>
-                    ))}
-                    {isHandsFree(gym) && (
-                      <span className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[11px] font-medium text-orange-700">
-                        🙌 몸만 와도 OK
-                      </span>
-                    )}
-                  </div>
+                <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                  {gym.trialPrice === 0 && (
+                    <span className="rounded-full bg-orange-500 px-2.5 py-1 text-[11px] font-bold text-white shadow">
+                      체험 무료
+                    </span>
+                  )}
+                  {isHandsFree(gym) && (
+                    <span className="rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold text-neutral-900 shadow">
+                      🙌 몸만 와도 OK
+                    </span>
+                  )}
                 </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-[11px] text-neutral-400">체험</p>
-                  <p
-                    className={`text-sm font-bold ${
-                      gym.trialPrice === 0 ? "text-orange-600" : ""
-                    }`}
-                  >
-                    {formatPrice(gym.trialPrice)}
-                  </p>
+              </div>
+
+              {/* 정보 */}
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-lg font-extrabold leading-tight tracking-tight">
+                    {gym.name}
+                  </h3>
+                  <span className="shrink-0 pt-0.5 text-sm font-bold text-neutral-700">
+                    ⭐ {gym.rating}
+                  </span>
+                </div>
+                <p className="mt-1 text-sm text-neutral-500">
+                  {gym.district} · 리뷰 {gym.reviewCount}
+                </p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {gym.disciplines.map((d) => (
+                    <span
+                      key={d}
+                      className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700"
+                    >
+                      {d}
+                    </span>
+                  ))}
                 </div>
               </div>
             </Link>

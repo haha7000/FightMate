@@ -13,9 +13,9 @@ export default function EventFeed({ events }: { events: GymEvent[] }) {
 
   return (
     <section className="mb-2 pt-2">
-      <div className="flex items-center justify-between px-5">
-        <h2 className="text-base font-bold">🔥 다가오는 이벤트</h2>
-        <span className="text-xs text-neutral-400">{events.length}건</span>
+      <div className="flex items-baseline justify-between px-5">
+        <h2 className="display text-2xl md:text-3xl">🔥 다가오는 이벤트</h2>
+        <span className="text-sm text-neutral-400">{events.length}건</span>
       </div>
 
       <nav className="mt-3 flex gap-2 overflow-x-auto px-5 pb-1">
