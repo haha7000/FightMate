@@ -62,7 +62,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 41,
     emoji: "🥋",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "개인 락커"],
-    photos: [{ src: "/gyms/mat.svg", caption: "매트 존" }, { src: "/gyms/class.svg", caption: "그룹 클래스" }, { src: "/gyms/shower.svg", caption: "샤워실" }, { src: "/gyms/reception.svg", caption: "리셉션" }],
+    photos: [{ src: "/gyms/gracie-1.jpg", caption: "스파링" }, { src: "/gyms/gracie-2.jpg", caption: "기술 훈련" }, { src: "/gyms/gracie-3.jpg", caption: "오픈매트" }],
   },
   {
     id: "ironfist-gangnam",
@@ -78,7 +78,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 27,
     emoji: "🥊",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "글러브·장비 대여"],
-    photos: [{ src: "/gyms/striking.svg", caption: "타격 존" }, { src: "/gyms/ring.svg", caption: "링" }, { src: "/gyms/class.svg", caption: "그룹 클래스" }, { src: "/gyms/locker.svg", caption: "락커룸" }],
+    photos: [{ src: "/gyms/ironfist-1.jpg", caption: "미트 트레이닝" }, { src: "/gyms/ironfist-2.jpg", caption: "샌드백 훈련" }, { src: "/gyms/ironfist-3.jpg", caption: "스파링" }],
   },
   {
     id: "topteam-seolleung",
@@ -94,7 +94,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 63,
     emoji: "🏆",
     amenities: ["운동복 대여", "샤워실", "개인 락커", "글러브·장비 대여", "주차 가능"],
-    photos: [{ src: "/gyms/ring.svg", caption: "케이지" }, { src: "/gyms/mat.svg", caption: "매트 존" }, { src: "/gyms/striking.svg", caption: "타격 존" }, { src: "/gyms/class.svg", caption: "시합반 훈련" }, { src: "/gyms/locker.svg", caption: "락커룸" }],
+    photos: [{ src: "/gyms/topteam-1.jpg", caption: "케이지 스파링" }, { src: "/gyms/topteam-2.jpg", caption: "그래플링" }, { src: "/gyms/topteam-3.jpg", caption: "시합반 훈련" }],
   },
   {
     id: "muay-thai-sinsa",
@@ -110,7 +110,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 35,
     emoji: "🇹🇭",
     amenities: ["수건 제공", "샤워실", "글러브·장비 대여"],
-    photos: [{ src: "/gyms/striking.svg", caption: "타격 존" }, { src: "/gyms/class.svg", caption: "그룹 클래스" }, { src: "/gyms/shower.svg", caption: "샤워실" }],
+    photos: [{ src: "/gyms/muaythai-1.jpg", caption: "클린치 훈련" }, { src: "/gyms/muaythai-2.jpg", caption: "패드 훈련" }, { src: "/gyms/muaythai-3.jpg", caption: "스파링" }],
   },
   {
     id: "wrestling-club-yangjae",
@@ -126,7 +126,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 19,
     emoji: "🤼",
     amenities: ["샤워실", "주차 가능"],
-    photos: [{ src: "/gyms/mat.svg", caption: "매트 존" }, { src: "/gyms/class.svg", caption: "그룹 클래스" }],
+    photos: [{ src: "/gyms/wrestling-1.jpg", caption: "케이지 훈련" }, { src: "/gyms/wrestling-2.jpg", caption: "테이크다운" }, { src: "/gyms/wrestling-3.jpg", caption: "스파링" }],
   },
   {
     id: "checkmat-apgujeong",
@@ -142,7 +142,7 @@ export const MOCK_GYMS: Gym[] = [
     reviewCount: 52,
     emoji: "🟦",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "개인 락커", "주차 가능"],
-    photos: [{ src: "/gyms/mat.svg", caption: "매트 존" }, { src: "/gyms/class.svg", caption: "노기 클래스" }, { src: "/gyms/shower.svg", caption: "샤워실" }, { src: "/gyms/locker.svg", caption: "락커룸" }, { src: "/gyms/reception.svg", caption: "리셉션" }],
+    photos: [{ src: "/gyms/checkmat-1.jpg", caption: "노기 롤링" }, { src: "/gyms/checkmat-2.jpg", caption: "기술 훈련" }, { src: "/gyms/checkmat-3.jpg", caption: "오픈매트" }],
   },
 ];
 
