@@ -8,8 +8,11 @@ import {
   eventKindStyle,
   formatEventDate,
   formatFee,
+  isAlmostFull,
+  isFull,
+  seatsLeft,
 } from "@/lib/events";
-import InterestButton from "@/components/InterestButton";
+import RsvpButton from "@/components/RsvpButton";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -45,6 +48,15 @@ export default async function EventDetailPage({ params }: Props) {
         ← 목록으로
       </Link>
 
+      {event.posterUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={event.posterUrl}
+          alt={`${event.title} 포스터`}
+          className="mt-5 w-full rounded-2xl border border-neutral-200 object-cover"
+        />
+      )}
+
       <div className="mt-5 flex items-center gap-2">
         <span
           className={`rounded-md px-2 py-1 text-xs font-semibold ${eventKindStyle(
@@ -76,7 +88,14 @@ export default async function EventDetailPage({ params }: Props) {
         <Row label="참가비" value={formatFee(event.fee)} highlight={event.fee === 0} />
         <Row
           label="정원"
-          value={event.capacity ? `${event.capacity}명` : "제한 없음"}
+          value={
+            event.capacity == null
+              ? "제한 없음"
+              : isFull(event)
+                ? `마감 (${event.capacity}/${event.capacity}명)`
+                : `${event.attendees}/${event.capacity}명 · ${seatsLeft(event)}자리 남음`
+          }
+          highlight={isAlmostFull(event)}
         />
         {gym && <Row label="장소" value={gym.address} />}
       </dl>
@@ -91,10 +110,7 @@ export default async function EventDetailPage({ params }: Props) {
       {/* 모바일: 하단 고정 / 데스크톱: 인라인 */}
       <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-neutral-50/95 p-4 backdrop-blur md:static md:mt-8 md:border-0 md:bg-transparent md:p-0">
         <div className="mx-auto max-w-2xl">
-          <InterestButton eventId={event.id} />
-          <p className="mt-2 text-center text-xs text-neutral-400 md:mb-0">
-            참가 신청은 체육관에 문의하세요. (온라인 신청 준비 중)
-          </p>
+          <RsvpButton event={event} />
         </div>
       </div>
     </main>

@@ -1,11 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export default function LoginPage() {
   const { signIn } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState<"kakao" | "google" | null>(null);
+
+  async function handleSignIn(provider: "kakao" | "google") {
+    setError(null);
+    setBusy(provider);
+    const { error } = await signIn(provider);
+    if (error) {
+      setError(error);
+      setBusy(null);
+    }
+    // 성공 시 브라우저가 OAuth 페이지로 이동하므로 busy 유지
+  }
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-5">
@@ -24,17 +38,24 @@ export default function LoginPage() {
 
       <div className="mt-10 flex flex-col gap-3">
         <button
-          onClick={() => signIn("kakao")}
-          className="flex items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3.5 font-bold text-[#191919] active:brightness-95"
+          onClick={() => handleSignIn("kakao")}
+          disabled={busy !== null}
+          className="flex items-center justify-center gap-2 rounded-xl bg-[#FEE500] py-3.5 font-bold text-[#191919] active:brightness-95 disabled:opacity-60"
         >
-          💬 카카오로 3초 만에 시작하기
+          {busy === "kakao" ? "이동 중…" : "💬 카카오로 3초 만에 시작하기"}
         </button>
         <button
-          onClick={() => signIn("google")}
-          className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white py-3.5 font-bold text-neutral-900 active:bg-neutral-100"
+          onClick={() => handleSignIn("google")}
+          disabled={busy !== null}
+          className="flex items-center justify-center gap-2 rounded-xl border border-neutral-300 bg-white py-3.5 font-bold text-neutral-900 active:bg-neutral-100 disabled:opacity-60"
         >
-          G  Google로 계속하기
+          {busy === "google" ? "이동 중…" : "G  Google로 계속하기"}
         </button>
+        {error && (
+          <p className="rounded-lg bg-orange-50 px-3 py-2 text-center text-sm text-orange-700">
+            로그인 실패: {error}
+          </p>
+        )}
       </div>
 
       <p className="mt-6 text-center text-xs text-neutral-400">

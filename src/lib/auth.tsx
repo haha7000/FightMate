@@ -46,25 +46,41 @@ export function useAuth() {
     return () => sub.subscription.unsubscribe();
   }, []);
 
-  const signIn = useCallback(async (provider: "kakao" | "google") => {
-    if (!isSupabaseConfigured) {
-      const s: Session = { name: "데모 유저", provider };
-      setSession(s);
-      setUser({ name: s.name, provider });
-      window.location.href = "/";
-      return;
-    }
-    const supabase = createClient();
-    if (!supabase) return;
-    await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        // 카카오는 비즈앱이 아니면 이메일 동의 불가 → 닉네임만 요청 (KOE006 방지)
-        ...(provider === "kakao" ? { scopes: "profile_nickname" } : {}),
-      },
-    });
-  }, []);
+  const signIn = useCallback(
+    async (provider: "kakao" | "google"): Promise<{ error?: string }> => {
+      if (!isSupabaseConfigured) {
+        const s: Session = { name: "데모 유저", provider };
+        setSession(s);
+        setUser({ name: s.name, provider });
+        window.location.href = "/";
+        return {};
+      }
+      const supabase = createClient();
+      if (!supabase) return { error: "Supabase 클라이언트를 만들 수 없어요." };
+
+      // 리다이렉트를 직접 수행한다 (SDK 자동 이동이 안 되는 환경 대비 + 에러 노출).
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          skipBrowserRedirect: true,
+          // 카카오는 비즈앱이 아니면 이메일 동의 불가 → 닉네임만 요청 (KOE006 방지)
+          ...(provider === "kakao" ? { scopes: "profile_nickname" } : {}),
+        },
+      });
+
+      if (error) {
+        console.error("[signIn]", error);
+        return { error: error.message };
+      }
+      if (data?.url) {
+        window.location.href = data.url;
+        return {};
+      }
+      return { error: "로그인 URL을 받지 못했어요." };
+    },
+    []
+  );
 
   const signOut = useCallback(async () => {
     if (isSupabaseConfigured) {

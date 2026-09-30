@@ -26,8 +26,28 @@ export interface GymEvent {
   startTime: string; // "14:00"
   fee: number; // 참가비 (0 = 무료)
   capacity: number | null; // 정원 (null = 제한 없음)
+  attendees: number; // 표시 인원 = 시드 베이스라인 + 실제 RSVP 수 (capacity와 함께 "25/30" 표시)
   description: string;
+  posterUrl?: string | null; // 대회·세미나 포스터 이미지 (Storage 공개 URL)
   openToVisitors: boolean; // 타 체육관/외부인 참가 가능 여부
+}
+
+// 남은 자리 (정원 무제한이면 null)
+export function seatsLeft(e: GymEvent): number | null {
+  if (e.capacity == null) return null;
+  return Math.max(0, e.capacity - e.attendees);
+}
+
+// 마감 여부
+export function isFull(e: GymEvent): boolean {
+  const left = seatsLeft(e);
+  return left !== null && left <= 0;
+}
+
+// 마감 임박 (남은 자리 5 이하). 무제한·마감은 false.
+export function isAlmostFull(e: GymEvent): boolean {
+  const left = seatsLeft(e);
+  return left !== null && left > 0 && left <= 5;
 }
 
 // TODO(M2): Supabase `events` 테이블로 교체
@@ -43,6 +63,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "14:00",
     fee: 0,
     capacity: 30,
+    attendees: 22,
     description:
       "매주 토요일 열리는 오픈매트입니다. 화이트벨트도 부담 없이 참여하세요. 가벼운 롤링 위주, 타 체육관 방문 환영.",
     openToVisitors: true,
@@ -57,6 +78,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "11:00",
     fee: 30000,
     capacity: 24,
+    attendees: 24,
     description:
       "국가대표 출신 게스트 코치의 테이크다운 세미나. MMA·그래플러 모두 환영. 노기 복장 권장.",
     openToVisitors: true,
@@ -71,6 +93,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "19:00",
     fee: 10000,
     capacity: null,
+    attendees: 0,
     description: "금요일 저녁 노기 오픈매트. 외국인 회원 다수, 다양한 스타일과 롤링 가능.",
     openToVisitors: true,
   },
@@ -84,6 +107,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "20:00",
     fee: 20000,
     capacity: 12,
+    attendees: 11,
     description: "스텝·잽·원투 기본기를 하루에 배우는 입문 클래스. 장비 무료 대여.",
     openToVisitors: true,
   },
@@ -97,6 +121,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "18:00",
     fee: 0,
     capacity: 40,
+    attendees: 18,
     description: "무에타이 전통 의식 와이크루 시연과 회원 친선 스파링. 관람·체험 모두 환영.",
     openToVisitors: true,
   },
@@ -110,6 +135,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "10:00",
     fee: 50000,
     capacity: 128,
+    attendees: 47,
     description:
       "체급·벨트별 브래킷으로 진행되는 아마추어 그래플링 대회. 검증된 전적으로 기록됩니다.",
     openToVisitors: true,
@@ -124,10 +150,30 @@ export const MOCK_EVENTS: GymEvent[] = [
     startTime: "14:00",
     fee: 0,
     capacity: 30,
+    attendees: 9,
     description: "매주 토요일 오픈매트. 화이트벨트 환영, 타 체육관 방문 환영.",
     openToVisitors: true,
   },
 ];
+
+// DB row(snake_case) → GymEvent. 표시 인원 = 베이스라인(attendees) + 실제 RSVP 수(rsvp_count).
+export function rowToEvent(r: Record<string, unknown>): GymEvent {
+  return {
+    id: r.id as string,
+    gymId: r.gym_id as string,
+    gymName: r.gym_name as string,
+    kind: r.kind as EventKind,
+    title: r.title as string,
+    date: r.date as string,
+    startTime: (r.start_time as string) ?? "",
+    fee: (r.fee as number) ?? 0,
+    capacity: (r.capacity as number) ?? null,
+    attendees: ((r.attendees as number) ?? 0) + ((r.rsvp_count as number) ?? 0),
+    description: (r.description as string) ?? "",
+    posterUrl: (r.poster_url as string) ?? null,
+    openToVisitors: (r.open_to_visitors as boolean) ?? true,
+  };
+}
 
 function todayStr(): string {
   return new Date().toISOString().slice(0, 10);

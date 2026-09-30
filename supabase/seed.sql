@@ -37,12 +37,12 @@ insert into reviews (gym_id, author, rating, text, created_at) values
 ('checkmat-apgujeong', '노기러버', 5, '노기 클래스가 매일 있는 곳이 드문데 여기가 그 곳. 외국인 회원들과 스파링하는 재미가 있습니다.', '2026-06-03');
 
 -- ── 이벤트 시드 (기준일 2026-06-14) ──
-insert into events (id, gym_id, gym_name, kind, title, date, start_time, fee, capacity, description, open_to_visitors) values
-('ev-gracie-openmat-0621','gracie-yeoksam','그레이시 주짓수 역삼','오픈매트','토요 오픈매트 (초보 환영)','2026-06-21','14:00',0,30,'매주 토요일 열리는 오픈매트입니다. 화이트벨트도 부담 없이 참여하세요. 가벼운 롤링 위주, 타 체육관 방문 환영.',true),
-('ev-topteam-seminar-0628','topteam-seolleung','탑팀 MMA 선릉','세미나','레슬링 테이크다운 세미나 (게스트 코치)','2026-06-28','11:00',30000,24,'국가대표 출신 게스트 코치의 테이크다운 세미나. MMA·그래플러 모두 환영. 노기 복장 권장.',true),
-('ev-checkmat-openmat-0620','checkmat-apgujeong','체크매트 압구정','오픈매트','노기 오픈매트','2026-06-20','19:00',10000,null,'금요일 저녁 노기 오픈매트. 외국인 회원 다수, 다양한 스타일과 롤링 가능.',true),
-('ev-ironfist-class-0619','ironfist-gangnam','아이언피스트 복싱 강남','특별수업','초보 복싱 입문 원데이 클래스','2026-06-19','20:00',20000,12,'스텝·잽·원투 기본기를 하루에 배우는 입문 클래스. 장비 무료 대여.',true),
-('ev-muaythai-event-0627','muay-thai-sinsa','싸바이 무에타이 신사','행사','와이크루 데이 + 회원 친선 스파링','2026-06-27','18:00',0,40,'무에타이 전통 의식 와이크루 시연과 회원 친선 스파링. 관람·체험 모두 환영.',true),
-('ev-topteam-comp-0712','topteam-seolleung','탑팀 MMA 선릉','대회','강남 아마추어 그래플링 오픈 (체급별)','2026-07-12','10:00',50000,128,'체급·벨트별 브래킷으로 진행되는 아마추어 그래플링 대회. 검증된 전적으로 기록됩니다.',true),
-('ev-gracie-openmat-0628','gracie-yeoksam','그레이시 주짓수 역삼','오픈매트','토요 오픈매트 (초보 환영)','2026-06-28','14:00',0,30,'매주 토요일 오픈매트. 화이트벨트 환영, 타 체육관 방문 환영.',true)
+insert into events (id, gym_id, gym_name, kind, title, date, start_time, fee, capacity, attendees, description, open_to_visitors) values
+('ev-gracie-openmat-0621','gracie-yeoksam','그레이시 주짓수 역삼','오픈매트','토요 오픈매트 (초보 환영)','2026-06-21','14:00',0,30,22,'매주 토요일 열리는 오픈매트입니다. 화이트벨트도 부담 없이 참여하세요. 가벼운 롤링 위주, 타 체육관 방문 환영.',true),
+('ev-topteam-seminar-0628','topteam-seolleung','탑팀 MMA 선릉','세미나','레슬링 테이크다운 세미나 (게스트 코치)','2026-06-28','11:00',30000,24,24,'국가대표 출신 게스트 코치의 테이크다운 세미나. MMA·그래플러 모두 환영. 노기 복장 권장.',true),
+('ev-checkmat-openmat-0620','checkmat-apgujeong','체크매트 압구정','오픈매트','노기 오픈매트','2026-06-20','19:00',10000,null,0,'금요일 저녁 노기 오픈매트. 외국인 회원 다수, 다양한 스타일과 롤링 가능.',true),
+('ev-ironfist-class-0619','ironfist-gangnam','아이언피스트 복싱 강남','특별수업','초보 복싱 입문 원데이 클래스','2026-06-19','20:00',20000,12,11,'스텝·잽·원투 기본기를 하루에 배우는 입문 클래스. 장비 무료 대여.',true),
+('ev-muaythai-event-0627','muay-thai-sinsa','싸바이 무에타이 신사','행사','와이크루 데이 + 회원 친선 스파링','2026-06-27','18:00',0,40,18,'무에타이 전통 의식 와이크루 시연과 회원 친선 스파링. 관람·체험 모두 환영.',true),
+('ev-topteam-comp-0712','topteam-seolleung','탑팀 MMA 선릉','대회','강남 아마추어 그래플링 오픈 (체급별)','2026-07-12','10:00',50000,128,47,'체급·벨트별 브래킷으로 진행되는 아마추어 그래플링 대회. 검증된 전적으로 기록됩니다.',true),
+('ev-gracie-openmat-0628','gracie-yeoksam','그레이시 주짓수 역삼','오픈매트','토요 오픈매트 (초보 환영)','2026-06-28','14:00',0,30,9,'매주 토요일 오픈매트. 화이트벨트 환영, 타 체육관 방문 환영.',true)
 on conflict (id) do nothing;

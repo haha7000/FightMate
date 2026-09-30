@@ -4,6 +4,8 @@ import {
   eventKindStyle,
   formatEventDate,
   formatFee,
+  isAlmostFull,
+  isFull,
   type GymEvent,
 } from "@/lib/events";
 
@@ -18,8 +20,17 @@ export default function EventCard({
   return (
     <Link
       href={`/event/${event.id}`}
-      className="block rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md active:bg-neutral-100"
+      className="block overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md active:bg-neutral-100"
     >
+      {event.posterUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={event.posterUrl}
+          alt={`${event.title} 포스터`}
+          className="aspect-[16/9] w-full object-cover"
+        />
+      )}
+      <div className="p-4">
       <div className="flex items-center gap-2">
         <span
           className={`rounded-md px-1.5 py-0.5 text-[11px] font-semibold ${eventKindStyle(
@@ -50,12 +61,20 @@ export default function EventCard({
         <span className={event.fee === 0 ? "text-orange-600" : ""}>
           {formatFee(event.fee)}
         </span>
-        {event.capacity && (
+        {event.capacity != null && (
           <>
             <span>·</span>
-            <span>정원 {event.capacity}명</span>
+            {isFull(event) ? (
+              <span className="font-semibold text-neutral-400">마감</span>
+            ) : (
+              <span className={isAlmostFull(event) ? "font-semibold text-orange-600" : ""}>
+                {event.attendees}/{event.capacity}명
+                {isAlmostFull(event) && " · 마감임박"}
+              </span>
+            )}
           </>
         )}
+      </div>
       </div>
     </Link>
   );
