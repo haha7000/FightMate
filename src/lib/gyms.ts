@@ -34,6 +34,9 @@ export interface Gym {
   emoji: string; // 사진 들어오기 전 임시 비주얼
   amenities: Amenity[];
   photos: GymPhoto[]; // 관장이 등록하는 시설·훈련 사진
+  lat: number | null; // 지도 표시용 좌표 (없으면 지도에서 제외)
+  lng: number | null;
+  kakaoPlaceId: string | null; // 카카오 장소 ID — 지도 검색 결과와 중복 제거용
 }
 
 export interface GymPhoto {
@@ -63,6 +66,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🥋",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "개인 락커"],
     photos: [{ src: "/gyms/gracie-1.jpg", caption: "스파링" }, { src: "/gyms/gracie-2.jpg", caption: "기술 훈련" }, { src: "/gyms/gracie-3.jpg", caption: "오픈매트" }],
+    lat: 37.4995539,
+    lng: 127.0313935,
+    kakaoPlaceId: null,
   },
   {
     id: "ironfist-gangnam",
@@ -79,6 +85,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🥊",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "글러브·장비 대여"],
     photos: [{ src: "/gyms/ironfist-1.jpg", caption: "미트 트레이닝" }, { src: "/gyms/ironfist-2.jpg", caption: "샌드백 훈련" }, { src: "/gyms/ironfist-3.jpg", caption: "스파링" }],
+    lat: 37.5126452,
+    lng: 127.0301548,
+    kakaoPlaceId: null,
   },
   {
     id: "topteam-seolleung",
@@ -95,6 +104,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🏆",
     amenities: ["운동복 대여", "샤워실", "개인 락커", "글러브·장비 대여", "주차 가능"],
     photos: [{ src: "/gyms/topteam-1.jpg", caption: "케이지 스파링" }, { src: "/gyms/topteam-2.jpg", caption: "그래플링" }, { src: "/gyms/topteam-3.jpg", caption: "시합반 훈련" }],
+    lat: 37.4932422,
+    lng: 127.0566935,
+    kakaoPlaceId: null,
   },
   {
     id: "muay-thai-sinsa",
@@ -111,6 +123,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🇹🇭",
     amenities: ["수건 제공", "샤워실", "글러브·장비 대여"],
     photos: [{ src: "/gyms/muaythai-1.jpg", caption: "클린치 훈련" }, { src: "/gyms/muaythai-2.jpg", caption: "패드 훈련" }, { src: "/gyms/muaythai-3.jpg", caption: "스파링" }],
+    lat: 37.5198382,
+    lng: 127.0297655,
+    kakaoPlaceId: null,
   },
   {
     id: "wrestling-club-yangjae",
@@ -127,6 +142,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🤼",
     amenities: ["샤워실", "주차 가능"],
     photos: [{ src: "/gyms/wrestling-1.jpg", caption: "케이지 훈련" }, { src: "/gyms/wrestling-2.jpg", caption: "테이크다운" }, { src: "/gyms/wrestling-3.jpg", caption: "스파링" }],
+    lat: 37.472004,
+    lng: 127.0374639,
+    kakaoPlaceId: null,
   },
   {
     id: "checkmat-apgujeong",
@@ -143,6 +161,9 @@ export const MOCK_GYMS: Gym[] = [
     emoji: "🟦",
     amenities: ["운동복 대여", "수건 제공", "샤워실", "개인 락커", "주차 가능"],
     photos: [{ src: "/gyms/checkmat-1.jpg", caption: "노기 롤링" }, { src: "/gyms/checkmat-2.jpg", caption: "기술 훈련" }, { src: "/gyms/checkmat-3.jpg", caption: "오픈매트" }],
+    lat: 37.5306686,
+    lng: 127.0308092,
+    kakaoPlaceId: null,
   },
 ];
 
@@ -163,6 +184,9 @@ export function rowToGym(r: Record<string, unknown>): Gym {
     emoji: (r.emoji as string) ?? "🥊",
     amenities: (r.amenities as Gym["amenities"]) ?? [],
     photos: (r.photos as Gym["photos"]) ?? [],
+    lat: r.lat == null ? null : Number(r.lat),
+    lng: r.lng == null ? null : Number(r.lng),
+    kakaoPlaceId: (r.kakao_place_id as string) ?? null,
   };
 }
 

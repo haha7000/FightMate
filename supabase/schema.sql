@@ -24,6 +24,11 @@ create table if not exists gyms (
   created_at    timestamptz not null default now()
 );
 
+-- 지도 표시용 좌표 + 카카오 장소 ID (2026-09-30-map.sql)
+alter table gyms add column if not exists lat double precision;
+alter table gyms add column if not exists lng double precision;
+alter table gyms add column if not exists kakao_place_id text;
+
 -- ──────────────────────────────────────────────
 -- 2. 파이터 프로필 (로그인 유저당 1개)
 -- ──────────────────────────────────────────────

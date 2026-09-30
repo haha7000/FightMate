@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 
 const TABS = [
   { href: "/", label: "홈", icon: "🏠" },
+  { href: "/map", label: "지도", icon: "🗺️" },
   { href: "/bookings", label: "내 예약", icon: "🎟️" },
   { href: "/card", label: "내 카드", icon: "🃏" },
 ];
@@ -18,14 +19,14 @@ export function TabBar() {
   const pathname = usePathname();
   return (
     <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-neutral-50/95 backdrop-blur md:hidden">
-      <div className="mx-auto flex max-w-md">
+      <div className="mx-auto flex h-14 max-w-md">
         {TABS.map((tab) => {
           const active = isActive(pathname, tab.href);
           return (
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] ${
+              className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
                 active ? "text-orange-600" : "text-neutral-400"
               }`}
             >

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import GymList from "@/components/GymList";
 import EventFeed from "@/components/EventFeed";
 import { getGyms, getUpcomingEvents } from "@/lib/data.server";
@@ -28,6 +29,18 @@ export default async function HomePage() {
       <div className="mt-4 flex items-baseline justify-between px-5 pb-3 md:mt-8">
         <h2 className="display text-2xl md:text-3xl">체육관</h2>
         <span className="text-sm text-neutral-400">{gyms.length}곳</span>
+      </div>
+      <div className="px-5 pb-4">
+        <Link
+          href="/map"
+          className="flex items-center justify-between rounded-2xl bg-neutral-900 px-5 py-4 text-white active:bg-neutral-800"
+        >
+          <span>
+            <span className="block text-base font-bold">🗺️ 내 주변 체육관 지도로 찾기</span>
+            <span className="mt-0.5 block text-xs text-neutral-400">전국 주짓수·복싱·MMA·무에타이</span>
+          </span>
+          <span className="text-xl">→</span>
+        </Link>
       </div>
       <GymList gyms={gyms} />
     </main>
