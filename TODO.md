@@ -8,10 +8,10 @@
 
 지금은 맥미니 Tailscale 주소라 본인 폰에서만 열린다.
 
-- [ ] Supabase 프로젝트 복구 (6월 이후 일시정지 → 페이지마다 DB 타임아웃 7초)
-  - [ ] 복구 후 `supabase/2026-09-30-map.sql` 실행
+- [x] Supabase 프로젝트 복구 (페이지 로딩 7초 → 0.5초)
+  - [x] 복구 후 `supabase/2026-09-30-map.sql` + `refresh-demo-events.sql` 실행
   - [ ] 복구 불가 시 새 프로젝트 + `schema.sql` → `seed.sql` → 마이그레이션
-- [ ] GitHub 원격 저장소 + 맥미니 SSH 키 등록 → 푸시
+- [x] GitHub 원격 저장소 + 맥미니 SSH 키 등록 → 푸시 (github.com/haha7000/FightMate)
 - [ ] Vercel 배포 + 환경변수 (Supabase, `KAKAO_REST_API_KEY`, `NEXT_PUBLIC_KAKAO_JS_KEY`)
 - [ ] 도메인 (예: fightmate.kr) 연결
   - [ ] 카카오 JavaScript SDK 도메인, Supabase Redirect URLs, 카카오·구글 OAuth 리다이렉트에 새 도메인 추가
@@ -62,7 +62,7 @@
 
 ## 기술 부채 (작업 중 발견)
 
-- [ ] `gyms.day_pass_price`를 nullable로 (지금은 `not null default 0` — 앱은 null = 1일권 미운영으로 해석)
+- [ ] `gyms.day_pass_price`를 nullable로 → `supabase/2026-10-03-day-pass-nullable.sql` 실행 필요
 - [x] `seed.sql` 이벤트 날짜를 실행일 기준으로 계산 + 지난 데모 이벤트 갱신용 `supabase/refresh-demo-events.sql`
 - [ ] DB 연결 실패 시 짧은 타임아웃 (지금은 실패하면 7초 대기 후 목데이터로 넘어감)
 - [ ] `.env.local.example`이 `.gitignore`의 `.env*`에 걸려 저장소에 없음 → `!.env.local.example` 추가

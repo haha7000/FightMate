@@ -13,7 +13,7 @@ create table if not exists gyms (
   address       text not null,
   intro         text not null default '',
   trial_price   integer not null default 0,
-  day_pass_price integer not null default 0,
+  day_pass_price integer,                       -- null = 1일권 미운영
   monthly_price integer,
   rating        numeric(2,1) not null default 0,
   review_count  integer not null default 0,
