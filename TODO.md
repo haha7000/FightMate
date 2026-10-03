@@ -62,7 +62,7 @@
 
 ## 기술 부채 (작업 중 발견)
 
-- [ ] `gyms.day_pass_price`를 nullable로 → `supabase/2026-10-03-day-pass-nullable.sql` 실행 필요
+- [x] `gyms.day_pass_price`를 nullable로 (`supabase/2026-10-03-day-pass-nullable.sql` 실행 완료)
 - [x] `seed.sql` 이벤트 날짜를 실행일 기준으로 계산 + 지난 데모 이벤트 갱신용 `supabase/refresh-demo-events.sql`
 - [ ] DB 연결 실패 시 짧은 타임아웃 (지금은 실패하면 7초 대기 후 목데이터로 넘어감)
 - [ ] `.env.local.example`이 `.gitignore`의 `.env*`에 걸려 저장소에 없음 → `!.env.local.example` 추가
