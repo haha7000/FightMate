@@ -63,7 +63,7 @@
 ## 기술 부채 (작업 중 발견)
 
 - [ ] `gyms.day_pass_price`를 nullable로 (지금은 `not null default 0` — 앱은 null = 1일권 미운영으로 해석)
-- [ ] `seed.sql` 이벤트 날짜가 6~7월이라 지남 (목데이터는 오늘 기준 상대 날짜로 바꿨음)
+- [x] `seed.sql` 이벤트 날짜를 실행일 기준으로 계산 + 지난 데모 이벤트 갱신용 `supabase/refresh-demo-events.sql`
 - [ ] DB 연결 실패 시 짧은 타임아웃 (지금은 실패하면 7초 대기 후 목데이터로 넘어감)
 - [ ] `.env.local.example`이 `.gitignore`의 `.env*`에 걸려 저장소에 없음 → `!.env.local.example` 추가
 - [ ] `src/lib/auth.tsx` 린트 에러 (effect 안 setState)
