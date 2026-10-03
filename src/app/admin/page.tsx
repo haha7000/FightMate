@@ -178,8 +178,11 @@ export default function AdminPage() {
               <input
                 className="input"
                 type="number"
-                value={gym.dayPassPrice}
-                onChange={(e) => update({ dayPassPrice: Number(e.target.value) })}
+                value={gym.dayPassPrice ?? ""}
+                placeholder="미운영이면 비워두세요"
+                onChange={(e) =>
+                  update({ dayPassPrice: e.target.value === "" ? null : Number(e.target.value) })
+                }
               />
             </Field>
           </div>

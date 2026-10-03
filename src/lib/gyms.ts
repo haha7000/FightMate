@@ -27,7 +27,7 @@ export interface Gym {
   address: string;
   intro: string;
   trialPrice: number; // 체험 1회
-  dayPassPrice: number; // 1일권
+  dayPassPrice: number | null; // 1일권 (null = 1일권 미운영)
   monthlyPrice: number | null; // 정기 (참고 표시용)
   rating: number;
   reviewCount: number;
@@ -42,6 +42,11 @@ export interface Gym {
 export interface GymPhoto {
   src: string;
   caption: string; // 예: 매트 존, 샤워실, 그룹 클래스
+}
+
+// 1일권(드롭인) 가능 여부 — 다른 체육관 수련자가 하루 운동하러 갈 수 있는 곳
+export function offersDayPass(gym: Gym): boolean {
+  return gym.dayPassPrice != null;
 }
 
 // 운동복 + 수건이 다 되면 빈손으로 가도 되는 체육관
@@ -78,7 +83,7 @@ export const MOCK_GYMS: Gym[] = [
     address: "서울 강남구 학동로 45 3층",
     intro: "직장인 새벽반·심야반 운영. 1:1 미트 트레이닝 강점.",
     trialPrice: 10000,
-    dayPassPrice: 15000,
+    dayPassPrice: null,
     monthlyPrice: 150000,
     rating: 4.6,
     reviewCount: 27,
@@ -135,7 +140,7 @@ export const MOCK_GYMS: Gym[] = [
     address: "서울 서초구 강남대로 12 4층",
     intro: "엘리트 선수 출신 코치진. 테이크다운 특화 커리큘럼.",
     trialPrice: 0,
-    dayPassPrice: 18000,
+    dayPassPrice: null,
     monthlyPrice: 160000,
     rating: 4.5,
     reviewCount: 19,
@@ -177,7 +182,7 @@ export function rowToGym(r: Record<string, unknown>): Gym {
     address: r.address as string,
     intro: (r.intro as string) ?? "",
     trialPrice: (r.trial_price as number) ?? 0,
-    dayPassPrice: (r.day_pass_price as number) ?? 0,
+    dayPassPrice: r.day_pass_price == null ? null : Number(r.day_pass_price),
     monthlyPrice: (r.monthly_price as number) ?? null,
     rating: Number(r.rating ?? 0),
     reviewCount: (r.review_count as number) ?? 0,
@@ -196,4 +201,11 @@ export function getGym(id: string): Gym | undefined {
 
 export function formatPrice(price: number): string {
   return price === 0 ? "무료" : `${price.toLocaleString("ko-KR")}원`;
+}
+
+// 카드용 짧은 가격: 0 → "무료", 20000 → "2만원", 15000 → "1.5만원"
+export function formatPriceShort(price: number): string {
+  if (price === 0) return "무료";
+  if (price >= 10000) return `${Number((price / 10000).toFixed(1))}만원`;
+  return `${price.toLocaleString("ko-KR")}원`;
 }

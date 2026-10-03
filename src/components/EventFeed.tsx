@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { EVENT_KINDS, type EventKind, type GymEvent } from "@/lib/events";
 import EventCard from "@/components/EventCard";
 
@@ -15,7 +16,9 @@ export default function EventFeed({ events }: { events: GymEvent[] }) {
     <section className="mb-2 pt-2">
       <div className="flex items-baseline justify-between px-5">
         <h2 className="display text-2xl md:text-3xl">🔥 다가오는 이벤트</h2>
-        <span className="text-sm text-neutral-400">{events.length}건</span>
+        <Link href="/events" className="text-sm font-medium text-orange-600">
+          전체 {events.length}건 →
+        </Link>
       </div>
 
       <nav className="mt-3 flex gap-2 overflow-x-auto px-5 pb-1">

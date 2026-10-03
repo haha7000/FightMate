@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 const TABS = [
   { href: "/", label: "홈", icon: "🏠" },
   { href: "/map", label: "지도", icon: "🗺️" },
+  { href: "/events", label: "이벤트", icon: "🔥" },
   { href: "/bookings", label: "내 예약", icon: "🎟️" },
   { href: "/card", label: "내 카드", icon: "🃏" },
 ];

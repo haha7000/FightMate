@@ -3,7 +3,7 @@
 import Script from "next/script";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { DISCIPLINES, formatPrice, type Discipline, type Gym } from "@/lib/gyms";
+import { DISCIPLINES, formatPrice, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
 import { distanceM, formatDistance, type Place } from "@/lib/places";
 
 // ── 카카오맵 SDK 중 실제로 쓰는 부분만 타입 선언 ──────────────
@@ -64,6 +64,7 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
   const [error, setError] = useState<string | null>(null);
   const [moved, setMoved] = useState(false);
   const [discipline, setDiscipline] = useState<Discipline | null>(null);
+  const [dayPassOnly, setDayPassOnly] = useState(false);
   const [selected, setSelected] = useState<Selected>(null);
   const [listOpen, setListOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -163,15 +164,20 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
     () =>
       gyms.filter(
         (g) =>
-          g.lat != null && g.lng != null && (!discipline || g.disciplines.includes(discipline))
+          g.lat != null &&
+          g.lng != null &&
+          (!discipline || g.disciplines.includes(discipline)) &&
+          (!dayPassOnly || offersDayPass(g))
       ),
-    [gyms, discipline]
+    [gyms, discipline, dayPassOnly]
   );
-  // 카카오 결과 중 이미 입점한 곳은 입점 핀으로만 보여준다
+  // 카카오 결과 중 이미 입점한 곳은 입점 핀으로만 보여준다.
+  // 1일권 정보는 입점 체육관에만 있으므로 1일권 필터 중엔 카카오 결과를 숨긴다.
   const otherPlaces = useMemo(() => {
+    if (dayPassOnly) return [];
     const partnerIds = new Set(gyms.map((g) => g.kakaoPlaceId).filter(Boolean));
     return places.filter((p) => !partnerIds.has(p.id));
-  }, [gyms, places]);
+  }, [gyms, places, dayPassOnly]);
 
   // 핀 다시 그리기
   useEffect(() => {
@@ -269,6 +275,14 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
 
         {/* 종목 필터 */}
         <div className="absolute inset-x-0 top-0 z-10 flex gap-2 overflow-x-auto px-3 pt-3 pb-2">
+          <Chip
+            label="🎟️ 1일권"
+            active={dayPassOnly}
+            onClick={() => {
+              setDayPassOnly((v) => !v);
+              setSelected(null);
+            }}
+          />
           <Chip label="전체" active={discipline === null} onClick={() => pickDiscipline(null)} />
           {DISCIPLINES.map((d) => (
             <Chip key={d} label={d} active={discipline === d} onClick={() => pickDiscipline(d)} />
@@ -335,7 +349,9 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
                       </p>
                       <p className="mt-0.5 truncate text-xs text-neutral-500">
                         {item.kind === "gym"
-                          ? `체험 ${formatPrice(item.gym.trialPrice)} · 바로 예약`
+                          ? `체험 ${formatPrice(item.gym.trialPrice)} · ${
+                              offersDayPass(item.gym) ? `1일권 ${formatPrice(item.gym.dayPassPrice!)}` : "1일권 없음"
+                            }`
                           : item.place.disciplines.join(" · ") || item.place.category}
                       </p>
                     </div>
@@ -358,9 +374,14 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
               </p>
             ) : (
               <p className="text-sm text-neutral-600">
-                주변 체육관 <b className="text-neutral-900">{partnerGyms.length + otherPlaces.length}</b>곳
-                {partnerGyms.length > 0 && (
-                  <span className="text-orange-600"> · 바로 예약 {partnerGyms.length}곳</span>
+                {dayPassOnly ? "1일권 가능" : "주변 체육관"}{" "}
+                <b className="text-neutral-900">{partnerGyms.length + otherPlaces.length}</b>곳
+                {dayPassOnly ? (
+                  <span className="text-neutral-400"> · FightMate 입점 체육관 기준</span>
+                ) : (
+                  partnerGyms.length > 0 && (
+                    <span className="text-orange-600"> · 바로 예약 {partnerGyms.length}곳</span>
+                  )
                 )}
               </p>
             )}
@@ -472,6 +493,15 @@ function GymSheet({ gym, distance, onClose }: { gym: Gym; distance: number | nul
         onClose={onClose}
       />
       <Tags items={gym.disciplines} />
+      <p className="mt-3 text-sm text-neutral-600">
+        체험 {formatPrice(gym.trialPrice)}
+        <span className="mx-1.5 text-neutral-300">|</span>
+        {offersDayPass(gym) ? (
+          <b className="text-neutral-900">1일권 {formatPrice(gym.dayPassPrice!)}</b>
+        ) : (
+          <span className="text-neutral-400">1일권 없음</span>
+        )}
+      </p>
       <div className="mt-4 flex gap-2">
         <Link href={`/gym/${gym.id}`} className="flex-1 rounded-xl border border-neutral-200 py-3 text-center text-sm font-bold">
           상세보기

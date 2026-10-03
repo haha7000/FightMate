@@ -9,16 +9,16 @@ export default async function HomePage() {
   return (
     <main className="mx-auto max-w-6xl pb-20">
       {/* 에디토리얼 히어로 */}
-      <header className="px-5 pt-12 pb-8 md:pt-20 md:pb-12">
+      <header className="px-5 pt-8 pb-6 md:pt-20 md:pb-12">
         <p className="text-xs font-extrabold uppercase tracking-[0.25em] text-orange-600">
           FightMate
         </p>
-        <h1 className="display mt-4 text-5xl text-neutral-950 md:text-8xl">
+        <h1 className="display mt-3 text-[2.6rem] text-neutral-950 md:text-8xl">
           지금 시작하는
           <br />
           격투기<span className="text-orange-500">.</span>
         </h1>
-        <p className="mt-5 max-w-md text-base text-neutral-500 md:text-xl">
+        <p className="mt-4 max-w-md text-[15px] text-neutral-500 md:text-xl">
           강남·서초 {gyms.length}개 체육관. 전화 한 통 없이, 링크 하나로 체험을
           예약하세요.
         </p>

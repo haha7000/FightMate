@@ -132,7 +132,10 @@ export default async function GymDetailPage({ params }: Props) {
         <h2 className="text-sm font-semibold text-neutral-600">가격</h2>
         <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200">
           <PriceRow label="체험 1회" value={formatPrice(gym.trialPrice)} highlight />
-          <PriceRow label="1일권 (오픈매트·자유운동)" value={formatPrice(gym.dayPassPrice)} />
+          <PriceRow
+            label="1일권 (오픈매트·자유운동)"
+            value={gym.dayPassPrice == null ? "운영 안 함" : formatPrice(gym.dayPassPrice)}
+          />
           {gym.monthlyPrice && (
             <PriceRow label="정기권 (월)" value={formatPrice(gym.monthlyPrice)} />
           )}

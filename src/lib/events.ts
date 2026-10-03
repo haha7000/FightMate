@@ -50,8 +50,24 @@ export function isAlmostFull(e: GymEvent): boolean {
   return left !== null && left > 0 && left <= 5;
 }
 
+// "YYYY-MM-DD" (로컬 날짜)
+export function toYmd(d: Date): string {
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+// 내일 이후 첫 번째 해당 요일(0=일 … 6=토) + weeksAhead주
+function nextWeekday(dow: number, weeksAhead = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  while (d.getDay() !== dow) d.setDate(d.getDate() + 1);
+  d.setDate(d.getDate() + weeksAhead * 7);
+  return toYmd(d);
+}
+
 // TODO(M2): Supabase `events` 테이블로 교체
-// 기준일: 2026-06-14 (다가오는 이벤트로 보이도록 미래 날짜 사용)
+// 데모 일정은 언제 열어도 "다가오는 이벤트"로 보이도록 오늘 기준 요일로 계산한다.
 export const MOCK_EVENTS: GymEvent[] = [
   {
     id: "ev-gracie-openmat-0621",
@@ -59,7 +75,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "그레이시 주짓수 역삼",
     kind: "오픈매트",
     title: "토요 오픈매트 (초보 환영)",
-    date: "2026-06-21",
+    date: nextWeekday(6),
     startTime: "14:00",
     fee: 0,
     capacity: 30,
@@ -74,7 +90,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "탑팀 MMA 선릉",
     kind: "세미나",
     title: "레슬링 테이크다운 세미나 (게스트 코치)",
-    date: "2026-06-28",
+    date: nextWeekday(0, 1),
     startTime: "11:00",
     fee: 30000,
     capacity: 24,
@@ -89,7 +105,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "체크매트 압구정",
     kind: "오픈매트",
     title: "노기 오픈매트",
-    date: "2026-06-20",
+    date: nextWeekday(5),
     startTime: "19:00",
     fee: 10000,
     capacity: null,
@@ -103,7 +119,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "아이언피스트 복싱 강남",
     kind: "특별수업",
     title: "초보 복싱 입문 원데이 클래스",
-    date: "2026-06-19",
+    date: nextWeekday(4),
     startTime: "20:00",
     fee: 20000,
     capacity: 12,
@@ -117,7 +133,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "싸바이 무에타이 신사",
     kind: "행사",
     title: "와이크루 데이 + 회원 친선 스파링",
-    date: "2026-06-27",
+    date: nextWeekday(6, 1),
     startTime: "18:00",
     fee: 0,
     capacity: 40,
@@ -131,7 +147,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "탑팀 MMA 선릉",
     kind: "대회",
     title: "강남 아마추어 그래플링 오픈 (체급별)",
-    date: "2026-07-12",
+    date: nextWeekday(0, 3),
     startTime: "10:00",
     fee: 50000,
     capacity: 128,
@@ -146,7 +162,7 @@ export const MOCK_EVENTS: GymEvent[] = [
     gymName: "그레이시 주짓수 역삼",
     kind: "오픈매트",
     title: "토요 오픈매트 (초보 환영)",
-    date: "2026-06-28",
+    date: nextWeekday(6, 1),
     startTime: "14:00",
     fee: 0,
     capacity: 30,
@@ -176,7 +192,7 @@ export function rowToEvent(r: Record<string, unknown>): GymEvent {
 }
 
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toYmd(new Date());
 }
 
 // 다가오는(오늘 이후) 이벤트만, 날짜 오름차순
