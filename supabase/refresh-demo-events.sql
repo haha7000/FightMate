@@ -9,3 +9,11 @@ update events set date = current_date + 1 + ((4 - extract(dow from current_date 
 update events set date = current_date + 1 + ((6 - extract(dow from current_date + 1)::int + 7) % 7) + 7 where id = 'ev-muaythai-event-0627';
 update events set date = current_date + 1 + ((0 - extract(dow from current_date + 1)::int + 7) % 7) + 21 where id = 'ev-topteam-comp-0712';
 update events set date = current_date + 1 + ((6 - extract(dow from current_date + 1)::int + 7) % 7) + 7 where id = 'ev-gracie-openmat-0628';
+
+-- 시드 설명에 잘못 들어간 줄바꿈+공백 정리 (SQL을 복사·붙여넣기 하며 긴 줄이 꺾여 들어감)
+update events
+set description = regexp_replace(description, E'\\n\\s+', ' ', 'g')
+where id in (
+  'ev-gracie-openmat-0621', 'ev-topteam-seminar-0628', 'ev-checkmat-openmat-0620',
+  'ev-ironfist-class-0619', 'ev-muaythai-event-0627', 'ev-topteam-comp-0712', 'ev-gracie-openmat-0628'
+);

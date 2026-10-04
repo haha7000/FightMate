@@ -6,6 +6,7 @@ import { rowToGym, type Gym } from "@/lib/gyms";
 import {
   MOCK_EVENTS,
   rowToEvent,
+  todayKST,
   upcoming,
   type GymEvent,
 } from "@/lib/events";
@@ -204,7 +205,7 @@ export async function fetchGymEvents(gymId: string): Promise<GymEvent[]> {
   const supabase = createClient();
   if (!supabase) return fallback();
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const { data, error } = await supabase
     .from("events")
     .select("*")

@@ -87,17 +87,17 @@ export default function RsvpButton({ event }: { event: GymEvent }) {
       {formOpen ? (
         <form
           onSubmit={confirmRsvp}
-          className="flex flex-col gap-2 rounded-xl border border-neutral-200 bg-white p-3"
+          className="flex flex-col gap-2"
         >
           <input
-            className="input"
+            className="w-full border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-brand-bright focus:outline-none"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="이름"
           />
           <input
-            className="input"
+            className="w-full border border-white/20 bg-white/5 px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-brand-bright focus:outline-none"
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -107,14 +107,14 @@ export default function RsvpButton({ event }: { event: GymEvent }) {
             <button
               type="button"
               onClick={() => setFormOpen(false)}
-              className="flex-1 rounded-xl border border-neutral-200 py-3 text-sm font-medium text-neutral-600"
+              className="flex-1 border border-white/25 py-3 text-[14px] font-semibold text-white/80"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="flex-1 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white active:bg-orange-600 disabled:opacity-50"
+              className="flex-[1.4] bg-brand-bright py-3 text-[15px] font-bold text-night disabled:opacity-50"
             >
               신청 확정
             </button>
@@ -124,27 +124,25 @@ export default function RsvpButton({ event }: { event: GymEvent }) {
         <button
           onClick={rsvped ? cancelRsvp : openForm}
           disabled={busy || full}
-          className={`w-full rounded-xl py-3.5 text-center font-bold transition-colors disabled:opacity-50 ${
-            rsvped
-              ? "bg-neutral-100 text-orange-600"
-              : "bg-orange-500 text-white active:bg-orange-600"
+          className={`w-full py-3.5 text-center text-[16px] font-bold transition-colors disabled:opacity-40 ${
+            rsvped ? "border border-brand-bright text-brand-bright" : "bg-brand-bright text-night"
           }`}
         >
           {full
             ? "정원 마감"
             : rsvped
-              ? "✅ 참가 신청됨 · 취소하기"
-              : "🙌 참가 신청하기"}
+              ? "참가 신청됨 · 취소하기"
+              : "참가 신청하기"}
         </button>
       )}
 
-      <p className="mt-2 text-center text-xs text-neutral-400">
+      <p className="mt-2 text-center text-[12px] text-white/50">
         {cap != null
           ? `${count}/${cap}명 신청${left && left > 0 ? ` · ${left}자리 남음` : ""}`
           : `${count}명 신청`}
       </p>
       {error && (
-        <p className="mt-1 text-center text-xs text-orange-600">{error}</p>
+        <p className="mt-1 text-center text-[12px] text-red-400">{error}</p>
       )}
     </div>
   );

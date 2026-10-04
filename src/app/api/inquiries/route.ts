@@ -7,9 +7,10 @@ interface InquiryBody {
   name?: string;
   phone?: string;
   date?: string;
+  type?: string;
 }
 
-// 체험 신청 접수.
+// 체험·1일권 신청 접수.
 // Supabase 설정 시 bookings 테이블에 저장, 아니면 로그만 남김(데모).
 // TODO(M2): 관장에게 알림(알림톡/문자) 발송
 export async function POST(request: Request) {
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
   }
 
   const { gymId, name, phone, date } = body;
+  const type = body.type === "1일권" ? "1일권" : "체험";
   if (!gymId || !name?.trim() || !phone?.trim() || !date) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });
   }
@@ -39,7 +41,7 @@ export async function POST(request: Request) {
       name: name.trim(),
       phone: phone.trim(),
       date,
-      type: "체험",
+      type,
     });
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

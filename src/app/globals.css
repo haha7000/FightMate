@@ -1,20 +1,60 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css");
 @import "tailwindcss";
 
-body {
-  font-family:
-    "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+/* ── 디자인 토큰 (시안 C: 밝은 화면 + 이벤트는 검은 포스터 띠) ──
+   포인트 색을 바꾸려면 brand 3개만 바꾸면 된다. */
+@theme {
+  --color-brand: #0e7a55; /* 매트 그린 — 밝은 바탕 위 */
+  --color-brand-bright: #2fbf85; /* 검은 바탕 위 */
+  --color-brand-tint: #e6f2ec; /* 옅은 배경 */
+  --color-ink: #1b1a18;
+  --color-muted: #7a746c;
+  --color-line: #e6e1da;
+  --color-field: #f1eee9;
+  --color-paper: #f7f5f2;
+  --color-night: #0c0c0c;
+  --color-star: #f5b301;
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
-  -webkit-font-smoothing: antialiased;
+  --font-display: var(--font-bhs), "Pretendard Variable", sans-serif; /* 굵은 한글 제목 */
+  --font-num: var(--font-anton), "Pretendard Variable", sans-serif; /* 날짜·숫자·영문 라벨 */
 }
 
-/* 에디토리얼 헤드라인: 초대형 볼드 + 타이트한 자간/행간 */
-.display {
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.02;
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  word-break: keep-all; /* 한글 단어 중간 줄바꿈 방지 */
+  overflow-wrap: anywhere;
+}
+
+/* 가로 스크롤 칩 줄 등에서 스크롤바 숨김 */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* 검은 포스터 띠의 필름 그레인 */
+.grain {
+  position: relative;
+  isolation: isolate;
+}
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
 .input {
-  @apply rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 focus:border-orange-500 focus:outline-none;
+  @apply w-full rounded-xl border border-line bg-white px-4 py-3 text-base text-ink placeholder:text-muted/70 focus:border-brand focus:outline-none;
 }

@@ -1,10 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { AMENITIES, MOCK_GYMS, formatPrice, isHandsFree } from "@/lib/gyms";
+import { CalendarDays, Check, MapPin, Shirt, Star, X } from "lucide-react";
+import { AMENITIES, MOCK_GYMS, formatPrice, isHandsFree, offersDayPass } from "@/lib/gyms";
+import { dateParts } from "@/lib/events";
 import { getEventsByGym, getGymById } from "@/lib/data.server";
+import GymPhotoCarousel from "@/components/GymPhotoCarousel";
+import EventBand from "@/components/EventBand";
 import ReviewSection from "@/components/ReviewSection";
-import EventCard from "@/components/EventCard";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -19,12 +22,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const gym = await getGymById(id);
   if (!gym) return {};
+  const dayPass = offersDayPass(gym) ? ` · 1일권 ${formatPrice(gym.dayPassPrice!)}` : "";
   return {
     title: `${gym.name} — FightMate`,
-    description: `${gym.district} · ${gym.disciplines.join("/")} · 체험 ${formatPrice(gym.trialPrice)}`,
+    description: `${gym.district} · ${gym.disciplines.join("/")} · 체험 ${formatPrice(gym.trialPrice)}${dayPass}`,
     openGraph: {
       title: `${gym.name} — 체험 ${formatPrice(gym.trialPrice)}`,
       description: gym.intro,
+      images: gym.photos[0] ? [gym.photos[0].src] : undefined,
     },
   };
 }
@@ -34,172 +39,131 @@ export default async function GymDetailPage({ params }: Props) {
   const gym = await getGymById(id);
   if (!gym) notFound();
   const events = await getEventsByGym(id);
+  const next = events[0];
+  const dayPass = offersDayPass(gym);
+  const directions =
+    gym.lat != null && gym.lng != null
+      ? `https://map.kakao.com/link/to/${encodeURIComponent(gym.name)},${gym.lat},${gym.lng}`
+      : `https://map.kakao.com/link/search/${encodeURIComponent(gym.address)}`;
 
   return (
-    <main className="mx-auto max-w-2xl pb-28 md:pb-16">
-      <header className="px-5 pt-6 md:pt-10">
-        <Link
-          href="/"
-          className="text-sm text-neutral-500 hover:text-neutral-800"
-        >
-          ← 목록으로
-        </Link>
-        {gym.photos.length > 0 ? (
-          // TODO(M2): Supabase Storage 사진으로 교체 (현재는 데모 플레이스홀더)
-          <div className="-mx-5 mt-5">
-            <div className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-5 pb-1">
-              {gym.photos.map((photo) => (
-                <figure key={photo.src + photo.caption} className="shrink-0 snap-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.src}
-                    alt={`${gym.name} ${photo.caption}`}
-                    className="h-44 w-72 rounded-xl object-cover md:h-56 md:w-[22rem]"
-                  />
-                  <figcaption className="mt-1.5 text-center text-xs text-neutral-400">
-                    {photo.caption}
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="mt-5 flex h-40 items-center justify-center rounded-2xl bg-white text-6xl md:h-56 md:text-7xl">
-            {gym.emoji}
-          </div>
-        )}
-        <h1 className="display mt-6 text-3xl md:text-4xl">{gym.name}</h1>
-        <p className="mt-2 text-sm text-neutral-500">
-          {gym.district} · ⭐ {gym.rating} · 리뷰 {gym.reviewCount}개
-        </p>
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {gym.disciplines.map((d) => (
-            <span
-              key={d}
-              className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700"
-            >
-              {d}
-            </span>
-          ))}
-        </div>
-      </header>
+    <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
+      <GymPhotoCarousel photos={gym.photos} name={gym.name} />
 
-      <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-600">소개</h2>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-          {gym.intro}
+      <section className="relative -mt-4 rounded-t-2xl bg-white px-4 pt-5 pb-6">
+        <p className="text-[13px] font-semibold text-brand">{gym.disciplines.join(" · ")}</p>
+        <h1 className="mt-1 text-[22px] font-bold leading-snug">{gym.name}</h1>
+        <p className="mt-1 flex items-center gap-1 text-[13px] text-muted">
+          <Star size={13} className="fill-star stroke-star" />
+          <b className="text-ink">{gym.rating}</b> · 리뷰 {gym.reviewCount}개 · {gym.district}
         </p>
-        <p className="mt-3 text-xs text-neutral-400">{gym.address}</p>
+
+        <ul className="mt-5 space-y-3 text-[14px]">
+          <li className="flex gap-2.5">
+            <MapPin size={18} className="mt-px shrink-0 text-muted" />
+            <span>
+              {gym.address}
+              <a
+                href={directions}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 text-[13px] font-semibold text-brand"
+              >
+                길찾기
+              </a>
+            </span>
+          </li>
+          {next && (
+            <li className="flex gap-2.5">
+              <CalendarDays size={18} className="mt-px shrink-0 text-muted" />
+              <span>
+                다음 {next.kind}{" "}
+                <b>
+                  {dateParts(next.date).m}/{dateParts(next.date).d}({dateParts(next.date).ko}) {next.startTime}
+                </b>
+              </span>
+            </li>
+          )}
+          <li className="flex gap-2.5">
+            <Shirt size={18} className="mt-px shrink-0 text-muted" />
+            {isHandsFree(gym)
+              ? "운동복·수건 제공. 몸만 와도 돼요"
+              : gym.amenities.includes("운동복 대여")
+                ? "운동복 대여 가능. 수건은 챙겨오세요"
+                : gym.amenities.includes("수건 제공")
+                  ? "수건 제공. 운동복은 챙겨오세요"
+                  : "운동복과 수건은 챙겨오세요"}
+          </li>
+        </ul>
+
+        {gym.intro && <p className="mt-5 text-[14px] leading-relaxed text-ink/80">{gym.intro}</p>}
       </section>
 
-      <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-600">시설 · 제공 사항</h2>
-        {isHandsFree(gym) && (
-          <p className="mt-2 inline-block rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-700">
-            🙌 몸만 가도 OK — 운동복·수건 제공
-          </p>
-        )}
-        <ul className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-          {AMENITIES.map(({ key, emoji }) => {
+      <section className="mt-2 bg-white px-4 py-5">
+        <h2 className="text-[16px] font-bold">가격</h2>
+        <div className="mt-3 divide-y divide-line rounded-xl border border-line text-[14px]">
+          <PriceRow label="체험 1회" value={formatPrice(gym.trialPrice)} strong />
+          <PriceRow label="1일권 (오픈매트·자유운동)" value={dayPass ? formatPrice(gym.dayPassPrice!) : "운영 안 함"} />
+          <PriceRow label="정기권 (월)" value={gym.monthlyPrice ? formatPrice(gym.monthlyPrice) : "체육관 문의"} />
+        </div>
+        <p className="mt-2 text-[12px] text-muted">정기권 등록은 체험 후 체육관에서 직접 진행돼요.</p>
+      </section>
+
+      <section className="mt-2 bg-white px-4 py-5">
+        <h2 className="text-[16px] font-bold">시설·제공</h2>
+        <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5 text-[14px]">
+          {AMENITIES.map(({ key }) => {
             const has = gym.amenities.includes(key);
             return (
-              <li
-                key={key}
-                className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm ${
-                  has
-                    ? "border-neutral-200 bg-white text-neutral-800"
-                    : "border-neutral-200 bg-neutral-50 text-neutral-400 line-through"
-                }`}
-              >
-                <span className={has ? "" : "grayscale opacity-40"}>{emoji}</span>
+              <li key={key} className={`flex items-center gap-2 ${has ? "" : "text-muted/70 line-through"}`}>
+                {has ? (
+                  <Check size={16} strokeWidth={2.5} className="shrink-0 text-brand" />
+                ) : (
+                  <X size={16} className="shrink-0" />
+                )}
                 {key}
               </li>
             );
           })}
         </ul>
-        {!isHandsFree(gym) && (
-          <p className="mt-2 text-xs text-neutral-400">
-            {gym.amenities.includes("운동복 대여")
-              ? "수건은 직접 챙겨가세요."
-              : gym.amenities.includes("수건 제공")
-                ? "운동복은 직접 챙겨가세요."
-                : "운동복과 수건은 직접 챙겨가세요."}
-          </p>
-        )}
-      </section>
-
-      <section className="mt-6 px-5">
-        <h2 className="text-sm font-semibold text-neutral-600">가격</h2>
-        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200">
-          <PriceRow label="체험 1회" value={formatPrice(gym.trialPrice)} highlight />
-          <PriceRow
-            label="1일권 (오픈매트·자유운동)"
-            value={gym.dayPassPrice == null ? "운영 안 함" : formatPrice(gym.dayPassPrice)}
-          />
-          {gym.monthlyPrice && (
-            <PriceRow label="정기권 (월)" value={formatPrice(gym.monthlyPrice)} />
-          )}
-        </div>
-        <p className="mt-2 text-xs text-neutral-400">
-          정기권 등록은 체험 후 체육관에서 직접 진행돼요.
-        </p>
       </section>
 
       {events.length > 0 && (
-        <section className="mt-6 px-5">
-          <h2 className="text-sm font-semibold text-neutral-600">
-            다가오는 이벤트
-          </h2>
-          <ul className="mt-3 flex flex-col gap-3">
-            {events.map((ev) => (
-              <li key={ev.id}>
-                <EventCard event={ev} />
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div className="mt-2">
+          <EventBand events={events} gyms={[gym]} title="이 체육관 일정" limit={5} showGym={false} />
+        </div>
       )}
 
       <ReviewSection gymId={gym.id} />
 
-      {/* 모바일: 하단 고정 CTA */}
-      <div className="fixed inset-x-0 bottom-0 border-t border-neutral-200 bg-neutral-50/95 p-4 backdrop-blur md:hidden">
-        <Link
-          href={`/gym/${gym.id}/apply`}
-          className="mx-auto block w-full max-w-2xl rounded-xl bg-orange-500 py-3.5 text-center font-bold text-white active:bg-orange-600"
-        >
-          체험 신청하기 · {formatPrice(gym.trialPrice)}
-        </Link>
-      </div>
-
-      {/* 데스크톱: 본문 내 CTA */}
-      <div className="hidden px-5 pt-8 md:block">
-        <Link
-          href={`/gym/${gym.id}/apply`}
-          className="block w-full rounded-xl bg-orange-500 py-3.5 text-center font-bold text-white hover:bg-orange-600"
-        >
-          체험 신청하기 · {formatPrice(gym.trialPrice)}
-        </Link>
+      {/* 하단 고정 예약 버튼 (앱 폭 안, 홈 바 영역 여백) */}
+      <div className="fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 border-t border-line bg-white px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+        <div className={`grid gap-2 text-[15px] font-bold ${dayPass ? "grid-cols-[1fr_1.4fr]" : "grid-cols-1"}`}>
+          {dayPass && (
+            <Link
+              href={`/gym/${gym.id}/apply?type=daypass`}
+              className="rounded-xl border border-ink py-3.5 text-center active:bg-field"
+            >
+              1일권 {formatPrice(gym.dayPassPrice!)}
+            </Link>
+          )}
+          <Link
+            href={`/gym/${gym.id}/apply`}
+            className="rounded-xl bg-brand py-3.5 text-center text-white active:opacity-90"
+          >
+            체험 신청 · {formatPrice(gym.trialPrice)}
+          </Link>
+        </div>
       </div>
     </main>
   );
 }
 
-function PriceRow({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function PriceRow({ label, value, strong = false }: { label: string; value: string; strong?: boolean }) {
   return (
-    <div className="flex items-center justify-between border-b border-neutral-200 bg-white px-4 py-3 last:border-b-0">
-      <span className="text-sm text-neutral-600">{label}</span>
-      <span className={`text-sm font-bold ${highlight ? "text-orange-600" : ""}`}>
-        {value}
-      </span>
+    <div className="flex items-center justify-between px-4 py-3">
+      <span className="text-muted">{label}</span>
+      <b className={`tabular-nums ${strong ? "text-brand" : ""}`}>{value}</b>
     </div>
   );
 }

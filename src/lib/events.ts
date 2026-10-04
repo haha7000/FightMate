@@ -191,8 +191,13 @@ export function rowToEvent(r: Record<string, unknown>): GymEvent {
   };
 }
 
+// 서비스는 한국 기준. 서버가 UTC(Vercel)여도 "오늘"은 KST로 계산한다.
+export function todayKST(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
+}
+
 function todayStr(): string {
-  return toYmd(new Date());
+  return todayKST();
 }
 
 // 다가오는(오늘 이후) 이벤트만, 날짜 오름차순
@@ -220,4 +225,50 @@ export function formatEventDate(date: string): string {
 
 export function formatFee(fee: number): string {
   return fee === 0 ? "무료" : `${fee.toLocaleString("ko-KR")}원`;
+}
+
+// ── 포스터 스타일 표시용 ─────────────────────────────
+
+export const EVENT_KIND_EN: Record<EventKind, string> = {
+  오픈매트: "OPEN MAT",
+  세미나: "SEMINAR",
+  대회: "TOURNAMENT",
+  특별수업: "CLASS",
+  행사: "EVENT",
+};
+
+const DOW_KO = ["일", "월", "화", "수", "목", "금", "토"];
+const DOW_EN = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+
+// "2026-10-10" → { m: 10, d: 10, ko: "토", en: "SAT" }
+export function dateParts(date: string) {
+  const [y, m, d] = date.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  return { m, d, ko: DOW_KO[dow], en: DOW_EN[dow] };
+}
+
+// 이번 주(오늘~일요일) / 다음 주(다음 월~일) / 그 이후
+export function weekBucket(date: string, today: string): "this" | "next" | "later" {
+  const toDay = (s: string) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return Date.UTC(y, m - 1, d) / 86_400_000;
+  };
+  const t = toDay(today);
+  const daysToSunday = 6 - ((new Date(t * 86_400_000).getUTCDay() + 6) % 7);
+  const diff = toDay(date) - t;
+  if (diff <= daysToSunday) return "this";
+  if (diff <= daysToSunday + 7) return "next";
+  return "later";
+}
+
+// Gi / No-Gi — 아직 DB 필드가 없어 제목·설명에서 추정. TODO: events에 gi_type 컬럼
+export function eventGiType(e: GymEvent, gymDisciplines: string[] = []): "GI" | "NO-GI" | null {
+  if (/노기|no-?gi/i.test(e.title + e.description)) return "NO-GI";
+  if (e.kind === "오픈매트" && gymDisciplines.includes("주짓수")) return "GI";
+  return null;
+}
+
+// 레벨 표시 — TODO: events에 level 컬럼
+export function eventLevel(e: GymEvent): string | null {
+  return /초보|입문|화이트벨트/.test(e.title + e.description) ? "초보 환영" : null;
 }

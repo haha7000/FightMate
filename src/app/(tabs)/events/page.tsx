@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import EventsBoard from "@/components/EventsBoard";
-import { getUpcomingEvents } from "@/lib/data.server";
+import { getGyms, getUpcomingEvents } from "@/lib/data.server";
+import { todayKST } from "@/lib/events";
 
 export const metadata: Metadata = {
   title: "오픈매트·세미나·대회 일정 — FightMate",
@@ -9,6 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function EventsPage() {
-  const events = await getUpcomingEvents();
-  return <EventsBoard events={events} />;
+  const [events, gyms] = await Promise.all([getUpcomingEvents(), getGyms()]);
+  // "이번 주" 판단 기준일을 서버에서 한 번 정해 내려준다 (서버·브라우저 날짜 불일치 방지)
+  return <EventsBoard events={events} gyms={gyms} today={todayKST()} />;
 }

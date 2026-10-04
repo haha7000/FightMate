@@ -117,7 +117,7 @@ export default function AdminPage() {
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">{b.name}</p>
-                    <span className="rounded-md bg-orange-100 px-2 py-1 text-[11px] font-semibold text-orange-700">
+                    <span className="rounded-md bg-brand-tint px-2 py-1 text-[11px] font-semibold text-brand">
                       {b.status}
                     </span>
                   </div>
@@ -240,7 +240,7 @@ export default function AdminPage() {
           <div>
             <p className="text-sm font-medium text-neutral-600">시설 · 제공 사항</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              {AMENITIES.map(({ key, emoji }) => {
+              {AMENITIES.map(({ key }) => {
                 const on = gym.amenities.includes(key);
                 return (
                   <button
@@ -249,11 +249,11 @@ export default function AdminPage() {
                     onClick={() => toggleAmenity(key)}
                     className={`flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm ${
                       on
-                        ? "border-orange-300 bg-orange-100/50 text-neutral-900"
+                        ? "border-brand bg-brand-tint text-neutral-900"
                         : "border-neutral-200 bg-white text-neutral-400"
                     }`}
                   >
-                    {emoji} {key} {on && "✓"}
+                    {key} {on && "✓"}
                   </button>
                 );
               })}
@@ -261,7 +261,7 @@ export default function AdminPage() {
           </div>
           <button
             onClick={() => setSaved(true)}
-            className="mt-2 rounded-xl bg-orange-500 py-3 font-bold text-white active:bg-orange-600"
+            className="mt-2 rounded-xl bg-brand py-3 font-bold text-white active:opacity-90"
           >
             {saved ? "저장됨 ✓ (데모)" : "저장"}
           </button>
@@ -285,7 +285,7 @@ function TabButton({
       onClick={onClick}
       className={`rounded-full px-4 py-2 text-sm font-medium ${
         active
-          ? "bg-orange-500 text-white"
+          ? "bg-brand text-white"
           : "border border-neutral-200 bg-white text-neutral-500"
       }`}
     >
@@ -418,11 +418,11 @@ function EventsTab({
                 onClick={() => setKind(k.key)}
                 className={`rounded-full px-3 py-1.5 text-sm ${
                   kind === k.key
-                    ? "bg-orange-500 text-white"
+                    ? "bg-brand text-white"
                     : "border border-neutral-200 text-neutral-600"
                 }`}
               >
-                {k.emoji} {k.key}
+                {k.key}
               </button>
             ))}
           </div>
@@ -528,7 +528,7 @@ function EventsTab({
             타 체육관·외부인 참가 환영
           </label>
 
-          {err && <p className="text-sm text-orange-600">{err}</p>}
+          {err && <p className="text-sm text-brand">{err}</p>}
 
           <div className="flex gap-2">
             <button
@@ -541,7 +541,7 @@ function EventsTab({
             <button
               type="submit"
               disabled={submitting || uploading}
-              className="flex-1 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white active:bg-orange-600 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-brand py-3 text-sm font-bold text-white active:opacity-90 disabled:opacity-50"
             >
               {submitting ? "등록 중…" : "등록"}
             </button>
@@ -614,7 +614,7 @@ function AdminEventItem({
                 >
                   <span className="font-medium">{r.name || "이름 미입력"}</span>
                   {r.phone ? (
-                    <a href={`tel:${r.phone}`} className="text-xs text-orange-600">
+                    <a href={`tel:${r.phone}`} className="text-xs text-brand">
                       {r.phone}
                     </a>
                   ) : (

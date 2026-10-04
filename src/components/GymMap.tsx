@@ -3,6 +3,7 @@
 import Script from "next/script";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ExternalLink, LocateFixed, Map as MapIcon, Navigation, Phone, RotateCw, Ticket, X } from "lucide-react";
 import { DISCIPLINES, formatPrice, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
 import { distanceM, formatDistance, type Place } from "@/lib/places";
 
@@ -258,7 +259,7 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
   }, [partnerGyms, otherPlaces, origin]);
 
   return (
-    <div className="fixed inset-x-0 top-0 bottom-14 flex flex-col md:top-14 md:bottom-0">
+    <div className="fixed top-0 left-1/2 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] flex w-full max-w-[480px] -translate-x-1/2 flex-col">
       {KAKAO_JS_KEY && (
         <Script
           src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_JS_KEY}&autoload=false`}
@@ -269,14 +270,15 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
 
       {/* 지도 영역 */}
       <div className="relative min-h-0 flex-1">
-        <div ref={mapEl} className="h-full w-full bg-neutral-100" />
+        <div ref={mapEl} className="h-full w-full bg-field" />
 
         {sdkError && <SdkErrorView />}
 
         {/* 종목 필터 */}
-        <div className="absolute inset-x-0 top-0 z-10 flex gap-2 overflow-x-auto px-3 pt-3 pb-2">
+        <div className="no-scrollbar absolute inset-x-0 top-0 z-10 flex gap-1.5 overflow-x-auto px-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2">
           <Chip
-            label="🎟️ 1일권"
+            label="1일권 가능"
+            icon={<Ticket size={14} strokeWidth={2} />}
             active={dayPassOnly}
             onClick={() => {
               setDayPassOnly((v) => !v);
@@ -293,13 +295,14 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
         {moved && !loading && (
           <button
             onClick={() => search()}
-            className="absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full bg-neutral-900 px-4 py-2 text-sm font-bold text-white shadow-lg active:bg-neutral-700"
+            className="absolute left-1/2 top-16 z-10 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-ink px-4 py-2 text-[14px] font-bold text-white shadow-lg"
           >
-            ↻ 이 지역에서 재검색
+            <RotateCw size={15} strokeWidth={2.5} />
+            이 지역에서 재검색
           </button>
         )}
         {loading && (
-          <div className="absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-sm font-medium text-neutral-600 shadow-lg">
+          <div className="absolute left-1/2 top-16 z-10 -translate-x-1/2 rounded-full bg-white px-4 py-2 text-[14px] font-medium text-muted shadow-lg">
             체육관 찾는 중…
           </div>
         )}
@@ -308,16 +311,16 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
         <button
           onClick={() => locate(false)}
           aria-label="내 위치로 이동"
-          className="absolute bottom-4 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white text-lg shadow-lg active:bg-neutral-100"
+          className="absolute bottom-4 right-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg active:bg-field"
         >
-          ◎
+          <LocateFixed size={20} />
         </button>
       </div>
 
       {/* 하단 패널: 선택한 체육관 / 목록 / 요약 */}
-      <div className="max-h-[55%] overflow-y-auto border-t border-neutral-200 bg-white">
+      <div className="max-h-[55%] overflow-y-auto border-t border-line bg-white">
         {notice && !selected && !listOpen && (
-          <p className="bg-orange-50 px-4 py-2 text-xs text-orange-700">{notice}</p>
+          <p className="bg-field px-4 py-2 text-[12px] text-muted">{notice}</p>
         )}
 
         {selected?.kind === "gym" && (
@@ -329,9 +332,9 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
 
         {!selected && listOpen && (
           <div>
-            <div className="sticky top-0 flex items-center justify-between border-b border-neutral-100 bg-white px-4 py-3">
+            <div className="sticky top-0 flex items-center justify-between border-b border-line bg-white px-4 py-3">
               <p className="text-sm font-bold">목록 {listItems.length}곳</p>
-              <button onClick={() => setListOpen(false)} className="text-sm text-neutral-500">
+              <button onClick={() => setListOpen(false)} className="text-[14px] text-muted">
                 지도 보기
               </button>
             </div>
@@ -340,14 +343,14 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
                 <li key={item.kind === "gym" ? `g-${item.gym.id}` : `p-${item.place.id}`}>
                   <button
                     onClick={() => focus(item.kind === "gym" ? { kind: "gym", gym: item.gym } : { kind: "place", place: item.place })}
-                    className="flex w-full items-center justify-between gap-3 border-b border-neutral-100 px-4 py-3 text-left active:bg-neutral-50"
+                    className="flex w-full items-center justify-between gap-3 border-b border-line px-4 py-3 text-left active:bg-field"
                   >
                     <div className="min-w-0">
                       <p className="truncate font-semibold">
-                        {item.kind === "gym" && <span className="mr-1 text-orange-500">●</span>}
+                        {item.kind === "gym" && <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-brand align-middle" />}
                         {item.kind === "gym" ? item.gym.name : item.place.name}
                       </p>
-                      <p className="mt-0.5 truncate text-xs text-neutral-500">
+                      <p className="mt-0.5 truncate text-[12px] text-muted">
                         {item.kind === "gym"
                           ? `체험 ${formatPrice(item.gym.trialPrice)} · ${
                               offersDayPass(item.gym) ? `1일권 ${formatPrice(item.gym.dayPassPrice!)}` : "1일권 없음"
@@ -355,7 +358,7 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
                           : item.place.disciplines.join(" · ") || item.place.category}
                       </p>
                     </div>
-                    {origin && <span className="shrink-0 text-xs text-neutral-400">{formatDistance(item.m)}</span>}
+                    {origin && <span className="shrink-0 text-[12px] text-muted tabular-nums">{formatDistance(item.m)}</span>}
                   </button>
                 </li>
               ))}
@@ -366,28 +369,28 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
         {!selected && !listOpen && (
           <div className="flex items-center justify-between px-4 py-3">
             {error ? (
-              <p className="text-sm text-orange-600">
+              <p className="text-[14px] text-red-600">
                 {error}{" "}
                 <button onClick={() => search()} className="font-bold underline">
                   다시 시도
                 </button>
               </p>
             ) : (
-              <p className="text-sm text-neutral-600">
+              <p className="text-[14px] text-muted">
                 {dayPassOnly ? "1일권 가능" : "주변 체육관"}{" "}
-                <b className="text-neutral-900">{partnerGyms.length + otherPlaces.length}</b>곳
+                <b className="text-ink">{partnerGyms.length + otherPlaces.length}</b>곳
                 {dayPassOnly ? (
-                  <span className="text-neutral-400"> · FightMate 입점 체육관 기준</span>
+                  <span> · FightMate 입점 체육관 기준</span>
                 ) : (
                   partnerGyms.length > 0 && (
-                    <span className="text-orange-600"> · 바로 예약 {partnerGyms.length}곳</span>
+                    <span className="font-semibold text-brand"> · 바로 예약 {partnerGyms.length}곳</span>
                   )
                 )}
               </p>
             )}
             <button
               onClick={() => setListOpen(true)}
-              className="rounded-full border border-neutral-200 px-3 py-1.5 text-sm font-medium text-neutral-700"
+              className="rounded-lg border border-line px-3 py-1.5 text-[13px] font-medium"
             >
               목록
             </button>
@@ -409,16 +412,16 @@ function pill(name: string, kind: "partner" | "place", selected = false): HTMLEl
   const label = document.createElement("span");
   const tail = document.createElement("span");
   if (kind === "partner") {
-    label.className = `max-w-40 truncate rounded-full bg-orange-500 px-2.5 py-1 text-xs font-bold text-white shadow-lg ring-2 ${
-      selected ? "ring-neutral-900" : "ring-white"
+    label.className = `max-w-40 truncate rounded-full bg-brand px-2.5 py-1 text-xs font-bold text-white shadow-lg ring-2 ${
+      selected ? "ring-ink" : "ring-white"
     }`;
-    tail.className = "-mt-1 h-2 w-2 rotate-45 bg-orange-500";
+    tail.className = "-mt-1 h-2 w-2 rotate-45 bg-brand";
   } else {
     label.className =
-      "max-w-40 truncate rounded-full bg-neutral-900 px-2.5 py-1 text-xs font-bold text-white shadow-lg ring-2 ring-white";
-    tail.className = "-mt-1 h-2 w-2 rotate-45 bg-neutral-900";
+      "max-w-40 truncate rounded-full bg-ink px-2.5 py-1 text-xs font-bold text-white shadow-lg ring-2 ring-white";
+    tail.className = "-mt-1 h-2 w-2 rotate-45 bg-ink";
   }
-  label.textContent = kind === "partner" ? `🥊 ${name}` : name;
+  label.textContent = name;
   wrap.append(label, tail);
   return wrap;
 }
@@ -428,7 +431,7 @@ function dot(): HTMLElement {
   const el = document.createElement("button");
   el.type = "button";
   el.setAttribute("aria-label", "체육관");
-  el.className = "block h-4 w-4 rounded-full bg-neutral-700 shadow ring-2 ring-white";
+  el.className = "block h-4 w-4 rounded-full bg-ink/75 shadow ring-2 ring-white";
   return el;
 }
 
@@ -440,14 +443,26 @@ function myDot(): HTMLElement {
 
 // ── 하단 패널 ─────────────────────────────────────────
 
-function Chip({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+function Chip({
+  label,
+  active,
+  onClick,
+  icon,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  icon?: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium shadow-md ${
-        active ? "bg-orange-500 text-white" : "bg-white text-neutral-700"
+      aria-pressed={active}
+      className={`flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-[13px] font-semibold shadow-md ${
+        active ? "bg-ink text-white" : "bg-white text-ink"
       }`}
     >
+      {icon}
       {label}
     </button>
   );
@@ -457,11 +472,11 @@ function SheetHeader({ title, sub, onClose }: { title: string; sub: string; onCl
   return (
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="truncate text-lg font-extrabold">{title}</h2>
-        <p className="mt-0.5 text-xs text-neutral-500">{sub}</p>
+        <h2 className="truncate text-[18px] font-bold">{title}</h2>
+        <p className="mt-0.5 text-[12px] text-muted">{sub}</p>
       </div>
-      <button onClick={onClose} aria-label="닫기" className="shrink-0 px-1 text-xl text-neutral-400">
-        ✕
+      <button onClick={onClose} aria-label="닫기" className="-mr-1 shrink-0 p-1 text-muted">
+        <X size={20} />
       </button>
     </div>
   );
@@ -472,7 +487,7 @@ function Tags({ items }: { items: string[] }) {
   return (
     <div className="mt-2 flex flex-wrap gap-1.5">
       {items.map((d) => (
-        <span key={d} className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-700">
+        <span key={d} className="rounded bg-field px-1.5 py-0.5 text-[11px] font-medium">
           {d}
         </span>
       ))}
@@ -480,39 +495,47 @@ function Tags({ items }: { items: string[] }) {
   );
 }
 
-// 입점 체육관: 우리 상세페이지·체험 신청으로 연결
+// 입점 체육관: 우리 상세페이지·체험/1일권 신청으로 연결
 function GymSheet({ gym, distance, onClose }: { gym: Gym; distance: number | null; onClose: () => void }) {
+  const dayPass = offersDayPass(gym);
   return (
     <div className="p-4">
-      <p className="mb-2 inline-block rounded-md bg-orange-100 px-2 py-0.5 text-[11px] font-bold text-orange-700">
+      <p className="mb-2 inline-block rounded-md bg-brand-tint px-2 py-0.5 text-[11px] font-bold text-brand">
         FightMate 입점 · 전화 없이 바로 예약
       </p>
       <SheetHeader
         title={gym.name}
-        sub={[distance != null && formatDistance(distance), gym.district, `⭐ ${gym.rating}`].filter(Boolean).join(" · ")}
+        sub={[distance != null && formatDistance(distance), gym.district, `★ ${gym.rating}`].filter(Boolean).join(" · ")}
         onClose={onClose}
       />
       <Tags items={gym.disciplines} />
-      <p className="mt-3 text-sm text-neutral-600">
-        체험 {formatPrice(gym.trialPrice)}
-        <span className="mx-1.5 text-neutral-300">|</span>
-        {offersDayPass(gym) ? (
-          <b className="text-neutral-900">1일권 {formatPrice(gym.dayPassPrice!)}</b>
+      <p className="mt-3 text-[14px] text-muted tabular-nums">
+        체험 <b className="text-ink">{formatPrice(gym.trialPrice)}</b>
+        <span className="mx-1.5 text-line">|</span>
+        {dayPass ? (
+          <>
+            1일권 <b className="text-ink">{formatPrice(gym.dayPassPrice!)}</b>
+          </>
         ) : (
-          <span className="text-neutral-400">1일권 없음</span>
+          "1일권 없음"
         )}
       </p>
-      <div className="mt-4 flex gap-2">
-        <Link href={`/gym/${gym.id}`} className="flex-1 rounded-xl border border-neutral-200 py-3 text-center text-sm font-bold">
-          상세보기
-        </Link>
+      <div className="mt-4 grid grid-cols-[1fr_1.6fr] gap-2 text-[14px] font-bold">
         <Link
-          href={`/gym/${gym.id}/apply`}
-          className="flex-[2] rounded-xl bg-orange-500 py-3 text-center text-sm font-bold text-white active:bg-orange-600"
+          href={dayPass ? `/gym/${gym.id}/apply?type=daypass` : `/gym/${gym.id}`}
+          className="rounded-xl border border-ink py-3 text-center"
         >
+          {dayPass ? "1일권 예약" : "상세보기"}
+        </Link>
+        <Link href={`/gym/${gym.id}/apply`} className="rounded-xl bg-brand py-3 text-center text-white">
           체험 신청 · {formatPrice(gym.trialPrice)}
         </Link>
       </div>
+      {dayPass && (
+        <Link href={`/gym/${gym.id}`} className="mt-3 block text-center text-[13px] font-semibold text-muted">
+          체육관 자세히 보기
+        </Link>
+      )}
     </div>
   );
 }
@@ -548,6 +571,7 @@ function PlaceSheet({ place, distance, onClose }: { place: Place; distance: numb
   }
 
   const directions = `https://map.kakao.com/link/to/${encodeURIComponent(place.name)},${place.lat},${place.lng}`;
+  const action = "flex flex-col items-center gap-1 rounded-xl bg-field py-2.5";
 
   return (
     <div className="p-4">
@@ -556,21 +580,27 @@ function PlaceSheet({ place, distance, onClose }: { place: Place; distance: numb
         sub={[distance != null && formatDistance(distance), place.category].filter(Boolean).join(" · ")}
         onClose={onClose}
       />
-      <p className="mt-2 text-sm text-neutral-600">{place.address}</p>
+      <p className="mt-2 text-[14px] text-muted">{place.address}</p>
       <Tags items={place.disciplines} />
 
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm font-medium">
+      <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[12px] font-semibold">
         {place.phone ? (
-          <a href={`tel:${place.phone}`} className="rounded-xl bg-neutral-100 py-2.5">
-            📞 전화
+          <a href={`tel:${place.phone}`} className={action}>
+            <Phone size={18} />
+            전화
           </a>
         ) : (
-          <span className="rounded-xl bg-neutral-50 py-2.5 text-neutral-300">📞 전화</span>
+          <span className={`${action} text-muted/50`}>
+            <Phone size={18} />
+            전화
+          </span>
         )}
-        <a href={directions} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-neutral-100 py-2.5">
-          🧭 길찾기
+        <a href={directions} target="_blank" rel="noopener noreferrer" className={action}>
+          <Navigation size={18} />
+          길찾기
         </a>
-        <a href={place.url} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-neutral-100 py-2.5">
+        <a href={place.url} target="_blank" rel="noopener noreferrer" className={action}>
+          <ExternalLink size={18} />
           카카오맵
         </a>
       </div>
@@ -578,9 +608,13 @@ function PlaceSheet({ place, distance, onClose }: { place: Place; distance: numb
       <button
         onClick={requestPartner}
         disabled={requested || sending}
-        className="mt-3 w-full rounded-xl border border-orange-300 bg-orange-50 py-3 text-sm font-bold text-orange-700 disabled:opacity-70"
+        className="mt-3 w-full rounded-xl bg-brand-tint py-3 text-[14px] font-bold text-brand disabled:opacity-80"
       >
-        {requested ? "✓ 입점 요청 완료 — 관장님께 전해드릴게요" : sending ? "요청 중…" : "🙋 여기도 전화 없이 예약하고 싶어요 (입점 요청)"}
+        {requested
+          ? "입점 요청 완료. 관장님께 전해드릴게요"
+          : sending
+            ? "요청 중…"
+            : "여기도 전화 없이 예약하고 싶어요 (입점 요청)"}
       </button>
     </div>
   );
@@ -589,16 +623,16 @@ function PlaceSheet({ place, distance, onClose }: { place: Place; distance: numb
 function SdkErrorView() {
   const origin = typeof window === "undefined" ? "" : window.location.origin;
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center bg-neutral-50 p-6 text-center">
+    <div className="absolute inset-0 z-20 flex items-center justify-center bg-paper p-6 text-center">
       <div>
-        <p className="text-3xl">🗺️</p>
+        <MapIcon size={36} className="mx-auto text-muted" />
         <p className="mt-3 font-bold">지도를 불러오지 못했어요</p>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+        <p className="mt-2 text-[14px] leading-relaxed text-muted">
           {KAKAO_JS_KEY ? (
             <>
-              카카오 개발자 콘솔 → 플랫폼 → Web 사이트 도메인에
+              카카오 개발자 콘솔 → 플랫폼 키 → JavaScript SDK 도메인에
               <br />
-              <code className="rounded bg-neutral-200 px-1.5 py-0.5 text-neutral-800">{origin}</code>
+              <code className="rounded bg-field px-1.5 py-0.5 text-ink">{origin}</code>
               <br />이 등록돼 있는지 확인해주세요.
             </>
           ) : (

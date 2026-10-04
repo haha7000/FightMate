@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { MOCK_GYMS, rowToGym, type Gym } from "@/lib/gyms";
-import { MOCK_EVENTS, rowToEvent, upcoming, type GymEvent } from "@/lib/events";
+import { MOCK_EVENTS, rowToEvent, todayKST, upcoming, type GymEvent } from "@/lib/events";
 
 // 체육관 목록 — Supabase 설정 시 DB에서, 아니면 목데이터.
 export async function getGyms(): Promise<Gym[]> {
@@ -35,7 +35,7 @@ export async function getUpcomingEvents(): Promise<GymEvent[]> {
   const supabase = await createClient();
   if (!supabase) return upcoming(MOCK_EVENTS);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const { data, error } = await supabase
     .from("events")
     .select("*")
@@ -51,7 +51,7 @@ export async function getEventsByGym(gymId: string): Promise<GymEvent[]> {
   const supabase = await createClient();
   if (!supabase) return upcoming(MOCK_EVENTS.filter((e) => e.gymId === gymId));
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = todayKST();
   const { data, error } = await supabase
     .from("events")
     .select("*")

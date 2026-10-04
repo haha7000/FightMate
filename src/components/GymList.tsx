@@ -2,136 +2,122 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  DISCIPLINES,
-  formatPriceShort,
-  isHandsFree,
-  offersDayPass,
-  type Discipline,
-  type Gym,
-} from "@/lib/gyms";
+import { CalendarDays, Star, Ticket } from "lucide-react";
+import { DISCIPLINES, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
+import { dateParts, type GymEvent } from "@/lib/events";
 
-export default function GymList({ gyms }: { gyms: Gym[] }) {
-  const [filter, setFilter] = useState<Discipline | null>(null);
+// 홈 체육관 목록: 필터 칩 + 폰 2열 카드. 카드마다 "다음 일정" 칩 (캐치테이블의 예약 가능 시간 칩처럼)
+export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEvent[] }) {
+  const [discipline, setDiscipline] = useState<Discipline | null>(null);
   const [dayPassOnly, setDayPassOnly] = useState(false);
+  const [freeTrialOnly, setFreeTrialOnly] = useState(false);
 
   const visible = gyms.filter(
     (g) =>
-      (!filter || g.disciplines.includes(filter)) &&
-      (!dayPassOnly || offersDayPass(g))
+      (!discipline || g.disciplines.includes(discipline)) &&
+      (!dayPassOnly || offersDayPass(g)) &&
+      (!freeTrialOnly || g.trialPrice === 0)
   );
 
   return (
-    <>
-      <nav className="flex gap-2 overflow-x-auto px-5 pb-4 md:flex-wrap md:overflow-visible md:pb-6">
-        {/* 차별점: 다른 체육관 수련자도 하루 운동하러 갈 수 있는 곳만 */}
-        <button
-          onClick={() => setDayPassOnly((v) => !v)}
-          aria-pressed={dayPassOnly}
-          className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-bold transition-colors ${
-            dayPassOnly
-              ? "bg-neutral-900 text-white"
-              : "border border-neutral-900 bg-white text-neutral-900"
-          }`}
-        >
-          🎟️ 1일권 가능
-        </button>
-        <span className="w-px shrink-0 self-stretch bg-neutral-200" aria-hidden />
-        <FilterChip
-          label="전체"
-          active={filter === null}
-          onClick={() => setFilter(null)}
-        />
+    <section className="pt-6">
+      <div className="flex items-baseline justify-between px-4">
+        <h2 className="text-[18px] font-bold">체육관</h2>
+        <span className="text-[13px] text-muted">{visible.length}곳</span>
+      </div>
+
+      <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto px-4 pb-1">
+        <Toggle on={dayPassOnly} onClick={() => setDayPassOnly((v) => !v)}>
+          <Ticket size={14} strokeWidth={2} />
+          1일권 가능
+        </Toggle>
+        <Toggle on={freeTrialOnly} onClick={() => setFreeTrialOnly((v) => !v)}>
+          체험 무료
+        </Toggle>
+        <span className="mx-0.5 w-px shrink-0 self-stretch bg-line" aria-hidden />
+        <Toggle on={discipline === null} onClick={() => setDiscipline(null)}>
+          전체
+        </Toggle>
         {DISCIPLINES.map((d) => (
-          <FilterChip
-            key={d}
-            label={d}
-            active={filter === d}
-            onClick={() => setFilter(d)}
-          />
+          <Toggle key={d} on={discipline === d} onClick={() => setDiscipline(d)}>
+            {d}
+          </Toggle>
         ))}
-      </nav>
+      </div>
 
-      {/* 폰 2열 · 태블릿 3열 · 데스크톱 4열. 테두리 없이 사진 중심 카드 */}
-      <ul className="grid grid-cols-2 gap-x-3 gap-y-6 px-4 sm:grid-cols-3 md:gap-x-5 md:px-5 lg:grid-cols-4">
-        {visible.map((gym) => (
-          <li key={gym.id}>
-            <Link href={`/gym/${gym.id}`} className="group block active:opacity-80">
-              <div className="relative aspect-square overflow-hidden rounded-2xl bg-neutral-100">
-                {gym.photos.length > 0 ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={gym.photos[0].src}
-                    alt={gym.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-4xl">
-                    {gym.emoji}
-                  </div>
-                )}
-                {gym.trialPrice === 0 && (
-                  <span className="absolute left-2 top-2 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-bold text-white shadow">
-                    체험 무료
-                  </span>
-                )}
-                {isHandsFree(gym) && (
-                  <span className="absolute bottom-2 left-2 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur">
-                    🙌 몸만 와도 OK
-                  </span>
-                )}
-              </div>
-
-              <div className="mt-2 px-0.5">
-                <h3 className="truncate text-[15px] font-bold leading-snug tracking-tight" title={gym.name}>
-                  {gym.name}
-                </h3>
-                <p className="mt-0.5 truncate text-xs text-neutral-500">
-                  <span className="font-semibold text-neutral-800">★ {gym.rating}</span>
-                  <span className="text-neutral-400"> ({gym.reviewCount})</span>
-                  {" · "}
-                  {gym.district.split(" ").at(-1)} · {gym.disciplines.join("·")}
+      <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-6 px-4">
+        {visible.map((g) => {
+          const next = events.find((e) => e.gymId === g.id);
+          return (
+            <li key={g.id}>
+              <Link href={`/gym/${g.id}`} className="block active:opacity-80">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-field">
+                  {g.photos[0] ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={g.photos[0].src} alt={g.name} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full items-center justify-center font-display text-[22px] text-muted">
+                      {g.name.slice(0, 2)}
+                    </div>
+                  )}
+                  {g.trialPrice === 0 && (
+                    <span className="absolute left-2 top-2 rounded-md bg-white/95 px-1.5 py-0.5 text-[11px] font-bold text-brand">
+                      체험 무료
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-2 truncate text-[15px] font-semibold">{g.name}</h3>
+                <p className="mt-0.5 flex items-center gap-1 truncate text-[12px] text-muted">
+                  <Star size={12} className="shrink-0 fill-star stroke-star" />
+                  <b className="font-semibold text-ink">{g.rating}</b>({g.reviewCount}) ·{" "}
+                  {g.district.split(" ").at(-1)}
                 </p>
-                <p className="mt-1 text-[13px]">
-                  <span className="font-bold">체험 {formatPriceShort(gym.trialPrice)}</span>
-                  {offersDayPass(gym) && (
-                    <span className="text-neutral-500"> · 1일권 {formatPriceShort(gym.dayPassPrice!)}</span>
+                <p className="mt-1 text-[13px] tabular-nums">
+                  {offersDayPass(g) ? (
+                    <>
+                      1일권 <b>{g.dayPassPrice!.toLocaleString("ko-KR")}원</b>
+                    </>
+                  ) : (
+                    <span className="text-muted">1일권 없음</span>
                   )}
                 </p>
-              </div>
-            </Link>
-          </li>
-        ))}
+                {next && (
+                  <span className="mt-2 inline-flex max-w-full items-center gap-1 truncate rounded-md bg-brand-tint px-2 py-1 text-[12px] font-semibold text-brand">
+                    <CalendarDays size={13} className="shrink-0" />
+                    {dateParts(next.date).ko} {next.startTime} {next.kind}
+                  </span>
+                )}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
 
       {visible.length === 0 && (
-        <p className="px-5 py-16 text-center text-sm text-neutral-400">
-          {dayPassOnly ? "조건에 맞는 1일권 체육관이 아직 없어요" : "해당 종목의 체육관이 아직 없어요"}
-        </p>
+        <p className="px-4 py-16 text-center text-[14px] text-muted">조건에 맞는 체육관이 아직 없어요</p>
       )}
-    </>
+    </section>
   );
 }
 
-function FilterChip({
-  label,
-  active,
+function Toggle({
+  on,
   onClick,
+  children,
 }: {
-  label: string;
-  active: boolean;
+  on: boolean;
   onClick: () => void;
+  children: React.ReactNode;
 }) {
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-        active
-          ? "bg-orange-500 text-white"
-          : "border border-neutral-200 bg-white text-neutral-600"
+      aria-pressed={on}
+      className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[13px] font-medium ${
+        on ? "border-transparent bg-ink text-white" : "border-line bg-white text-ink"
       }`}
     >
-      {label}
+      {children}
     </button>
   );
 }

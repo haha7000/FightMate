@@ -2,37 +2,39 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { CalendarDays, House, IdCard, Map, Ticket } from "lucide-react";
 
 const TABS = [
-  { href: "/", label: "홈", icon: "🏠" },
-  { href: "/map", label: "지도", icon: "🗺️" },
-  { href: "/events", label: "이벤트", icon: "🔥" },
-  { href: "/bookings", label: "내 예약", icon: "🎟️" },
-  { href: "/card", label: "내 카드", icon: "🃏" },
+  { href: "/", label: "홈", Icon: House },
+  { href: "/map", label: "지도", Icon: Map },
+  { href: "/events", label: "이벤트", Icon: CalendarDays },
+  { href: "/bookings", label: "내 예약", Icon: Ticket },
+  { href: "/card", label: "내 카드", Icon: IdCard },
 ];
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
+// 하단 탭바 — 앱 폭(480px) 안에 고정, 아이폰 홈 바 영역만큼 여백
 export function TabBar() {
   const pathname = usePathname();
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-20 border-t border-neutral-200 bg-neutral-50/95 backdrop-blur md:hidden">
-      <div className="mx-auto flex h-14 max-w-md">
-        {TABS.map((tab) => {
-          const active = isActive(pathname, tab.href);
+    <nav className="fixed bottom-0 left-1/2 z-30 w-full max-w-[480px] -translate-x-1/2 border-t border-line bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+      <div className="grid h-14 grid-cols-5">
+        {TABS.map(({ href, label, Icon }) => {
+          const active = isActive(pathname, href);
           return (
             <Link
-              key={tab.href}
-              href={tab.href}
-              className={`flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
-                active ? "text-orange-600" : "text-neutral-400"
+              key={href}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              className={`flex flex-col items-center justify-center gap-1 text-[10px] font-medium ${
+                active ? "text-brand" : "text-muted"
               }`}
             >
-              <span className="text-lg leading-none">{tab.icon}</span>
-              {tab.label}
+              <Icon size={22} strokeWidth={active ? 2.3 : 1.7} />
+              {label}
             </Link>
           );
         })}
@@ -41,49 +43,10 @@ export function TabBar() {
   );
 }
 
-export function TopNav() {
-  const pathname = usePathname();
-  const { user, signOut } = useAuth();
+export function Wordmark({ className = "" }: { className?: string }) {
   return (
-    <header className="hidden border-b border-neutral-200 md:block">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-5">
-        <Link href="/" className="text-sm font-bold tracking-widest text-orange-600">
-          FIGHTMATE
-        </Link>
-        <nav className="flex items-center gap-6">
-          {TABS.map((tab) => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`text-sm font-medium ${
-                isActive(pathname, tab.href)
-                  ? "text-neutral-900"
-                  : "text-neutral-400 hover:text-neutral-600"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          ))}
-          {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-neutral-600">{user.name}님</span>
-              <button
-                onClick={signOut}
-                className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm text-neutral-500 hover:border-neutral-300"
-              >
-                로그아웃
-              </button>
-            </div>
-          ) : (
-            <Link
-              href="/login"
-              className="rounded-lg border border-neutral-200 px-3 py-1.5 text-sm text-neutral-600 hover:border-neutral-300"
-            >
-              로그인
-            </Link>
-          )}
-        </nav>
-      </div>
-    </header>
+    <span className={`text-[15px] font-black tracking-tight ${className}`}>
+      fight<span className="text-brand">mate</span>
+    </span>
   );
 }
