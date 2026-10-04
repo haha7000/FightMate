@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { rowToGym, type Gym } from "@/lib/gyms";
 import {
   MOCK_EVENTS,
   rowToEvent,
@@ -27,9 +26,16 @@ export async function fetchBookings(): Promise<Booking[]> {
   const supabase = createClient();
   if (!supabase) return getBookingsLocal();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  // 관장은 RLS상 자기 체육관 신청도 조회되므로 "내 예약"은 본인 것만
   const { data } = await supabase
     .from("bookings")
     .select("*")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   return (data ?? []).map((r) => ({
@@ -215,25 +221,6 @@ export async function fetchGymEvents(gymId: string): Promise<GymEvent[]> {
 
   if (error || !data) return fallback();
   return data.map(rowToEvent);
-}
-
-// 현재 로그인 유저가 소유한 체육관 (관장). 없으면 null.
-export async function fetchOwnerGym(): Promise<Gym | null> {
-  if (!isSupabaseConfigured) return null;
-  const supabase = createClient();
-  if (!supabase) return null;
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  const { data } = await supabase
-    .from("gyms")
-    .select("*")
-    .eq("owner_id", user.id)
-    .maybeSingle();
-  return data ? rowToGym(data) : null;
 }
 
 // 포스터 이미지 업로드 → 공개 URL 반환. (데모는 임시 object URL)

@@ -47,12 +47,14 @@ export function useAuth() {
   }, []);
 
   const signIn = useCallback(
-    async (provider: "kakao" | "google"): Promise<{ error?: string }> => {
+    async (provider: "kakao" | "google", next?: string): Promise<{ error?: string }> => {
+      // 로그인 후 돌아갈 경로 — 우리 사이트 내부 경로만
+      const safeNext = next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
       if (!isSupabaseConfigured) {
         const s: Session = { name: "데모 유저", provider };
         setSession(s);
         setUser({ name: s.name, provider });
-        window.location.href = "/";
+        window.location.href = safeNext;
         return {};
       }
       const supabase = createClient();
@@ -62,7 +64,7 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(safeNext)}`,
           skipBrowserRedirect: true,
           // 카카오는 비즈앱이 아니면 이메일 동의 불가 → 닉네임만 요청 (KOE006 방지)
           ...(provider === "kakao" ? { scopes: "profile_nickname" } : {}),

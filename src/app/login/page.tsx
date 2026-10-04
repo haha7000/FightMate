@@ -14,7 +14,9 @@ export default function LoginPage() {
   async function handleSignIn(provider: "kakao" | "google") {
     setError(null);
     setBusy(provider);
-    const { error } = await signIn(provider);
+    // ?next=/gym/xxx/apply 처럼 로그인 전에 하던 화면으로 돌아가기
+    const next = new URLSearchParams(window.location.search).get("next") ?? undefined;
+    const { error } = await signIn(provider, next);
     if (error) {
       setError(error);
       setBusy(null);

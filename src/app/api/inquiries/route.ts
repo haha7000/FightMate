@@ -33,9 +33,12 @@ export async function POST(request: Request) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "로그인이 필요해요" }, { status: 401 });
+    }
 
     const { error } = await supabase.from("bookings").insert({
-      user_id: user?.id ?? null,
+      user_id: user.id,
       gym_id: gymId,
       gym_name: gym?.name ?? gymId,
       name: name.trim(),

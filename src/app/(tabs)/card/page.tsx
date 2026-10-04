@@ -3,11 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import Link from "next/link";
-import { Download } from "lucide-react";
+import { ChevronRight, Download, ShieldCheck, Store } from "lucide-react";
 import { DISCIPLINES } from "@/lib/gyms";
 import { type FighterProfile } from "@/lib/store";
 import { fetchProfile, saveProfile } from "@/lib/data.client";
 import { useAuth } from "@/lib/auth";
+import { fetchMyRoles } from "@/lib/partner.client";
 
 const BELTS = ["해당 없음", "화이트", "블루", "퍼플", "브라운", "블랙"];
 
@@ -34,11 +35,15 @@ export default function CardPage() {
   const [saved, setSaved] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
+  const [roles, setRoles] = useState<{ isAdmin: boolean; gymCount: number }>({ isAdmin: false, gymCount: 0 });
 
   useEffect(() => {
     fetchProfile().then((stored) => {
       if (stored) setProfileState(stored);
     });
+    fetchMyRoles()
+      .then(setRoles)
+      .catch(() => null); // 역할 테이블이 아직 없으면 입구를 숨김
   }, []);
 
   function update(patch: Partial<FighterProfile>) {
@@ -82,6 +87,29 @@ export default function CardPage() {
           </Link>
         )}
       </header>
+
+      {(roles.gymCount > 0 || roles.isAdmin) && (
+        <div className="mx-4 mt-4 divide-y divide-line overflow-hidden rounded-xl border border-line bg-white">
+          <Link href="/partner" className="flex items-center gap-3 px-4 py-3.5 active:bg-field">
+              <Store size={20} className="text-brand" />
+              <span className="flex-1">
+                <span className="block text-[15px] font-semibold">관장 모드</span>
+                <span className="text-[12px] text-muted">신청 확인 · 일정 · 체육관 정보 · 홍보</span>
+              </span>
+              <ChevronRight size={18} className="text-muted" />
+            </Link>
+          {roles.isAdmin && (
+            <Link href="/ops" className="flex items-center gap-3 px-4 py-3.5 active:bg-field">
+              <ShieldCheck size={20} className="text-ink" />
+              <span className="flex-1">
+                <span className="block text-[15px] font-semibold">운영자</span>
+                <span className="text-[12px] text-muted">체육관 등록 · 관장 초대 · 입점 요청</span>
+              </span>
+              <ChevronRight size={18} className="text-muted" />
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="px-4 pt-5">
         {/* 카드 미리보기 — 이미지로 저장되는 영역 */}

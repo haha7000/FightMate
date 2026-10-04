@@ -1,11 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Star } from "lucide-react";
+import { useAuth } from "@/lib/auth";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { type Review } from "@/lib/store";
 import { fetchReviews, submitReview } from "@/lib/data.client";
 
 export default function ReviewSection({ gymId }: { gymId: string }) {
+  const { user, loading } = useAuth();
+  const pathname = usePathname();
+  // 리뷰는 로그인한 회원만 (DB 정책도 본인 명의만 허용)
+  const needsLogin = isSupabaseConfigured && !loading && !user;
   const [reviews, setReviews] = useState<Review[]>([]);
   const [writing, setWriting] = useState(false);
   const [author, setAuthor] = useState("");
@@ -19,7 +27,7 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     // TODO(M2): 예약 이력 있는 유저만 작성 가능하게 제한
-    await submitReview({ gymId, author: author.trim() || "익명", rating, text: text.trim() });
+    await submitReview({ gymId, author: author.trim() || user?.name || "익명", rating, text: text.trim() });
     setReviews(await fetchReviews(gymId));
     setWriting(false);
     setAuthor("");
@@ -33,9 +41,15 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
         <h2 className="text-[16px] font-bold">
           리뷰 <span className="text-muted">{reviews.length}</span>
         </h2>
-        <button onClick={() => setWriting((v) => !v)} className="text-[14px] font-semibold text-brand">
-          {writing ? "취소" : "리뷰 쓰기"}
-        </button>
+        {needsLogin ? (
+          <Link href={`/login?next=${encodeURIComponent(pathname)}`} className="text-[14px] font-semibold text-brand">
+            로그인하고 리뷰 쓰기
+          </Link>
+        ) : (
+          <button onClick={() => setWriting((v) => !v)} className="text-[14px] font-semibold text-brand">
+            {writing ? "취소" : "리뷰 쓰기"}
+          </button>
+        )}
       </div>
 
       {writing && (
@@ -55,7 +69,12 @@ export default function ReviewSection({ gymId }: { gymId: string }) {
               </button>
             ))}
           </div>
-          <input className="input" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="닉네임 (선택)" />
+          <input
+            className="input"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder={user?.name ? `닉네임 (비우면 ${user.name})` : "닉네임 (선택)"}
+          />
           <textarea
             className="input min-h-24 resize-none"
             required

@@ -14,7 +14,7 @@ export interface Booking {
   phone: string;
   date: string; // YYYY-MM-DD
   type: "체험" | "1일권";
-  status: "신청됨" | "확정" | "사용 완료";
+  status: "신청됨" | "확정" | "거절" | "사용 완료";
   createdAt: string;
 }
 
