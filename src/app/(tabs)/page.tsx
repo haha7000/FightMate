@@ -39,9 +39,11 @@ export default async function HomePage() {
         </Link>
       </header>
 
-      <EventBand events={events} gyms={gyms} />
-
       <GymList gyms={gyms} events={events} />
+
+      <div className="mt-10">
+        <EventBand events={events} gyms={gyms} />
+      </div>
     </main>
   );
 }
