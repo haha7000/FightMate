@@ -15,6 +15,8 @@ const api = {
   revokeInvite: vi.fn(async () => {}),
   setGymPublished: vi.fn(async () => {}),
   fetchBookingStats: vi.fn(() => new Promise(() => {})), // 지표는 StatsPanel 테스트에서
+  fetchPartnerApplications: vi.fn(async () => [] as unknown[]),
+  setPartnerApplicationDone: vi.fn(async () => {}),
 };
 vi.mock("@/lib/partner.client", () => api);
 const { default: OpsConsole } = await import("./OpsConsole");
@@ -67,5 +69,40 @@ describe("운영자 화면", () => {
     await user.click(screen.getByRole("button", { name: "초대 취소" }));
     expect(api.revokeInvite).toHaveBeenCalledWith("abcdef123456");
     await waitFor(() => expect(screen.queryByText(/…123456/)).toBeNull());
+  });
+});
+
+describe("운영자 화면 — 관장 입점 신청", () => {
+  const app = (over = {}) => ({
+    id: "a1", gymName: "선릉 복싱", address: "서울 강남구 선릉로 1", ownerName: "김관장", phone: "01011112222",
+    message: "저녁에 연락 주세요", done: false, createdAt: "2026-10-06T01:00:00Z", ...over,
+  });
+
+  it("새 신청 수 배지, 전화 링크, 남긴 말", async () => {
+    api.fetchPartnerApplications.mockResolvedValue([app(), app({ id: "a2", gymName: "끝난 곳", phone: "0212345678", message: "", done: true })]);
+    setup();
+    expect(await screen.findByText("선릉 복싱")).toBeTruthy();
+    const heading = screen.getByRole("heading", { name: /관장 입점 신청/ });
+    expect(within(heading).getByText("1")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "010-1111-2222" }).getAttribute("href")).toBe("tel:01011112222");
+    expect(screen.getByText("저녁에 연락 주세요")).toBeTruthy();
+  });
+
+  it("처리 완료 → 저장하고 배지가 사라진다", async () => {
+    api.fetchPartnerApplications.mockResolvedValue([app()]);
+    const user = setup();
+    await user.click(await screen.findByRole("button", { name: "처리 완료" }));
+    expect(api.setPartnerApplicationDone).toHaveBeenCalledWith("a1", true);
+    expect(await screen.findByRole("button", { name: "다시 열기" })).toBeTruthy();
+    expect(within(screen.getByRole("heading", { name: /관장 입점 신청/ })).queryByText("1")).toBeNull();
+  });
+
+  it("이 정보로 등록 → 등록 폼에 이름·주소가 채워진다", async () => {
+    window.scrollTo = vi.fn();
+    api.fetchPartnerApplications.mockResolvedValue([app()]);
+    const user = setup();
+    await user.click(await screen.findByRole("button", { name: /이 정보로 등록/ }));
+    expect(screen.getByDisplayValue("선릉 복싱")).toBeTruthy();
+    expect(screen.getByDisplayValue("서울 강남구 선릉로 1")).toBeTruthy();
   });
 });

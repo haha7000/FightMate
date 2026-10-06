@@ -19,6 +19,7 @@ describe("검색 노출 (sitemap·robots) · 앱 설치 (manifest)", () => {
     expect(urls).toContain("https://fightmate.kr");
     expect(urls).toContain(`https://fightmate.kr/gym/${MOCK_GYMS[0].id}`);
     expect(urls).toContain("https://fightmate.kr/event/ev1");
+    expect(urls).toContain("https://fightmate.kr/for-gyms"); // 관장님 입점 안내는 검색에 노출
     expect(urls.every((u) => u.startsWith("https://fightmate.kr"))).toBe(true);
   });
 

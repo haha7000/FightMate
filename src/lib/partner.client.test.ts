@@ -179,3 +179,27 @@ describe("운영자 — 예약 지표", () => {
     expect(s).toMatchObject({ active: 1, last7: 1 });
   });
 });
+
+describe("운영자 — 관장 입점 신청", () => {
+  it("처리 안 한 것 먼저, 그 안에서 최신순", async () => {
+    const r = (id: string, status: string, at: string) => ({
+      id, gym_name: id, address: "", owner_name: "김", phone: "01011112222", message: "", status, created_at: at,
+    });
+    sb = fakeSupabase({ responses: { "partner_applications.select": { data: [
+      r("c", "새 신청", "2026-10-06T00:00:00Z"),
+      r("b", "처리 완료", "2026-10-05T00:00:00Z"),
+      r("a", "새 신청", "2026-10-04T00:00:00Z"),
+    ] } } });
+    const list = await p.fetchPartnerApplications();
+    expect(list.map((x) => [x.id, x.done])).toEqual([["c", false], ["a", false], ["b", true]]);
+    expect(sb.calls[0].filters).toEqual([["order", ["created_at", { ascending: false }]]]);
+  });
+
+  it("처리 완료·다시 열기", async () => {
+    sb = fakeSupabase({});
+    await p.setPartnerApplicationDone("a1", true);
+    await p.setPartnerApplicationDone("a1", false);
+    expect(sb.calls.map((c) => c.args[0])).toEqual([{ status: "처리 완료" }, { status: "새 신청" }]);
+    expect(sb.calls[0].filters).toEqual([["eq", ["id", "a1"]]]);
+  });
+});

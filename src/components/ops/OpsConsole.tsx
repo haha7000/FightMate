@@ -3,38 +3,60 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Copy, EyeOff, Home, Link2, Plus, Store } from "lucide-react";
+import { ChevronDown, Copy, EyeOff, Home, Link2, Plus, Store, UserRound } from "lucide-react";
 import { DISCIPLINES, type Discipline, type Gym } from "@/lib/gyms";
 import {
   createInvite,
   fetchGymMembers,
   fetchGymRequests,
   fetchMemberCounts,
+  fetchPartnerApplications,
   fetchPendingInvites,
   removeGymMember,
   revokeInvite,
   setGymPublished,
+  setPartnerApplicationDone,
   type GymMember,
   type GymRequestSummary,
+  type PartnerApplication,
   type PendingInvite,
 } from "@/lib/partner.client";
 import { Chip } from "@/components/ui/Chip";
 import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 import StatsPanel from "@/components/ops/StatsPanel";
-import { monthDay } from "@/lib/format";
+import { formatPhone, monthDay } from "@/lib/format";
 
 type Prefill = { name: string; address: string; kakaoPlaceId: string | null };
 
 export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [requests, setRequests] = useState<GymRequestSummary[] | null>(null);
+  const [applications, setApplications] = useState<PartnerApplication[] | null>(null);
   const [prefill, setPrefill] = useState<Prefill | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
     fetchMemberCounts().then(setCounts).catch(() => null);
     fetchGymRequests().then(setRequests).catch(() => setRequests([]));
+    fetchPartnerApplications().then(setApplications).catch(() => setApplications([]));
   }, []);
+
+  function openCreateForm(p: Prefill) {
+    setPrefill(p);
+    setFormOpen(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function toggleApplication(a: PartnerApplication) {
+    await setPartnerApplicationDone(a.id, !a.done).catch(() => null);
+    setApplications((list) =>
+      list
+        ?.map((x) => (x.id === a.id ? { ...x, done: !a.done } : x))
+        .sort((x, y) => Number(x.done) - Number(y.done)) ?? null
+    );
+  }
+
+  const newApplications = applications?.filter((a) => !a.done).length ?? 0;
 
   return (
     <main className="min-h-dvh pb-[calc(env(safe-area-inset-bottom)+2rem)]">
@@ -68,7 +90,7 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
             <Plus size={18} /> 체육관 등록
           </button>
         ) : (
-          <GymCreateForm key={prefill?.kakaoPlaceId ?? "new"} prefill={prefill} onClose={() => setFormOpen(false)} />
+          <GymCreateForm key={prefill ? `${prefill.kakaoPlaceId ?? ""}|${prefill.name}` : "new"} prefill={prefill} onClose={() => setFormOpen(false)} />
         )}
       </section>
 
@@ -82,6 +104,49 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
               members={counts[g.id] ?? 0}
               onMembersChange={(n) => setCounts((c) => ({ ...c, [g.id]: n }))}
             />
+          ))}
+        </ul>
+      </section>
+
+      <section className="px-4 pt-6">
+        <h2 className="flex items-center gap-1.5 text-[15px] font-bold">
+          관장 입점 신청
+          {newApplications > 0 && (
+            <span className="rounded-full bg-red-500 px-1.5 text-[11px] font-bold text-white">{newApplications}</span>
+          )}
+        </h2>
+        <p className="mt-1 text-[12px] text-muted">관장님이 직접 보낸 신청. 전화로 확인한 뒤 체육관을 등록하고 초대 링크를 보내주세요.</p>
+        {applications === null && <p className="py-8 text-center text-[14px] text-muted">불러오는 중…</p>}
+        {applications?.length === 0 && <p className="py-8 text-center text-[14px] text-muted">아직 신청이 없어요</p>}
+        <ul className="mt-2 flex flex-col gap-2">
+          {applications?.map((a) => (
+            <li key={a.id} className={`rounded-xl border border-line p-4 ${a.done ? "bg-field opacity-70" : "bg-white"}`}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold">{a.gymName}</p>
+                  {a.address && <p className="mt-0.5 truncate text-[12px] text-muted">{a.address}</p>}
+                  <p className="mt-1 flex items-center gap-1 text-[13px]">
+                    <UserRound size={13} className="text-muted" /> {a.ownerName} ·{" "}
+                    <a href={`tel:${a.phone}`} className="font-semibold text-brand tabular-nums">
+                      {formatPhone(a.phone)}
+                    </a>
+                  </p>
+                </div>
+                <span className="shrink-0 text-[12px] text-muted">{monthDay(a.createdAt)}</span>
+              </div>
+              {a.message && <p className="mt-2 whitespace-pre-line rounded-lg bg-field px-3 py-2 text-[13px]">{a.message}</p>}
+              <div className="mt-3 grid grid-cols-2 gap-2 text-[13px] font-semibold">
+                <button
+                  onClick={() => openCreateForm({ name: a.gymName, address: a.address, kakaoPlaceId: null })}
+                  className="flex items-center justify-center gap-1.5 rounded-lg bg-field py-2"
+                >
+                  <Store size={15} /> 이 정보로 등록
+                </button>
+                <button onClick={() => toggleApplication(a)} className="rounded-lg bg-field py-2">
+                  {a.done ? "다시 열기" : "처리 완료"}
+                </button>
+              </div>
+            </li>
           ))}
         </ul>
       </section>
@@ -107,11 +172,7 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
                 <span className="shrink-0 rounded-md bg-brand-tint px-2 py-1 text-[12px] font-bold text-brand">요청 {r.count}</span>
               </div>
               <button
-                onClick={() => {
-                  setPrefill({ name: r.name, address: r.address, kakaoPlaceId: r.placeId });
-                  setFormOpen(true);
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
+                onClick={() => openCreateForm({ name: r.name, address: r.address, kakaoPlaceId: r.placeId })}
                 className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-field py-2 text-[13px] font-semibold"
               >
                 <Store size={15} /> 이 정보로 체육관 등록

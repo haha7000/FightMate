@@ -17,7 +17,7 @@ export default async function PartnerPage({ searchParams }: Props) {
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=${encodeURIComponent("/partner")}`);
 
-  const gyms = viewer.isAdmin ? await getGyms() : viewer.memberships.map((m) => m.gym);
+  const gyms = viewer.isAdmin ? await getGyms({ includeHidden: true }) : viewer.memberships.map((m) => m.gym);
 
   if (gyms.length === 0) {
     return (
@@ -31,7 +31,10 @@ export default async function PartnerPage({ searchParams }: Props) {
           <br />
           체육관이 연결되고 이 화면을 쓸 수 있어요.
         </p>
-        <Link href="/" className="mt-8 rounded-xl bg-field px-6 py-3 text-[15px] font-bold">
+        <Link href="/for-gyms" className="mt-8 rounded-xl bg-brand px-6 py-3 text-[15px] font-bold text-white">
+          우리 체육관 입점 신청하기
+        </Link>
+        <Link href="/" className="mt-2 rounded-xl bg-field px-6 py-3 text-[15px] font-bold">
           홈으로
         </Link>
       </main>

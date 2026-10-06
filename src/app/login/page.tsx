@@ -93,6 +93,9 @@ export default function LoginPage() {
             "데모 모드입니다. 키 연결 전까지 가짜 로그인으로 동작합니다."
           )}
         </p>
+        <Link href="/for-gyms" className="mt-1 text-center text-[13px] font-semibold text-white/70 underline underline-offset-2">
+          체육관 관장님이신가요? 입점 신청
+        </Link>
       </div>
     </main>
   );

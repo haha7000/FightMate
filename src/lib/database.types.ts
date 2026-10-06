@@ -1,4 +1,4 @@
-// Supabase DB 타입 — supabase/schema.sql + 마이그레이션(2026-09-30 ~ 2026-10-08) 기준으로 직접 작성.
+// Supabase DB 타입 — supabase/schema.sql + 마이그레이션(2026-09-30 ~ 2026-10-09) 기준으로 직접 작성.
 // `supabase gen types typescript` 출력과 같은 모양이라, 나중에 CLI로 생성한 파일로 그대로 교체할 수 있다.
 // 컬럼을 추가·변경하면 여기도 함께 고친다 (안 고치면 타입 검사에서 바로 드러난다).
 
@@ -273,6 +273,32 @@ export type Database = {
         };
         Update: Partial<Database["public"]["Tables"]["gym_invites"]["Insert"]>;
         Relationships: [GymFk<"gym_invites_gym_id_fkey">];
+      };
+      partner_applications: {
+        Row: {
+          id: string;
+          gym_name: string;
+          address: string;
+          owner_name: string;
+          phone: string;
+          message: string;
+          user_id: string | null;
+          status: string; // '새 신청' | '처리 완료'
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          gym_name: string;
+          address?: string;
+          owner_name: string;
+          phone: string;
+          message?: string;
+          user_id?: string | null;
+          status?: string;
+          created_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["partner_applications"]["Insert"]>;
+        Relationships: [];
       };
       gym_notify: {
         Row: { gym_id: string; phone: string; enabled: boolean; updated_at: string };

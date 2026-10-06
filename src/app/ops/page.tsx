@@ -7,7 +7,7 @@ import { getViewer } from "@/lib/viewer";
 
 export const metadata: Metadata = { title: "운영자 — FightMate", robots: { index: false } };
 
-// 운영자 화면: 예약 지표 · 체육관 등록 · 관장 초대 링크 · 입점 요청
+// 운영자 화면: 예약 지표 · 체육관 등록 · 관장 초대 링크 · 관장 입점 신청 · 입점 요청
 export default async function OpsPage() {
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=${encodeURIComponent("/ops")}`);

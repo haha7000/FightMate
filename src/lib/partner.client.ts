@@ -173,6 +173,46 @@ export async function fetchBookingStats(now = new Date()): Promise<BookingStats>
   return summarizeBookings(data ?? [], now);
 }
 
+export interface PartnerApplication {
+  id: string;
+  gymName: string;
+  address: string;
+  ownerName: string;
+  phone: string;
+  message: string;
+  done: boolean;
+  createdAt: string;
+}
+
+// 관장님 입점 신청 (운영자). 처리 안 한 것 먼저, 그 안에서 최신순.
+export async function fetchPartnerApplications(): Promise<PartnerApplication[]> {
+  const { data, error } = await db()
+    .from("partner_applications")
+    .select("id, gym_name, address, owner_name, phone, message, status, created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? [])
+    .map((r) => ({
+      id: r.id,
+      gymName: r.gym_name,
+      address: r.address,
+      ownerName: r.owner_name,
+      phone: r.phone,
+      message: r.message,
+      done: r.status === "처리 완료",
+      createdAt: r.created_at,
+    }))
+    .sort((a, b) => Number(a.done) - Number(b.done));
+}
+
+export async function setPartnerApplicationDone(id: string, done: boolean): Promise<void> {
+  const { error } = await db()
+    .from("partner_applications")
+    .update({ status: done ? "처리 완료" : "새 신청" })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+}
+
 export async function fetchMemberCounts(): Promise<Record<string, number>> {
   const { data, error } = await db().from("gym_members").select("gym_id");
   if (error) throw new Error(error.message);
