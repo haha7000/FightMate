@@ -20,6 +20,7 @@ import {
 } from "@/lib/partner.client";
 import { Chip } from "@/components/ui/Chip";
 import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
+import StatsPanel from "@/components/ops/StatsPanel";
 import { monthDay } from "@/lib/format";
 
 type Prefill = { name: string; address: string; kakaoPlaceId: string | null };
@@ -50,6 +51,10 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
           {gyms.some((g) => g.isPublished === false) && ` · 숨김 ${gyms.filter((g) => g.isPublished === false).length}곳`}
         </p>
       </header>
+
+      <section className="px-4 pt-5">
+        <StatsPanel />
+      </section>
 
       <section className="px-4 pt-5">
         {!formOpen ? (

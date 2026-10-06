@@ -34,7 +34,7 @@ export default function PrivacyPage() {
           <b>체육관 관장님</b>: 새 신청 알림을 받을 휴대폰 번호
         </li>
         <li>
-          <b>자동 수집</b>: 로그인 유지를 위한 쿠키, 접속 기록(서버 로그)
+          <b>자동 수집</b>: 로그인 유지를 위한 쿠키, 접속 기록(서버 로그), 방문 통계(본 페이지·기기 종류·국가 — 쿠키 없이 익명으로 집계하며 개인을 식별하지 않음)
         </li>
       </ul>
 
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
       <h2>5. 처리 위탁</h2>
       <ul>
         <li>Supabase — 회원 인증, 데이터 저장</li>
-        <li>Vercel — 웹 서비스 호스팅</li>
+        <li>Vercel — 웹 서비스 호스팅, 익명 방문 통계</li>
         <li>카카오 — 로그인, 지도·장소 검색</li>
         <li>Google — 로그인</li>
         <li>솔라피 — 관장님 알림 문자 발송</li>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Black_Han_Sans } from "next/font/google";
 import "./globals.css";
 import { siteUrl } from "@/lib/origin";
+import { SiteAnalytics } from "@/components/SiteAnalytics";
 
 // 제목용 굵은 한글(Black Han Sans) + 날짜·숫자용 압축체(Anton). 본문은 Pretendard.
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: "--font-anton" });
@@ -43,6 +44,7 @@ export default function RootLayout({
         <div className="mx-auto min-h-dvh max-w-[480px] bg-paper shadow-[0_0_0_1px_var(--color-line)]">
           {children}
         </div>
+        <SiteAnalytics />
       </body>
     </html>
   );

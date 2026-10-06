@@ -14,6 +14,7 @@ const api = {
   removeGymMember: vi.fn(async () => {}),
   revokeInvite: vi.fn(async () => {}),
   setGymPublished: vi.fn(async () => {}),
+  fetchBookingStats: vi.fn(() => new Promise(() => {})), // 지표는 StatsPanel 테스트에서
 };
 vi.mock("@/lib/partner.client", () => api);
 const { default: OpsConsole } = await import("./OpsConsole");

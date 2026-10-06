@@ -2,6 +2,7 @@
 
 // 관장 모드·운영자 화면에서 쓰는 데이터 함수. 권한은 DB 보안 정책(RLS)이 최종 판단한다.
 import { createClient } from "@/lib/supabase/client";
+import { summarizeBookings, type BookingStats } from "@/lib/stats";
 import type { Gym } from "@/lib/gyms";
 import { digitsOnly } from "@/lib/format";
 import { toBookingStatus, toBookingType, type BookingStatus, type BookingType } from "@/lib/bookings";
@@ -160,6 +161,16 @@ export async function fetchGymRequests(): Promise<GymRequestSummary[]> {
       });
   }
   return [...byPlace.values()].sort((a, b) => b.count - a.count);
+}
+
+// 운영자 지표용 신청 기록 (개인정보 없이 집계에 필요한 칸만)
+export async function fetchBookingStats(now = new Date()): Promise<BookingStats> {
+  const { data, error } = await db()
+    .from("bookings")
+    .select("gym_id, gym_name, status, type, created_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return summarizeBookings(data ?? [], now);
 }
 
 export async function fetchMemberCounts(): Promise<Record<string, number>> {

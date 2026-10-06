@@ -1,0 +1,18 @@
+# 매일 운영 사이트 상태 확인.
+# - Supabase 무료 플랜은 7일 동안 접속이 없으면 일시정지된다 → 매일 DB를 한 번 조회해 막는다.
+# - 사이트나 DB가 죽어 있으면 이 작업이 실패하고, GitHub가 저장소 주인에게 실패 메일을 보낸다.
+name: Daily ping
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 매일 오전 9시 (한국 시간)
+  workflow_dispatch: # Actions 탭에서 직접 실행도 가능
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 사이트·DB 상태 확인
+        run: |
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 20 --retry-all-errors \
+            https://fightmate-livid.vercel.app/api/health

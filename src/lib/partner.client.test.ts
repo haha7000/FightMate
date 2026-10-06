@@ -168,3 +168,14 @@ describe("운영자 — 숨기기·관장 연결·초대 관리", () => {
     await expect(p.revokeInvite("t1")).rejects.toThrow("권한 없음");
   });
 });
+
+describe("운영자 — 예약 지표", () => {
+  it("개인정보 없이 집계에 필요한 칸만 가져온다", async () => {
+    sb = fakeSupabase({ responses: { "bookings.select": { data: [
+      { gym_id: "g1", gym_name: "그레이시", status: "신청됨", type: "체험", created_at: "2026-10-05T00:00:00Z" },
+    ] } } });
+    const s = await p.fetchBookingStats(new Date("2026-10-06T00:00:00Z"));
+    expect(sb.calls[0].args[0]).toBe("gym_id, gym_name, status, type, created_at");
+    expect(s).toMatchObject({ active: 1, last7: 1 });
+  });
+});
