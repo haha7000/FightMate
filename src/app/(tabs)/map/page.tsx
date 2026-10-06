@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import GymMap from "@/components/GymMap";
+import GymMap from "@/components/map/GymMap";
 import { getGyms } from "@/lib/data.server";
 
 export const metadata: Metadata = {

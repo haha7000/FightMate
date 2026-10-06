@@ -1,5 +1,8 @@
 import { DISCIPLINES, type Discipline } from "@/lib/gyms";
 
+// 카카오 로컬 검색 반경 상한 (m) — 지도 화면과 서버 검색이 같은 값을 쓴다
+export const MAX_RADIUS_M = 20000;
+
 // 카카오 로컬 검색으로 찾은 체육관 (아직 FightMate 미입점)
 export interface Place {
   id: string; // 카카오 장소 ID

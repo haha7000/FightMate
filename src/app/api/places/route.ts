@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { DISCIPLINES, type Discipline } from "@/lib/gyms";
-import { MAX_RADIUS_M, searchGymPlaces } from "@/lib/places.server";
+import { MAX_RADIUS_M } from "@/lib/places";
+import { searchGymPlaces } from "@/lib/places.server";
 
 // 지도 화면용 주변 체육관 검색.
 // GET /api/places?lat=37.49&lng=127.02&radius=3000&d=주짓수

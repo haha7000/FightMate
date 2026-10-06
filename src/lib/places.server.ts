@@ -1,12 +1,11 @@
 import "server-only";
 import { DISCIPLINES, type Discipline } from "@/lib/gyms";
-import { detectDisciplines, type Place } from "@/lib/places";
+import { MAX_RADIUS_M, detectDisciplines, type Place } from "@/lib/places";
 
 // 카카오 로컬 키워드 검색. REST 키는 서버에만 두고 API Route에서만 호출한다.
 const KAKAO_KEYWORD_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 const PAGE_SIZE = 15;
 const MAX_PAGES = 3; // 카카오 정책상 검색어 1개당 최대 45건
-export const MAX_RADIUS_M = 20000; // 카카오 radius 상한
 
 // 같은 지역 반복 검색은 잠깐 캐시 (쿼터 절약). 좌표는 소수 3자리(약 100m)로 묶는다.
 const CACHE_TTL_MS = 5 * 60 * 1000;
