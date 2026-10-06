@@ -2,6 +2,16 @@ export type Discipline = "주짓수" | "복싱" | "MMA" | "킥복싱" | "무에�
 
 export const DISCIPLINES: Discipline[] = ["주짓수", "복싱", "MMA", "킥복싱", "무에타이", "레슬링"];
 
+// 포스터·파이터 카드용 영문 표기
+export const DISCIPLINE_EN: Record<Discipline, string> = {
+  주짓수: "BJJ",
+  복싱: "BOXING",
+  MMA: "MMA",
+  킥복싱: "KICKBOXING",
+  무에타이: "MUAY THAI",
+  레슬링: "WRESTLING",
+};
+
 export type Amenity =
   | "운동복 대여"
   | "수건 제공"
@@ -78,9 +88,6 @@ export function rowToGym(r: Record<string, unknown>): Gym {
 }
 
 
-export function formatPrice(price: number): string {
-  return price === 0 ? "무료" : `${price.toLocaleString("ko-KR")}원`;
-}
 
 // 카드용 짧은 가격: 0 → "무료", 20000 → "2만원", 15000 → "1.5만원"
 export function formatPriceShort(price: number): string {

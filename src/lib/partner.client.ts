@@ -3,6 +3,7 @@
 // 관장 모드·운영자 화면에서 쓰는 데이터 함수. 권한은 DB 보안 정책(RLS)이 최종 판단한다.
 import { createClient } from "@/lib/supabase/client";
 import type { Gym } from "@/lib/gyms";
+import { digitsOnly } from "@/lib/format";
 
 export type BookingStatus = "신청됨" | "확정" | "거절" | "사용 완료";
 
@@ -63,7 +64,7 @@ export async function fetchNotify(gymId: string): Promise<NotifySetting | null> 
 export async function saveNotify(gymId: string, setting: NotifySetting): Promise<void> {
   const { error } = await db()
     .from("gym_notify")
-    .upsert({ gym_id: gymId, phone: setting.phone.replace(/\D/g, ""), enabled: setting.enabled, updated_at: new Date().toISOString() });
+    .upsert({ gym_id: gymId, phone: digitsOnly(setting.phone), enabled: setting.enabled, updated_at: new Date().toISOString() });
   if (error) throw new Error(error.message);
 }
 

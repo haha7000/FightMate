@@ -4,11 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import Link from "next/link";
 import { ChevronRight, Download, ShieldCheck, Store } from "lucide-react";
-import { DISCIPLINES } from "@/lib/gyms";
+import { DISCIPLINES, DISCIPLINE_EN, type Discipline } from "@/lib/gyms";
 import { type FighterProfile } from "@/lib/store";
 import { fetchProfile, saveProfile } from "@/lib/data.client";
 import { useAuth } from "@/lib/auth";
 import { fetchMyRoles } from "@/lib/partner.client";
+import { Field } from "@/components/ui/Field";
 
 const BELTS = ["해당 없음", "화이트", "블루", "퍼플", "브라운", "블랙"];
 
@@ -21,14 +22,6 @@ const EMPTY: FighterProfile = {
   belt: "해당 없음",
 };
 
-const DISCIPLINE_EN: Record<string, string> = {
-  주짓수: "BJJ",
-  복싱: "BOXING",
-  MMA: "MMA",
-  킥복싱: "KICKBOXING",
-  무에타이: "MUAY THAI",
-  레슬링: "WRESTLING",
-};
 
 export default function CardPage() {
   const [profile, setProfileState] = useState<FighterProfile>(EMPTY);
@@ -122,7 +115,7 @@ export default function CardPage() {
           </div>
 
           <p className="mt-8 font-num text-[12px] tracking-[0.24em] text-brand-bright">
-            {DISCIPLINE_EN[profile.discipline] ?? profile.discipline}
+            {DISCIPLINE_EN[profile.discipline as Discipline] ?? profile.discipline}
           </p>
           <p className="mt-1 font-display text-[44px] leading-[1.05]">{profile.nickname || "닉네임"}</p>
           <p className="mt-2 text-[14px] text-white/60">{profile.gymName || "소속 체육관"}</p>
@@ -224,11 +217,3 @@ function Stat({ label, value, last = false }: { label: string; value: string; la
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="text-[14px] font-semibold">{label}</span>
-      {children}
-    </label>
-  );
-}

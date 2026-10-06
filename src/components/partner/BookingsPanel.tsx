@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { MessageSquare, Phone, RotateCcw } from "lucide-react";
 import NotifyCard from "./NotifyCard";
 import { fetchGymBookings, setBookingStatus, type BookingStatus, type GymBooking } from "@/lib/partner.client";
+import { Chip } from "@/components/ui/Chip";
+import { monthDay } from "@/lib/format";
 
 type Filter = "pending" | "confirmed" | "history";
 const FILTERS: { key: Filter; label: string }[] = [
@@ -21,12 +23,6 @@ const STATUS_STYLE: Record<BookingStatus, string> = {
 
 // 확인이 필요한 상태 변경 (실수로 누르면 손님에게 바로 영향이 가는 것)
 type Pending = { booking: GymBooking; to: BookingStatus };
-
-// "10-06T…" → "10/6"
-const md = (iso: string) => {
-  const [, m, d] = iso.slice(0, 10).split("-").map(Number);
-  return `${m}/${d}`;
-};
 
 // 문자 앱을 본문이 채워진 상태로 열기 (iOS는 &body=, 그 외는 ?body=)
 function smsHref(phone: string, body: string) {
@@ -77,24 +73,24 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
 
       <div className="mt-4 flex gap-1.5">
         {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`rounded-lg border px-3 py-1.5 text-[13px] font-semibold ${
-              filter === f.key ? "border-transparent bg-ink text-white" : "border-line bg-white"
-            }`}
-          >
+          <Chip key={f.key} active={filter === f.key} onClick={() => setFilter(f.key)}>
             {f.label}
             {bookings && count(f.key) > 0 && (
               <span
-                className={`ml-1 ${
-                  f.key === "pending" ? (filter === f.key ? "text-brand-bright" : "text-brand") : filter === f.key ? "text-white/60" : "text-muted"
-                }`}
+                className={
+                  f.key === "pending"
+                    ? filter === f.key
+                      ? "text-brand-bright"
+                      : "text-brand"
+                    : filter === f.key
+                      ? "text-white/60"
+                      : "text-muted"
+                }
               >
                 {count(f.key)}
               </span>
             )}
-          </button>
+          </Chip>
         ))}
       </div>
 
@@ -109,7 +105,7 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
       <ul className="mt-3 flex flex-col gap-2">
         {visible.map((b) => {
           const busy = busyId === b.id;
-          const reofferText = `[FightMate] ${gymName}입니다. ${md(b.date)} ${b.type} 신청 주셨는데 자리가 생겨 연락드려요. 그 날 오실 수 있으면 답장 주세요!`;
+          const reofferText = `[FightMate] ${gymName}입니다. ${monthDay(b.date)} ${b.type} 신청 주셨는데 자리가 생겨 연락드려요. 그 날 오실 수 있으면 답장 주세요!`;
           return (
             <li key={b.id} className="rounded-xl border border-line bg-white p-4">
               <div className="flex items-start justify-between gap-3">
@@ -118,8 +114,8 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
                     {b.name} <span className="text-[13px] font-medium text-muted">· {b.type}</span>
                   </p>
                   <p className="mt-0.5 text-[13px] text-muted tabular-nums">
-                    희망일 <b className="text-ink">{b.date}</b> · 신청 {md(b.createdAt)}
-                    {b.statusChangedAt && b.status !== "신청됨" && ` · ${md(b.statusChangedAt)} ${b.status}`}
+                    희망일 <b className="text-ink">{b.date}</b> · 신청 {monthDay(b.createdAt)}
+                    {b.statusChangedAt && b.status !== "신청됨" && ` · ${monthDay(b.statusChangedAt)} ${b.status}`}
                   </p>
                 </div>
                 <span className={`shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold ${STATUS_STYLE[b.status]}`}>

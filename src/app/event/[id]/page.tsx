@@ -9,11 +9,11 @@ import {
   eventGiType,
   eventLevel,
   formatEventDate,
-  formatFee,
   isFull,
   seatsLeft,
 } from "@/lib/events";
 import RsvpButton from "@/components/RsvpButton";
+import { formatWon } from "@/lib/format";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!event) return {};
   return {
     title: `${event.title} — ${event.gymName} | FightMate`,
-    description: `${formatEventDate(event.date)} ${event.startTime} · ${event.gymName} · ${formatFee(event.fee)}`,
+    description: `${formatEventDate(event.date)} ${event.startTime} · ${event.gymName} · ${formatWon(event.fee)}`,
     openGraph: {
       title: event.title,
       description: `${formatEventDate(event.date)} ${event.startTime} · ${event.gymName}`,

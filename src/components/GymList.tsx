@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarDays, Star, Ticket } from "lucide-react";
 import { DISCIPLINES, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
 import { dateParts, type GymEvent } from "@/lib/events";
+import { Chip } from "@/components/ui/Chip";
 
 // 홈 체육관 목록: 필터 칩 + 폰 2열 카드. 카드마다 "다음 일정" 칩 (캐치테이블의 예약 가능 시간 칩처럼)
 export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEvent[] }) {
@@ -27,21 +28,21 @@ export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEven
       </div>
 
       <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto px-4 pb-1">
-        <Toggle on={dayPassOnly} onClick={() => setDayPassOnly((v) => !v)}>
+        <Chip active={dayPassOnly} onClick={() => setDayPassOnly((v) => !v)}>
           <Ticket size={14} strokeWidth={2} />
           1일권 가능
-        </Toggle>
-        <Toggle on={freeTrialOnly} onClick={() => setFreeTrialOnly((v) => !v)}>
+        </Chip>
+        <Chip active={freeTrialOnly} onClick={() => setFreeTrialOnly((v) => !v)}>
           체험 무료
-        </Toggle>
+        </Chip>
         <span className="mx-0.5 w-px shrink-0 self-stretch bg-line" aria-hidden />
-        <Toggle on={discipline === null} onClick={() => setDiscipline(null)}>
+        <Chip active={discipline === null} onClick={() => setDiscipline(null)}>
           전체
-        </Toggle>
+        </Chip>
         {DISCIPLINES.map((d) => (
-          <Toggle key={d} on={discipline === d} onClick={() => setDiscipline(d)}>
+          <Chip key={d} active={discipline === d} onClick={() => setDiscipline(d)}>
             {d}
-          </Toggle>
+          </Chip>
         ))}
       </div>
 
@@ -100,24 +101,3 @@ export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEven
   );
 }
 
-function Toggle({
-  on,
-  onClick,
-  children,
-}: {
-  on: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={on}
-      className={`flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-[13px] font-medium ${
-        on ? "border-transparent bg-ink text-white" : "border-line bg-white text-ink"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}

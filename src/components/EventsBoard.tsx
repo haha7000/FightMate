@@ -4,6 +4,7 @@ import { useState } from "react";
 import PosterEventRow from "@/components/PosterEventRow";
 import type { Gym } from "@/lib/gyms";
 import { EVENT_KINDS, weekBucket, type EventKind, type GymEvent } from "@/lib/events";
+import { Chip } from "@/components/ui/Chip";
 
 type Range = "this" | "next" | "all";
 const RANGES: { key: Range; label: string }[] = [
@@ -66,19 +67,19 @@ export default function EventsBoard({
           ))}
         </div>
         <div className="no-scrollbar flex gap-1.5 overflow-x-auto py-3">
-          <Chip on={kind === null} onClick={() => setKind(null)}>
+          <Chip tone="dark" active={kind === null} onClick={() => setKind(null)}>
             전체
           </Chip>
           {EVENT_KINDS.map((k) => (
-            <Chip key={k.key} on={kind === k.key} onClick={() => setKind(k.key)}>
+            <Chip key={k.key} tone="dark" active={kind === k.key} onClick={() => setKind(k.key)}>
               {k.key}
             </Chip>
           ))}
           <span className="mx-0.5 w-px shrink-0 self-stretch bg-white/15" aria-hidden />
-          <Chip on={freeOnly} onClick={() => setFreeOnly((v) => !v)}>
+          <Chip tone="dark" active={freeOnly} onClick={() => setFreeOnly((v) => !v)}>
             무료만
           </Chip>
-          <Chip on={visitorsOnly} onClick={() => setVisitorsOnly((v) => !v)}>
+          <Chip tone="dark" active={visitorsOnly} onClick={() => setVisitorsOnly((v) => !v)}>
             외부인 가능
           </Chip>
         </div>
@@ -104,16 +105,3 @@ export default function EventsBoard({
   );
 }
 
-function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={on}
-      className={`shrink-0 px-3 py-1.5 text-[13px] font-semibold ${
-        on ? "bg-brand-bright text-night" : "border border-white/20 text-white/75"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}

@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toPng } from "html-to-image";
 import { Copy, Download, Share } from "lucide-react";
-import { formatPrice, offersDayPass, type Gym } from "@/lib/gyms";
+import { offersDayPass, type Gym } from "@/lib/gyms";
+import { formatWon } from "@/lib/format";
 
 // 홍보 키트: 체육관 페이지 링크 + 카운터·탈의실에 붙일 QR 포스터
 export default function PromotePanel({ gym }: { gym: Gym }) {
@@ -83,7 +84,7 @@ export default function PromotePanel({ gym }: { gym: Gym }) {
           <div className="mt-5 flex justify-center gap-6 text-[13px]">
             <span>
               <span className="block font-num text-[22px] leading-none text-brand-bright">
-                {gym.trialPrice === 0 ? "FREE" : formatPrice(gym.trialPrice)}
+                {gym.trialPrice === 0 ? "FREE" : formatWon(gym.trialPrice)}
               </span>
               <span className="text-white/60">체험</span>
             </span>

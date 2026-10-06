@@ -4,8 +4,10 @@ import Script from "next/script";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExternalLink, LocateFixed, Map as MapIcon, Navigation, Phone, RotateCw, Ticket, X } from "lucide-react";
-import { DISCIPLINES, formatPrice, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
+import { DISCIPLINES, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
 import { distanceM, formatDistance, type Place } from "@/lib/places";
+import { formatWon } from "@/lib/format";
+import { Chip } from "@/components/ui/Chip";
 
 // ── 카카오맵 SDK 중 실제로 쓰는 부분만 타입 선언 ──────────────
 interface KLatLng {
@@ -277,17 +279,23 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
         {/* 종목 필터 */}
         <div className="no-scrollbar absolute inset-x-0 top-0 z-10 flex gap-1.5 overflow-x-auto px-3 pt-[calc(env(safe-area-inset-top)+0.75rem)] pb-2">
           <Chip
-            label="1일권 가능"
-            icon={<Ticket size={14} strokeWidth={2} />}
+            tone="floating"
             active={dayPassOnly}
             onClick={() => {
               setDayPassOnly((v) => !v);
               setSelected(null);
             }}
-          />
-          <Chip label="전체" active={discipline === null} onClick={() => pickDiscipline(null)} />
+          >
+            <Ticket size={14} strokeWidth={2} />
+            1일권 가능
+          </Chip>
+          <Chip tone="floating" active={discipline === null} onClick={() => pickDiscipline(null)}>
+            전체
+          </Chip>
           {DISCIPLINES.map((d) => (
-            <Chip key={d} label={d} active={discipline === d} onClick={() => pickDiscipline(d)} />
+            <Chip key={d} tone="floating" active={discipline === d} onClick={() => pickDiscipline(d)}>
+              {d}
+            </Chip>
           ))}
         </div>
 
@@ -352,8 +360,8 @@ export default function GymMap({ gyms }: { gyms: Gym[] }) {
                       </p>
                       <p className="mt-0.5 truncate text-[12px] text-muted">
                         {item.kind === "gym"
-                          ? `체험 ${formatPrice(item.gym.trialPrice)} · ${
-                              offersDayPass(item.gym) ? `1일권 ${formatPrice(item.gym.dayPassPrice!)}` : "1일권 없음"
+                          ? `체험 ${formatWon(item.gym.trialPrice)} · ${
+                              offersDayPass(item.gym) ? `1일권 ${formatWon(item.gym.dayPassPrice!)}` : "1일권 없음"
                             }`
                           : item.place.disciplines.join(" · ") || item.place.category}
                       </p>
@@ -443,31 +451,6 @@ function myDot(): HTMLElement {
 
 // ── 하단 패널 ─────────────────────────────────────────
 
-function Chip({
-  label,
-  active,
-  onClick,
-  icon,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-  icon?: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
-      className={`flex shrink-0 items-center gap-1 rounded-lg px-3 py-1.5 text-[13px] font-semibold shadow-md ${
-        active ? "bg-ink text-white" : "bg-white text-ink"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
-  );
-}
-
 function SheetHeader({ title, sub, onClose }: { title: string; sub: string; onClose: () => void }) {
   return (
     <div className="flex items-start justify-between gap-3">
@@ -510,11 +493,11 @@ function GymSheet({ gym, distance, onClose }: { gym: Gym; distance: number | nul
       />
       <Tags items={gym.disciplines} />
       <p className="mt-3 text-[14px] text-muted tabular-nums">
-        체험 <b className="text-ink">{formatPrice(gym.trialPrice)}</b>
+        체험 <b className="text-ink">{formatWon(gym.trialPrice)}</b>
         <span className="mx-1.5 text-line">|</span>
         {dayPass ? (
           <>
-            1일권 <b className="text-ink">{formatPrice(gym.dayPassPrice!)}</b>
+            1일권 <b className="text-ink">{formatWon(gym.dayPassPrice!)}</b>
           </>
         ) : (
           "1일권 없음"
@@ -528,7 +511,7 @@ function GymSheet({ gym, distance, onClose }: { gym: Gym; distance: number | nul
           {dayPass ? "1일권 예약" : "상세보기"}
         </Link>
         <Link href={`/gym/${gym.id}/apply`} className="rounded-xl bg-brand py-3 text-center text-white">
-          체험 신청 · {formatPrice(gym.trialPrice)}
+          체험 신청 · {formatWon(gym.trialPrice)}
         </Link>
       </div>
       {dayPass && (

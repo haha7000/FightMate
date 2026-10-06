@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Check, ImagePlus, X } from "lucide-react";
 import { AMENITIES, DISCIPLINES, type Amenity, type Discipline, type Gym } from "@/lib/gyms";
 import { saveGym, uploadGymPhoto } from "@/lib/partner.client";
+import { Field } from "@/components/ui/Field";
+import { Chip } from "@/components/ui/Chip";
 
 // 체육관 정보: 사진·소개·종목·가격·1일권 운영·시설. 저장하면 손님 페이지에 바로 반영.
 export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
@@ -146,7 +148,7 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
         <p className="text-[14px] font-semibold">종목</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {DISCIPLINES.map((d: Discipline) => (
-            <Chip key={d} on={gym.disciplines.includes(d)} onClick={() => update({ disciplines: toggle(gym.disciplines, d) })}>
+            <Chip key={d} active={gym.disciplines.includes(d)} onClick={() => update({ disciplines: toggle(gym.disciplines, d) })}>
               {d}
             </Chip>
           ))}
@@ -246,26 +248,3 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[14px] font-semibold">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
-      className={`rounded-lg border px-3 py-1.5 text-[13px] font-semibold ${
-        on ? "border-transparent bg-ink text-white" : "border-line bg-white"
-      }`}
-    >
-      {children}
-    </button>
-  );
-}

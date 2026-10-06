@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import { BellOff, BellRing } from "lucide-react";
 import { fetchNotify, saveNotify, sendNotifyTest, type NotifySetting } from "@/lib/partner.client";
+import { digitsOnly, formatPhone, isMobilePhone } from "@/lib/format";
 
-const formatPhone = (p: string) => p.replace(/^(\d{3})(\d{3,4})(\d{4})$/, "$1-$2-$3");
-const isMobile = (p: string) => /^01[016789]\d{7,8}$/.test(p.replace(/\D/g, ""));
 
 // 새 신청 문자 알림 설정: 번호 등록 · 켜고 끄기 · 테스트 문자
 export default function NotifyCard({ gymId }: { gymId: string }) {
@@ -29,7 +28,7 @@ export default function NotifyCard({ gymId }: { gymId: string }) {
     setMessage(null);
     try {
       await saveNotify(gymId, next);
-      setSetting({ ...next, phone: next.phone.replace(/\D/g, "") });
+      setSetting({ ...next, phone: digitsOnly(next.phone) });
       setEditing(false);
     } catch (e) {
       setMessage({ ok: false, text: e instanceof Error ? e.message : "저장하지 못했어요" });
@@ -59,7 +58,7 @@ export default function NotifyCard({ gymId }: { gymId: string }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!isMobile(phone)) return setMessage({ ok: false, text: "휴대폰 번호를 확인해주세요 (010으로 시작)" });
+            if (!isMobilePhone(phone)) return setMessage({ ok: false, text: "휴대폰 번호를 확인해주세요 (010으로 시작)" });
             save({ phone, enabled: true });
           }}
         >

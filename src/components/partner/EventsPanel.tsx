@@ -6,7 +6,6 @@ import type { Gym } from "@/lib/gyms";
 import {
   EVENT_KINDS,
   dateParts,
-  formatFee,
   upcoming,
   type EventKind,
   type GymEvent,
@@ -19,6 +18,9 @@ import {
   uploadEventPoster,
   type RsvpEntry,
 } from "@/lib/data.client";
+import { formatWon } from "@/lib/format";
+import { Field } from "@/components/ui/Field";
+import { Chip } from "@/components/ui/Chip";
 
 // 일정 관리: 오픈매트·세미나·대회 등록 → 홈·이벤트 탭에 바로 노출
 export default function EventsPanel({ gym }: { gym: Gym }) {
@@ -101,7 +103,7 @@ function EventItem({ event: e, onRemove }: { event: GymEvent; onRemove: () => vo
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-[12px] text-muted">
-            {e.kind} · {e.startTime} · {formatFee(e.fee)}
+            {e.kind} · {e.startTime} · {formatWon(e.fee)}
           </p>
           <p className="mt-0.5 font-semibold leading-snug">{e.title}</p>
           <p className="mt-0.5 text-[12px] text-muted">
@@ -204,16 +206,9 @@ function EventForm({
     <form onSubmit={submit} className="mt-3 flex flex-col gap-4 rounded-xl border border-line bg-white p-4">
       <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
         {EVENT_KINDS.map((k) => (
-          <button
-            key={k.key}
-            type="button"
-            onClick={() => setKind(k.key)}
-            className={`shrink-0 rounded-lg border px-3 py-1.5 text-[13px] font-semibold ${
-              kind === k.key ? "border-transparent bg-ink text-white" : "border-line"
-            }`}
-          >
+          <Chip key={k.key} active={kind === k.key} onClick={() => setKind(k.key)}>
             {k.key}
-          </button>
+          </Chip>
         ))}
       </div>
       <input
@@ -224,16 +219,16 @@ function EventForm({
         onChange={(e) => setTitle(e.target.value)}
       />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="날짜">
+        <Field label="날짜" compact>
           <input className="input" type="date" required min={today} value={date} onChange={(e) => setDate(e.target.value)} />
         </Field>
-        <Field label="시작 시간">
+        <Field label="시작 시간" compact>
           <input className="input" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
         </Field>
-        <Field label="참가비 (0 = 무료)">
+        <Field label="참가비 (0 = 무료)" compact>
           <input className="input" type="number" inputMode="numeric" min="0" value={fee} onChange={(e) => setFee(e.target.value)} />
         </Field>
-        <Field label="정원 (비우면 제한 없음)">
+        <Field label="정원 (비우면 제한 없음)" compact>
           <input
             className="input"
             type="number"
@@ -301,11 +296,3 @@ function EventForm({
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-1.5">
-      <span className="text-[13px] font-semibold">{label}</span>
-      {children}
-    </label>
-  );
-}

@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft } from "lucide-react";
-import { formatPrice, type Gym } from "@/lib/gyms";
+import { type Gym } from "@/lib/gyms";
 import { addBooking } from "@/lib/store";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { formatWon } from "@/lib/format";
+import { Field } from "@/components/ui/Field";
 
 export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1일권" }) {
   const router = useRouter();
@@ -90,7 +92,7 @@ export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1
         <div className="min-w-0">
           <p className="truncate text-[15px] font-semibold">{gym.name}</p>
           <p className="mt-0.5 text-[13px] text-muted">
-            {kind} · <b className="text-brand">{formatPrice(price)}</b>
+            {kind} · <b className="text-brand">{formatWon(price)}</b>
           </p>
         </div>
       </div>
@@ -147,11 +149,3 @@ export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="flex flex-col gap-2">
-      <span className="text-[14px] font-semibold">{label}</span>
-      {children}
-    </label>
-  );
-}

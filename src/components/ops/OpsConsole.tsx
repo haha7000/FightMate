@@ -11,6 +11,7 @@ import {
   fetchMemberCounts,
   type GymRequestSummary,
 } from "@/lib/partner.client";
+import { Chip } from "@/components/ui/Chip";
 
 type Prefill = { name: string; address: string; kakaoPlaceId: string | null };
 
@@ -217,16 +218,13 @@ function GymCreateForm({ prefill, onClose }: { prefill: Prefill | null; onClose:
         {DISCIPLINES.map((d) => {
           const on = disciplines.includes(d);
           return (
-            <button
+            <Chip
               key={d}
-              type="button"
+              active={on}
               onClick={() => setDisciplines((list) => (on ? list.filter((x) => x !== d) : [...list, d]))}
-              className={`rounded-lg border px-3 py-1.5 text-[13px] font-semibold ${
-                on ? "border-transparent bg-ink text-white" : "border-line"
-              }`}
             >
               {d}
-            </button>
+            </Chip>
           );
         })}
       </div>

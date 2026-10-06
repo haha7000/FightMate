@@ -95,9 +95,6 @@ export function formatEventDate(date: string): string {
   return `${m}/${d} (${dow})`;
 }
 
-export function formatFee(fee: number): string {
-  return fee === 0 ? "무료" : `${fee.toLocaleString("ko-KR")}원`;
-}
 
 // ── 포스터 스타일 표시용 ─────────────────────────────
 

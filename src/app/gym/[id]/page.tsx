@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CalendarDays, Check, MapPin, Shirt, Star, X } from "lucide-react";
-import { AMENITIES, formatPrice, isHandsFree, offersDayPass } from "@/lib/gyms";
+import { AMENITIES, isHandsFree, offersDayPass } from "@/lib/gyms";
 import { dateParts } from "@/lib/events";
 import { getEventsByGym, getGymById } from "@/lib/data.server";
 import GymPhotoCarousel from "@/components/GymPhotoCarousel";
 import EventBand from "@/components/EventBand";
 import ReviewSection from "@/components/ReviewSection";
+import { formatWon } from "@/lib/format";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -18,12 +19,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const gym = await getGymById(id);
   if (!gym) return {};
-  const dayPass = offersDayPass(gym) ? ` · 1일권 ${formatPrice(gym.dayPassPrice!)}` : "";
+  const dayPass = offersDayPass(gym) ? ` · 1일권 ${formatWon(gym.dayPassPrice!)}` : "";
   return {
     title: `${gym.name} — FightMate`,
-    description: `${gym.district} · ${gym.disciplines.join("/")} · 체험 ${formatPrice(gym.trialPrice)}${dayPass}`,
+    description: `${gym.district} · ${gym.disciplines.join("/")} · 체험 ${formatWon(gym.trialPrice)}${dayPass}`,
     openGraph: {
-      title: `${gym.name} — 체험 ${formatPrice(gym.trialPrice)}`,
+      title: `${gym.name} — 체험 ${formatWon(gym.trialPrice)}`,
       description: gym.intro,
       images: gym.photos[0] ? [gym.photos[0].src] : undefined,
     },
@@ -98,9 +99,9 @@ export default async function GymDetailPage({ params }: Props) {
       <section className="mt-2 bg-white px-4 py-5">
         <h2 className="text-[16px] font-bold">가격</h2>
         <div className="mt-3 divide-y divide-line rounded-xl border border-line text-[14px]">
-          <PriceRow label="체험 1회" value={formatPrice(gym.trialPrice)} strong />
-          <PriceRow label="1일권 (오픈매트·자유운동)" value={dayPass ? formatPrice(gym.dayPassPrice!) : "운영 안 함"} />
-          <PriceRow label="정기권 (월)" value={gym.monthlyPrice ? formatPrice(gym.monthlyPrice) : "체육관 문의"} />
+          <PriceRow label="체험 1회" value={formatWon(gym.trialPrice)} strong />
+          <PriceRow label="1일권 (오픈매트·자유운동)" value={dayPass ? formatWon(gym.dayPassPrice!) : "운영 안 함"} />
+          <PriceRow label="정기권 (월)" value={gym.monthlyPrice ? formatWon(gym.monthlyPrice) : "체육관 문의"} />
         </div>
         <p className="mt-2 text-[12px] text-muted">정기권 등록은 체험 후 체육관에서 직접 진행돼요.</p>
       </section>
@@ -140,14 +141,14 @@ export default async function GymDetailPage({ params }: Props) {
               href={`/gym/${gym.id}/apply?type=daypass`}
               className="rounded-xl border border-ink py-3.5 text-center active:bg-field"
             >
-              1일권 {formatPrice(gym.dayPassPrice!)}
+              1일권 {formatWon(gym.dayPassPrice!)}
             </Link>
           )}
           <Link
             href={`/gym/${gym.id}/apply`}
             className="rounded-xl bg-brand py-3.5 text-center text-white active:opacity-90"
           >
-            체험 신청 · {formatPrice(gym.trialPrice)}
+            체험 신청 · {formatWon(gym.trialPrice)}
           </Link>
         </div>
       </div>
