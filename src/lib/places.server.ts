@@ -98,7 +98,11 @@ export async function searchGymPlaces(opts: {
         }
         continue;
       }
-      const detected = detectDisciplines(`${doc.place_name} ${doc.category_name}`);
+      // 종목 판단 우선순위: 이름 → (이름에 없으면) 카카오 분류 → (그것도 없으면) 찾아낸 검색어.
+      // 카카오는 킥복싱 체육관을 "복싱,권투"로 분류하는 경우가 많아, 이름과 분류를 섞으면
+      // 킥복싱 체육관이 복싱으로도 분류된다.
+      const fromName = detectDisciplines(doc.place_name);
+      const detected = fromName.length > 0 ? fromName : detectDisciplines(doc.category_name);
       byId.set(doc.id, {
         id: doc.id,
         name: doc.place_name,
@@ -108,8 +112,7 @@ export async function searchGymPlaces(opts: {
         lat: Number(doc.y),
         lng: Number(doc.x),
         url: doc.place_url,
-        // "슈프림짐"처럼 이름에 종목이 없으면 찾아낸 검색어의 종목으로 간주
-        disciplines: detected.length > 0 ? detected : [query],
+        disciplines: detected.length > 0 ? detected : [query], // 예: "슈프림짐"
       });
     }
   });
