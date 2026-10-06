@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import type { Database } from "@/lib/database.types";
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from "./config";
 
 // 서버 컴포넌트 / 라우트 핸들러용 Supabase 클라이언트.
@@ -10,7 +11,7 @@ export async function createClient() {
 
   const cookieStore = await cookies();
 
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  return createServerClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

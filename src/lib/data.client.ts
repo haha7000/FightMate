@@ -19,6 +19,7 @@ import {
   type FighterProfile,
   type Review,
 } from "@/lib/store";
+import { toBookingStatus, toBookingType } from "@/lib/bookings";
 
 // ── 예약 ──────────────────────────────────────
 export async function fetchBookings(): Promise<Booking[]> {
@@ -45,8 +46,8 @@ export async function fetchBookings(): Promise<Booking[]> {
     name: r.name,
     phone: r.phone,
     date: r.date,
-    type: r.type,
-    status: r.status,
+    type: toBookingType(r.type),
+    status: toBookingStatus(r.status),
     createdAt: r.created_at,
   }));
 }
@@ -69,7 +70,7 @@ export async function fetchReviews(gymId: string): Promise<Review[]> {
     author: r.author,
     rating: r.rating,
     text: r.text,
-    date: (r.created_at as string).slice(0, 10),
+    date: r.created_at.slice(0, 10),
   }));
 }
 
@@ -199,7 +200,7 @@ export async function fetchEventRoster(eventId: string): Promise<RsvpEntry[]> {
   return (data ?? []).map((r) => ({
     name: r.name ?? "",
     phone: r.phone ?? "",
-    createdAt: r.created_at as string,
+    createdAt: r.created_at,
   }));
 }
 

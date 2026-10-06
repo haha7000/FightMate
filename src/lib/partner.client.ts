@@ -4,15 +4,16 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Gym } from "@/lib/gyms";
 import { digitsOnly } from "@/lib/format";
+import { toBookingStatus, toBookingType, type BookingStatus, type BookingType } from "@/lib/bookings";
 
-export type BookingStatus = "신청됨" | "확정" | "거절" | "사용 완료";
+export type { BookingStatus } from "@/lib/bookings";
 
 export interface GymBooking {
   id: string;
   name: string;
   phone: string;
   date: string;
-  type: "체험" | "1일권";
+  type: BookingType;
   status: BookingStatus;
   createdAt: string;
   statusChangedAt: string | null; // 거절·확정한 시각 (2026-10-06 SQL 실행 전이면 null)
@@ -37,8 +38,8 @@ export async function fetchGymBookings(gymId: string): Promise<GymBooking[]> {
     name: r.name,
     phone: r.phone,
     date: r.date,
-    type: r.type,
-    status: r.status,
+    type: toBookingType(r.type),
+    status: toBookingStatus(r.status),
     createdAt: r.created_at,
     statusChangedAt: r.status_changed_at ?? null,
   }));
@@ -173,7 +174,7 @@ export async function createInvite(gymId: string, role: "owner" | "coach"): Prom
     .select("token")
     .single();
   if (error) throw new Error(error.message);
-  return data.token as string;
+  return data.token;
 }
 
 export async function redeemInvite(token: string): Promise<string> {
@@ -188,7 +189,7 @@ export async function redeemInvite(token: string): Promise<string> {
     const key = Object.keys(known).find((k) => error.message.includes(k));
     throw new Error(key ? known[key] : error.message);
   }
-  return data as string;
+  return data;
 }
 
 // 내 역할 (내 카드 탭에서 관장 모드·운영자 입구 표시용)

@@ -12,14 +12,6 @@ interface InquiryBody {
   type?: string;
 }
 
-interface NotifyTarget {
-  phone: string;
-  gym_id: string;
-  gym_name: string;
-  applicant: string;
-  visit_date: string;
-  kind: string;
-}
 
 // 체험·1일권 신청 접수 → 관장님께 문자 알림 (응답을 먼저 보내고 문자는 그 뒤에)
 export async function POST(request: Request) {
@@ -73,7 +65,7 @@ export async function POST(request: Request) {
   const opsPhone = process.env.OPS_NOTIFY_PHONE; // 초기 운영: 사장님도 모든 신청을 문자로 받기
 
   after(async () => {
-    const list = (targets ?? []) as NotifyTarget[];
+    const list = targets ?? [];
     for (const t of list) {
       await sendSms(
         t.phone,

@@ -29,12 +29,10 @@ export async function getViewer(): Promise<Viewer | null> {
 
   const name = displayName(user.user_metadata, "회원");
 
-  const memberships = (memberRes.data ?? [])
-    .filter((r) => r.gyms)
-    .map((r) => ({
-      gym: rowToGym(r.gyms as unknown as Record<string, unknown>),
-      role: r.role as GymRole,
-    }));
+  // gym_members → gyms 외래키 관계로 체육관 행이 함께 온다 (DB 타입에 관계 정의)
+  const memberships = (memberRes.data ?? []).flatMap((r) =>
+    r.gyms ? [{ gym: rowToGym(r.gyms), role: (r.role === "coach" ? "coach" : "owner") as GymRole }] : []
+  );
 
   return { userId: user.id, name, isAdmin: !!adminRes.data, memberships };
 }

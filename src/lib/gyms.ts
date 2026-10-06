@@ -1,3 +1,5 @@
+import type { Json, Tables } from "@/lib/database.types";
+
 export type Discipline = "주짓수" | "복싱" | "MMA" | "킥복싱" | "무에타이" | "레슬링";
 
 export const DISCIPLINES: Discipline[] = ["주짓수", "복싱", "MMA", "킥복싱", "무에타이", "레슬링"];
@@ -49,10 +51,11 @@ export interface Gym {
   kakaoPlaceId: string | null; // 카카오 장소 ID — 지도 검색 결과와 중복 제거용
 }
 
-export interface GymPhoto {
+// DB jsonb에 그대로 저장되므로 interface 대신 type (Json 타입과 호환)
+export type GymPhoto = {
   src: string;
   caption: string; // 예: 매트 존, 샤워실, 그룹 클래스
-}
+};
 
 // 1일권(드롭인) 가능 여부 — 다른 체육관 수련자가 하루 운동하러 갈 수 있는 곳
 export function offersDayPass(gym: Gym): boolean {
@@ -64,26 +67,39 @@ export function isHandsFree(gym: Gym): boolean {
   return gym.amenities.includes("운동복 대여") && gym.amenities.includes("수건 제공");
 }
 
+const isDiscipline = (x: string): x is Discipline => (DISCIPLINES as string[]).includes(x);
+const isAmenity = (x: string): x is Amenity => (AMENITIES as string[]).includes(x);
+
+// photos(jsonb)는 관장 모드에서 저장한 [{ src, caption }]. 모양이 다른 항목은 버린다.
+function parsePhotos(j: Json): GymPhoto[] {
+  if (!Array.isArray(j)) return [];
+  return j.flatMap((p) =>
+    p && typeof p === "object" && !Array.isArray(p) && typeof p.src === "string"
+      ? [{ src: p.src, caption: typeof p.caption === "string" ? p.caption : "" }]
+      : []
+  );
+}
+
 // DB row(snake_case) → Gym(camelCase)
-export function rowToGym(r: Record<string, unknown>): Gym {
+export function rowToGym(r: Tables<"gyms">): Gym {
   return {
-    id: r.id as string,
-    name: r.name as string,
-    disciplines: (r.disciplines as Gym["disciplines"]) ?? [],
-    district: r.district as string,
-    address: r.address as string,
-    intro: (r.intro as string) ?? "",
-    trialPrice: (r.trial_price as number) ?? 0,
-    dayPassPrice: r.day_pass_price == null ? null : Number(r.day_pass_price),
-    monthlyPrice: (r.monthly_price as number) ?? null,
-    rating: Number(r.rating ?? 0),
-    reviewCount: (r.review_count as number) ?? 0,
-    emoji: (r.emoji as string) ?? "🥊",
-    amenities: (r.amenities as Gym["amenities"]) ?? [],
-    photos: (r.photos as Gym["photos"]) ?? [],
-    lat: r.lat == null ? null : Number(r.lat),
-    lng: r.lng == null ? null : Number(r.lng),
-    kakaoPlaceId: (r.kakao_place_id as string) ?? null,
+    id: r.id,
+    name: r.name,
+    disciplines: r.disciplines.filter(isDiscipline),
+    district: r.district,
+    address: r.address,
+    intro: r.intro,
+    trialPrice: r.trial_price,
+    dayPassPrice: r.day_pass_price,
+    monthlyPrice: r.monthly_price,
+    rating: Number(r.rating), // numeric 컬럼
+    reviewCount: r.review_count,
+    emoji: r.emoji,
+    amenities: r.amenities.filter(isAmenity),
+    photos: parsePhotos(r.photos),
+    lat: r.lat,
+    lng: r.lng,
+    kakaoPlaceId: r.kakao_place_id,
   };
 }
 

@@ -1,3 +1,5 @@
+import type { Tables } from "@/lib/database.types";
+
 export type EventKind = "오픈매트" | "세미나" | "대회" | "특별수업" | "행사";
 
 export const EVENT_KINDS: EventKind[] = ["오픈매트", "세미나", "대회", "특별수업", "행사"];
@@ -30,22 +32,24 @@ export function isFull(e: GymEvent): boolean {
   return left !== null && left <= 0;
 }
 
+const toEventKind = (s: string): EventKind => ((EVENT_KINDS as string[]).includes(s) ? (s as EventKind) : "행사");
+
 // DB row(snake_case) → GymEvent. 표시 인원 = 베이스라인(attendees) + 실제 RSVP 수(rsvp_count).
-export function rowToEvent(r: Record<string, unknown>): GymEvent {
+export function rowToEvent(r: Tables<"events">): GymEvent {
   return {
-    id: r.id as string,
-    gymId: r.gym_id as string,
-    gymName: r.gym_name as string,
-    kind: r.kind as EventKind,
-    title: r.title as string,
-    date: r.date as string,
-    startTime: (r.start_time as string) ?? "",
-    fee: (r.fee as number) ?? 0,
-    capacity: (r.capacity as number) ?? null,
-    attendees: ((r.attendees as number) ?? 0) + ((r.rsvp_count as number) ?? 0),
-    description: (r.description as string) ?? "",
-    posterUrl: (r.poster_url as string) ?? null,
-    openToVisitors: (r.open_to_visitors as boolean) ?? true,
+    id: r.id,
+    gymId: r.gym_id,
+    gymName: r.gym_name,
+    kind: toEventKind(r.kind),
+    title: r.title,
+    date: r.date,
+    startTime: r.start_time,
+    fee: r.fee,
+    capacity: r.capacity,
+    attendees: r.attendees + r.rsvp_count,
+    description: r.description,
+    posterUrl: r.poster_url,
+    openToVisitors: r.open_to_visitors,
   };
 }
 

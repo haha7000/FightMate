@@ -17,7 +17,7 @@ export default async function InvitePage({ params }: Props) {
   const { data } = supabase
     ? await supabase.rpc("peek_gym_invite", { invite_token: token })
     : { data: null };
-  const invite = (data as { gym_id: string; gym_name: string; role: string; expired: boolean; used: boolean }[] | null)?.[0];
+  const invite = data?.[0];
   const viewer = await getViewer();
   const alreadyMember = !!invite && !!viewer?.memberships.some((m) => m.gym.id === invite.gym_id);
 

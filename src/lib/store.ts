@@ -1,3 +1,5 @@
+import type { BookingStatus, BookingType } from "@/lib/bookings";
+
 // 데모용 로컬 스토리지 저장소.
 // TODO(M1→M2): Supabase로 교체 — 이 파일의 함수 시그니처를 유지한 채 내부만 바꾼다.
 
@@ -13,8 +15,8 @@ export interface Booking {
   name: string;
   phone: string;
   date: string; // YYYY-MM-DD
-  type: "체험" | "1일권";
-  status: "신청됨" | "확정" | "거절" | "사용 완료";
+  type: BookingType;
+  status: BookingStatus;
   createdAt: string;
 }
 
