@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MessageSquare, Phone, RotateCcw } from "lucide-react";
+import NotifyCard from "./NotifyCard";
 import { fetchGymBookings, setBookingStatus, type BookingStatus, type GymBooking } from "@/lib/partner.client";
 
 type Filter = "pending" | "confirmed" | "history";
@@ -72,7 +73,9 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
 
   return (
     <section className="px-4 pt-4">
-      <div className="flex gap-1.5">
+      <NotifyCard gymId={gymId} />
+
+      <div className="mt-4 flex gap-1.5">
         {FILTERS.map((f) => (
           <button
             key={f.key}

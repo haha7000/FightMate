@@ -48,6 +48,35 @@ export async function setBookingStatus(id: string, status: BookingStatus): Promi
   if (error) throw new Error(error.message);
 }
 
+// ── 관장: 새 신청 알림 ─────────────────────────
+export interface NotifySetting {
+  phone: string;
+  enabled: boolean;
+}
+
+export async function fetchNotify(gymId: string): Promise<NotifySetting | null> {
+  const { data, error } = await db().from("gym_notify").select("phone, enabled").eq("gym_id", gymId).maybeSingle();
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function saveNotify(gymId: string, setting: NotifySetting): Promise<void> {
+  const { error } = await db()
+    .from("gym_notify")
+    .upsert({ gym_id: gymId, phone: setting.phone.replace(/\D/g, ""), enabled: setting.enabled, updated_at: new Date().toISOString() });
+  if (error) throw new Error(error.message);
+}
+
+export async function sendNotifyTest(gymId: string): Promise<void> {
+  const res = await fetch("/api/partner/notify-test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ gymId }),
+  });
+  const body = (await res.json().catch(() => ({}))) as { error?: string };
+  if (!res.ok) throw new Error(body.error ?? "테스트 문자를 보내지 못했어요");
+}
+
 // ── 관장: 체육관 정보 ───────────────────────────
 export async function saveGym(gym: Gym): Promise<void> {
   const { error } = await db()
