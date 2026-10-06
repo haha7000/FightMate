@@ -17,9 +17,13 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "invalid json" }, { status: 400 });
   }
-  const { placeId, name, address, phone } = body;
-  if (!placeId || !name) {
-    return NextResponse.json({ error: "missing fields" }, { status: 400 });
+  // 로그인 없이 누구나 보낼 수 있으므로 형식·길이를 제한한다 (쓰레기 데이터 대량 투입 방지)
+  const placeId = body.placeId?.trim() ?? "";
+  const name = body.name?.trim() ?? "";
+  const address = body.address?.trim() ?? "";
+  const phone = body.phone?.trim() ?? "";
+  if (!/^\d{1,20}$/.test(placeId) || !name || name.length > 100 || address.length > 300 || phone.length > 30) {
+    return NextResponse.json({ error: "invalid fields" }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -30,8 +34,8 @@ export async function POST(request: Request) {
     const { error } = await supabase.from("gym_requests").insert({
       kakao_place_id: placeId,
       name,
-      address: address ?? "",
-      phone: phone ?? "",
+      address,
+      phone,
       user_id: user?.id ?? null,
     });
     if (!error) return NextResponse.json({ ok: true, persisted: true });
