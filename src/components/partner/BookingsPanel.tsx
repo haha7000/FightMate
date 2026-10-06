@@ -19,6 +19,7 @@ const STATUS_STYLE: Record<BookingStatus, string> = {
   확정: "bg-ink text-white",
   거절: "bg-red-50 text-red-700",
   "사용 완료": "bg-field text-muted",
+  취소: "bg-field text-muted line-through",
 };
 
 // 확인이 필요한 상태 변경 (실수로 누르면 손님에게 바로 영향이 가는 것)
@@ -205,7 +206,7 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
 function inFilter(b: GymBooking, f: Filter) {
   if (f === "pending") return b.status === "신청됨";
   if (f === "confirmed") return b.status === "확정";
-  return b.status === "거절" || b.status === "사용 완료";
+  return b.status === "거절" || b.status === "사용 완료" || b.status === "취소";
 }
 
 // 아래에서 올라오는 확인 시트 (브라우저 기본 confirm 대신)

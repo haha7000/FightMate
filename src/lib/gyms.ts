@@ -49,6 +49,10 @@ export interface Gym {
   lat: number | null; // 지도 표시용 좌표 (없으면 지도에서 제외)
   lng: number | null;
   kakaoPlaceId: string | null; // 카카오 장소 ID — 지도 검색 결과와 중복 제거용
+  phone: string | null; // 체육관 대표 번호 (손님이 거는 번호, 공개)
+  hours: string | null; // 운영시간 (자유 입력, 여러 줄)
+  timetableUrl: string | null; // 수업 시간표 이미지
+  isPublished: boolean; // false = 운영자가 숨김 (손님에게 안 보임)
 }
 
 // DB jsonb에 그대로 저장되므로 interface 대신 type (Json 타입과 호환)
@@ -100,6 +104,10 @@ export function rowToGym(r: Tables<"gyms">): Gym {
     lat: r.lat,
     lng: r.lng,
     kakaoPlaceId: r.kakao_place_id,
+    phone: r.phone,
+    hours: r.hours,
+    timetableUrl: r.timetable_url,
+    isPublished: r.is_published,
   };
 }
 

@@ -22,6 +22,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.4995539,
     lng: 127.0313935,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
   {
     id: "ironfist-gangnam",
@@ -41,6 +45,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.5126452,
     lng: 127.0301548,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
   {
     id: "topteam-seolleung",
@@ -60,6 +68,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.4932422,
     lng: 127.0566935,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
   {
     id: "muay-thai-sinsa",
@@ -79,6 +91,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.5198382,
     lng: 127.0297655,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
   {
     id: "wrestling-club-yangjae",
@@ -98,6 +114,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.472004,
     lng: 127.0374639,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
   {
     id: "checkmat-apgujeong",
@@ -117,6 +137,10 @@ export const MOCK_GYMS: Gym[] = [
     lat: 37.5306686,
     lng: 127.0308092,
     kakaoPlaceId: null,
+    phone: null,
+    hours: null,
+    timetableUrl: null,
+    isPublished: true,
   },
 ];
 

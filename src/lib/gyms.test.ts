@@ -21,6 +21,10 @@ const row: Tables<"gyms"> = {
   lat: 37.5,
   lng: 127.03,
   kakao_place_id: null,
+  phone: null,
+  hours: null,
+  timetable_url: null,
+  is_published: true,
   created_at: "2026-10-01T00:00:00Z",
 };
 

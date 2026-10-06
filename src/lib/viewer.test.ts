@@ -8,7 +8,7 @@ const { getViewer } = await import("./viewer");
 const gymRow = {
   id: "g1", name: "그레이시", disciplines: ["주짓수"], district: "강남구 역삼동", address: "주소", intro: "",
   trial_price: 0, day_pass_price: 20000, monthly_price: null, rating: 4.8, review_count: 1, emoji: "",
-  amenities: [], photos: [], owner_id: null, lat: null, lng: null, kakao_place_id: null, created_at: "",
+  amenities: [], photos: [], owner_id: null, lat: null, lng: null, kakao_place_id: null, phone: null, hours: null, timetable_url: null, is_published: true, created_at: "",
 };
 
 describe("getViewer — 로그인 사용자의 역할", () => {

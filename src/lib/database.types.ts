@@ -1,4 +1,4 @@
-// Supabase DB 타입 — supabase/schema.sql + 마이그레이션(2026-09-30 ~ 2026-10-07) 기준으로 직접 작성.
+// Supabase DB 타입 — supabase/schema.sql + 마이그레이션(2026-09-30 ~ 2026-10-08) 기준으로 직접 작성.
 // `supabase gen types typescript` 출력과 같은 모양이라, 나중에 CLI로 생성한 파일로 그대로 교체할 수 있다.
 // 컬럼을 추가·변경하면 여기도 함께 고친다 (안 고치면 타입 검사에서 바로 드러난다).
 
@@ -36,6 +36,10 @@ export type Database = {
           lat: number | null;
           lng: number | null;
           kakao_place_id: string | null;
+          phone: string | null; // 체육관 대표 번호 (공개)
+          hours: string | null; // 운영시간 (자유 입력)
+          timetable_url: string | null; // 수업 시간표 이미지
+          is_published: boolean; // false = 운영자가 숨김
           created_at: string;
         };
         Insert: {
@@ -57,6 +61,10 @@ export type Database = {
           lat?: number | null;
           lng?: number | null;
           kakao_place_id?: string | null;
+          phone?: string | null;
+          hours?: string | null;
+          timetable_url?: string | null;
+          is_published?: boolean;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["gyms"]["Insert"]>;
@@ -96,8 +104,10 @@ export type Database = {
           phone: string;
           date: string;
           type: string; // '체험' | '1일권'
-          status: string; // '신청됨' | '확정' | '거절' | '사용 완료'
+          status: string; // '신청됨' | '확정' | '거절' | '사용 완료' | '취소'
           status_changed_at: string | null;
+          preferred_time: string | null; // 오전 | 오후 | 저녁 | 상관없음
+          note: string | null; // 요청사항
           created_at: string;
         };
         Insert: {
@@ -111,6 +121,8 @@ export type Database = {
           type?: string;
           status?: string;
           status_changed_at?: string | null;
+          preferred_time?: string | null;
+          note?: string | null;
           created_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["bookings"]["Insert"]>;
@@ -278,6 +290,8 @@ export type Database = {
         Returns: { gym_id: string; gym_name: string; role: string; expired: boolean; used: boolean }[];
       };
       redeem_gym_invite: { Args: { invite_token: string }; Returns: string };
+      cancel_my_booking: { Args: { bid: string }; Returns: undefined };
+      delete_my_account: { Args: never; Returns: undefined };
       booking_notify_targets: {
         Args: { bid: string };
         Returns: {
