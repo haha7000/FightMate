@@ -24,3 +24,9 @@ export function monthDay(dateOrIso: string): string {
   const [, m, d] = dateOrIso.slice(0, 10).split("-").map(Number);
   return `${m}/${d}`;
 }
+
+/** 체육관 대표 번호처럼 유선·휴대폰·대표번호를 모두 허용 (예: 02-123-4567, 1588-0000, 010-1234-5678) */
+export function isPhoneNumber(s: string): boolean {
+  const d = digitsOnly(s);
+  return /^[0-9\-\s]+$/.test(s.trim()) && d.length >= 8 && d.length <= 12;
+}

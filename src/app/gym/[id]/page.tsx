@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { CalendarDays, Check, MapPin, Shirt, Star, X } from "lucide-react";
-import { AMENITIES, hasReviews, isHandsFree, offersDayPass } from "@/lib/gyms";
-import { dateParts } from "@/lib/events";
+import { Check, Star, X } from "lucide-react";
+import { AMENITIES, hasReviews, offersDayPass } from "@/lib/gyms";
 import { getEventsByGym, getGymById } from "@/lib/data.server";
 import GymPhotoCarousel from "@/components/GymPhotoCarousel";
 import EventBand from "@/components/EventBand";
 import ReviewSection from "@/components/ReviewSection";
 import { formatWon } from "@/lib/format";
+import { GymInfoRows } from "@/components/GymInfoRows";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -38,10 +38,6 @@ export default async function GymDetailPage({ params }: Props) {
   const events = await getEventsByGym(id);
   const next = events[0];
   const dayPass = offersDayPass(gym);
-  const directions =
-    gym.lat != null && gym.lng != null
-      ? `https://map.kakao.com/link/to/${encodeURIComponent(gym.name)},${gym.lat},${gym.lng}`
-      : `https://map.kakao.com/link/search/${encodeURIComponent(gym.address)}`;
 
   return (
     <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
@@ -62,46 +58,21 @@ export default async function GymDetailPage({ params }: Props) {
           · {gym.district}
         </p>
 
-        <ul className="mt-5 space-y-3 text-[14px]">
-          <li className="flex gap-2.5">
-            <MapPin size={18} className="mt-px shrink-0 text-muted" />
-            <span>
-              {gym.address}
-              <a
-                href={directions}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-2 text-[13px] font-semibold text-brand"
-              >
-                길찾기
-              </a>
-            </span>
-          </li>
-          {next && (
-            <li className="flex gap-2.5">
-              <CalendarDays size={18} className="mt-px shrink-0 text-muted" />
-              <span>
-                다음 {next.kind}{" "}
-                <b>
-                  {dateParts(next.date).m}/{dateParts(next.date).d}({dateParts(next.date).ko}) {next.startTime}
-                </b>
-              </span>
-            </li>
-          )}
-          <li className="flex gap-2.5">
-            <Shirt size={18} className="mt-px shrink-0 text-muted" />
-            {isHandsFree(gym)
-              ? "운동복·수건 제공. 몸만 와도 돼요"
-              : gym.amenities.includes("운동복 대여")
-                ? "운동복 대여 가능. 수건은 챙겨오세요"
-                : gym.amenities.includes("수건 제공")
-                  ? "수건 제공. 운동복은 챙겨오세요"
-                  : "운동복과 수건은 챙겨오세요"}
-          </li>
-        </ul>
+        <GymInfoRows gym={gym} next={next} />
 
         {gym.intro && <p className="mt-5 text-[14px] leading-relaxed text-ink/80">{gym.intro}</p>}
       </section>
+
+      {gym.timetableUrl && (
+        <section className="mt-2 bg-white px-4 py-5">
+          <h2 className="text-[16px] font-bold">수업 시간표</h2>
+          <a href={gym.timetableUrl} target="_blank" rel="noopener noreferrer" className="mt-3 block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={gym.timetableUrl} alt={`${gym.name} 수업 시간표`} className="w-full rounded-xl border border-line" />
+          </a>
+          <p className="mt-2 text-[12px] text-muted">눌러서 크게 보기</p>
+        </section>
+      )}
 
       <section className="mt-2 bg-white px-4 py-5">
         <h2 className="text-[16px] font-bold">가격</h2>

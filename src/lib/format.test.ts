@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { digitsOnly, formatPhone, formatWon, isMobilePhone, monthDay } from "./format";
+import { digitsOnly, formatPhone, formatWon, isMobilePhone, isPhoneNumber, monthDay } from "./format";
 
 describe("formatWon", () => {
   it("0원은 무료", () => expect(formatWon(0)).toBe("무료"));
@@ -19,4 +19,9 @@ describe("휴대폰 번호", () => {
 describe("monthDay", () => {
   it("날짜", () => expect(monthDay("2026-10-06")).toBe("10/6"));
   it("ISO 시각도 날짜 부분만", () => expect(monthDay("2026-01-09T23:10:00+09:00")).toBe("1/9"));
+});
+
+describe("isPhoneNumber — 체육관 대표 번호", () => {
+  it.each(["02-123-4567", "031-123-4567", "1588-0000", "010-1234-5678", "0212345678"])("%s 허용", (p) => expect(isPhoneNumber(p)).toBe(true));
+  it.each(["전화주세요", "123", "02-123-4567 (내선 2)", "010-1234-5678-9999"])("%s 거절", (p) => expect(isPhoneNumber(p)).toBe(false));
 });

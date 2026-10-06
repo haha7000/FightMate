@@ -45,8 +45,18 @@ describe("관장 모드 — 체육관 정보 저장", () => {
     expect(sb.calls[0].args[0]).toEqual({
       name: "그레이시", intro: "소개", disciplines: ["주짓수"], trial_price: 0, day_pass_price: null,
       monthly_price: 180000, amenities: ["샤워실"], photos: [{ src: "/a.jpg", caption: "" }],
+      phone: null, hours: null, timetable_url: null,
     });
     expect(sb.calls[0].filters).toEqual([["eq", ["id", "g1"]]]);
+  });
+
+  it("연락처·운영시간은 앞뒤 공백을 지우고, 비우면 null", async () => {
+    sb = fakeSupabase({});
+    await p.saveGym({ ...gym, phone: " 02-123-4567 ", hours: "  평일 07–23시\n", timetableUrl: "/t.jpg" });
+    expect(sb.calls[0].args[0]).toMatchObject({ phone: "02-123-4567", hours: "평일 07–23시", timetable_url: "/t.jpg" });
+    sb = fakeSupabase({});
+    await p.saveGym({ ...gym, phone: "   ", hours: "" });
+    expect(sb.calls[0].args[0]).toMatchObject({ phone: null, hours: null });
   });
 });
 

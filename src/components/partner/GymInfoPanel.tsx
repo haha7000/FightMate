@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ImagePlus, X } from "lucide-react";
+import { isPhoneNumber } from "@/lib/format";
 import { AMENITIES, DISCIPLINES, type Discipline, type Gym } from "@/lib/gyms";
 import { saveGym, uploadGymPhoto } from "@/lib/partner.client";
 import { Field } from "@/components/ui/Field";
@@ -25,6 +26,21 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
 
   function toggle<T>(list: T[], item: T): T[] {
     return list.includes(item) ? list.filter((x) => x !== item) : [...list, item];
+  }
+
+  const [timetableUploading, setTimetableUploading] = useState(false);
+  async function onTimetable(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setTimetableUploading(true);
+    try {
+      update({ timetableUrl: await uploadGymPhoto(gym.id, file) });
+    } catch (err) {
+      setMessage({ ok: false, text: `시간표 업로드 실패: ${err instanceof Error ? err.message : ""}` });
+    } finally {
+      setTimetableUploading(false);
+    }
   }
 
   async function onPhotos(e: React.ChangeEvent<HTMLInputElement>) {
@@ -55,6 +71,9 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
   async function save() {
     if (!gym.name.trim()) return setMessage({ ok: false, text: "체육관 이름을 입력해주세요" });
     if (gym.disciplines.length === 0) return setMessage({ ok: false, text: "종목을 하나 이상 골라주세요" });
+    if (gym.phone?.trim() && !isPhoneNumber(gym.phone)) {
+      return setMessage({ ok: false, text: "전화번호를 확인해주세요 (예: 02-123-4567)" });
+    }
     setSaving(true);
     setMessage(null);
     try {
@@ -134,6 +153,51 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
       <Field label="체육관 이름">
         <input className="input" value={gym.name} onChange={(e) => update({ name: e.target.value })} />
       </Field>
+
+      <Field label="체육관 전화번호 (손님에게 보여요)">
+        <input
+          className="input"
+          type="tel"
+          inputMode="tel"
+          placeholder="02-123-4567"
+          value={gym.phone ?? ""}
+          onChange={(e) => update({ phone: e.target.value })}
+        />
+      </Field>
+
+      <Field label="운영시간">
+        <textarea
+          className="input min-h-24 resize-none"
+          placeholder={"평일 07:00 – 23:00\n토요일 10:00 – 18:00 (오픈매트 14시)\n일요일 휴무"}
+          value={gym.hours ?? ""}
+          onChange={(e) => update({ hours: e.target.value })}
+        />
+      </Field>
+
+      <div>
+        <p className="text-[14px] font-semibold">수업 시간표 (이미지)</p>
+        <p className="mt-1 text-[12px] text-muted">카운터에 붙여둔 시간표를 찍어 올려도 돼요. 손님이 몇 시에 오면 되는지 알 수 있어요.</p>
+        {gym.timetableUrl ? (
+          <div className="relative mt-2 inline-block">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={gym.timetableUrl} alt="수업 시간표" className="max-h-60 rounded-lg border border-line object-contain" />
+            <button
+              type="button"
+              aria-label="시간표 빼기"
+              onClick={() => update({ timetableUrl: null })}
+              className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/70 text-white"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <label className="mt-2 flex h-24 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-line text-[13px] text-muted">
+            <ImagePlus size={20} />
+            {timetableUploading ? "올리는 중…" : "시간표 이미지 추가"}
+            <input type="file" accept="image/*" className="hidden" disabled={timetableUploading} onChange={onTimetable} />
+          </label>
+        )}
+      </div>
 
       <Field label="소개">
         <textarea

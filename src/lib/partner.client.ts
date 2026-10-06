@@ -96,6 +96,9 @@ export async function saveGym(gym: Gym): Promise<void> {
       monthly_price: gym.monthlyPrice,
       amenities: gym.amenities,
       photos: gym.photos,
+      phone: gym.phone?.trim() || null,
+      hours: gym.hours?.trim() || null,
+      timetable_url: gym.timetableUrl ?? null,
     })
     .eq("id", gym.id);
   if (error) throw new Error(error.message);
