@@ -20,7 +20,7 @@ vi.mock("next/server", async (orig) => ({
 const { POST } = await import("./route");
 
 const URL_ = "http://localhost:3000/api/inquiries";
-const valid = { gymId: "gracie-yeoksam", name: "  홍길동 ", phone: " 010-1234-5678 ", date: "2026-10-10" };
+const valid = { gymId: "gracie-yeoksam", name: "  홍길동 ", phone: " 010-1234-5678 ", date: "2099-10-10", agreed: true };
 const settle = () => Promise.all(afterTasks.splice(0));
 
 beforeEach(() => {
@@ -80,7 +80,7 @@ describe("POST /api/inquiries — 체험·1일권 신청", () => {
       rpc: {
         booking_notify_targets: {
           data: [
-            { phone: "01011112222", gym_id: "g1", gym_name: "그레이시", applicant: "홍길동", visit_date: "2026-10-10", kind: "체험" },
+            { phone: "01011112222", gym_id: "g1", gym_name: "그레이시", applicant: "홍길동", visit_date: "2099-10-10", kind: "체험" },
           ],
         },
       },
@@ -94,7 +94,7 @@ describe("POST /api/inquiries — 체험·1일권 신청", () => {
     const [to, text] = sendSms.mock.calls[0];
     expect(to).toBe("01011112222");
     expect(text).toContain("https://fightmate.example/partner?gym=g1");
-    expect(text).toContain("10/10(토)");
+    expect(text).toContain("10/10(토)"); // 2099-10-10은 토요일
   });
 
   it("운영자 번호가 있으면 함께 보내고, 관장 번호가 없으면 직접 연락 필요라고 알림", async () => {
@@ -116,5 +116,47 @@ describe("POST /api/inquiries — 체험·1일권 신청", () => {
     expect(res.status).toBe(500);
     expect(sb.rpcCalls).toEqual([]);
     expect(afterTasks).toHaveLength(0);
+  });
+
+  it("개인정보 제공 동의가 없으면 400 (화면 체크박스를 우회해도)", async () => {
+    const sb = fakeSupabase({ user: { id: "u1" } });
+    createClient.mockResolvedValue(sb.client);
+    const res = await POST(jsonRequest(URL_, { ...valid, agreed: undefined }));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("동의");
+    expect(sb.calls).toHaveLength(0);
+  });
+
+  it.each([
+    ["지난 날짜", "2020-01-01"],
+    ["형식이 이상한 날짜", "내일"],
+  ])("%s는 400", async (_, date) => {
+    createClient.mockResolvedValue(fakeSupabase({ user: { id: "u1" } }).client);
+    expect((await POST(jsonRequest(URL_, { ...valid, date }))).status).toBe(400);
+  });
+
+  it("요청사항이 300자를 넘으면 400", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ user: { id: "u1" } }).client);
+    expect((await POST(jsonRequest(URL_, { ...valid, note: "가".repeat(301) }))).status).toBe(400);
+  });
+
+  it("희망 시간대·요청사항 저장, 이상한 시간대는 '상관없음'", async () => {
+    const sb = fakeSupabase({ user: { id: "u1" }, responses: { "bookings.insert": { data: { id: "b1" } } } });
+    createClient.mockResolvedValue(sb.client);
+    await POST(jsonRequest(URL_, { ...valid, preferredTime: "저녁", note: "  복싱 6개월  " }));
+    await POST(jsonRequest(URL_, { ...valid, preferredTime: "새벽3시", note: "   " }));
+    const inserts = sb.calls.filter((c) => c.op === "insert").map((c) => c.args[0]);
+    expect(inserts[0]).toMatchObject({ preferred_time: "저녁", note: "복싱 6개월" });
+    expect(inserts[1]).toMatchObject({ preferred_time: "상관없음", note: null });
+    await settle();
+  });
+
+  it("같은 날짜로 이미 신청했으면 409와 안내 문구", async () => {
+    createClient.mockResolvedValue(
+      fakeSupabase({ user: { id: "u1" }, responses: { "bookings.insert": { error: { message: "dup", code: "23505" } } } }).client
+    );
+    const res = await POST(jsonRequest(URL_, valid));
+    expect(res.status).toBe(409);
+    expect((await res.json()).error).toContain("이미 같은 날짜로 신청했어요");
   });
 });

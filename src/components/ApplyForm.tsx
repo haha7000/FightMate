@@ -9,12 +9,17 @@ import { addBooking } from "@/lib/store";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { formatWon } from "@/lib/format";
 import { Field } from "@/components/ui/Field";
+import { Chip } from "@/components/ui/Chip";
+import { NOTE_MAX, PREFERRED_TIMES, type PreferredTime } from "@/lib/bookings";
 
 export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1일권" }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [date, setDate] = useState("");
+  const [preferredTime, setPreferredTime] = useState<PreferredTime>("상관없음");
+  const [note, setNote] = useState("");
+  const [agreed, setAgreed] = useState(false); // 체육관에 개인정보 제공 동의 (필수)
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,16 +35,20 @@ export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1
       const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ gymId: gym.id, name, phone, date, type: kind }),
+        body: JSON.stringify({ gymId: gym.id, name, phone, date, type: kind, preferredTime, note, agreed }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        // 서버가 알려준 이유 (예: 이미 같은 날짜로 신청함)를 그대로 보여준다
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error);
+      }
       // Supabase 미설정(데모) 시에만 로컬에 저장. 설정 시엔 API가 DB에 저장함.
       if (!isSupabaseConfigured) {
         addBooking({ gymId: gym.id, gymName: gym.name, name, phone, date, type: kind });
       }
       setDone(true);
-    } catch {
-      setError("신청에 실패했어요. 잠시 후 다시 시도해주세요.");
+    } catch (err) {
+      setError(err instanceof Error && err.message ? err.message : "신청에 실패했어요. 잠시 후 다시 시도해주세요.");
     } finally {
       setSubmitting(false);
     }
@@ -132,11 +141,51 @@ export default function ApplyForm({ gym, kind }: { gym: Gym; kind: "체험" | "1
           />
         </Field>
 
+        <div>
+          <p className="text-[14px] font-semibold">희망 시간대</p>
+          <div className="mt-2 flex flex-wrap gap-1.5" role="radiogroup" aria-label="희망 시간대">
+            {PREFERRED_TIMES.map((t) => (
+              <Chip key={t} active={preferredTime === t} onClick={() => setPreferredTime(t)}>
+                {t}
+              </Chip>
+            ))}
+          </div>
+        </div>
+
+        <Field label="요청사항 (선택)">
+          <textarea
+            value={note}
+            maxLength={NOTE_MAX}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="운동 경력, 궁금한 점을 적어주세요. 예: 복싱 6개월 했어요 / 주차 되나요?"
+            className="input min-h-24 resize-none"
+          />
+          <span className="self-end text-[12px] text-muted tabular-nums">
+            {note.length}/{NOTE_MAX}
+          </span>
+        </Field>
+
+        <label className="flex items-start gap-2.5 rounded-xl bg-field p-3 text-[13px] leading-relaxed">
+          <input
+            type="checkbox"
+            required
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-0.5 h-5 w-5 shrink-0 accent-[var(--color-brand)]"
+          />
+          <span>
+            <b>(필수)</b> 신청 확인과 연락을 위해 {gym.name}에 이름·연락처·희망 일시·요청사항을 제공하는 데 동의합니다.{" "}
+            <Link href="/privacy" className="text-muted underline underline-offset-2">
+              자세히
+            </Link>
+          </span>
+        </label>
+
         {error && <p className="text-[14px] text-red-600">{error}</p>}
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !agreed}
           className="mt-2 rounded-xl bg-brand py-3.5 text-[15px] font-bold text-white disabled:opacity-50"
         >
           {submitting ? "신청 중…" : `${kind} 신청하기`}

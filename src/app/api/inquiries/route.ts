@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getGymById } from "@/lib/data.server";
 import { newBookingText, sendSms } from "@/lib/notify.server";
 import { publicOrigin } from "@/lib/origin";
+import { NOTE_MAX, toPreferredTime } from "@/lib/bookings";
+import { todayKST } from "@/lib/events";
 
 interface InquiryBody {
   gymId?: string;
@@ -10,6 +12,9 @@ interface InquiryBody {
   phone?: string;
   date?: string;
   type?: string;
+  preferredTime?: string;
+  note?: string;
+  agreed?: boolean; // 체육관에 개인정보 제공 동의
 }
 
 
@@ -26,6 +31,17 @@ export async function POST(request: Request) {
   const type = body.type === "1일권" ? "1일권" : "체험";
   if (!gymId || !name?.trim() || !phone?.trim() || !date) {
     return NextResponse.json({ error: "missing fields" }, { status: 400 });
+  }
+  // 화면의 체크박스만으로는 우회가 쉬우니 서버에서도 동의를 확인한다 (개인정보 제3자 제공)
+  if (body.agreed !== true) {
+    return NextResponse.json({ error: "체육관에 정보 제공 동의가 필요해요" }, { status: 400 });
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date < todayKST()) {
+    return NextResponse.json({ error: "희망 날짜를 다시 골라주세요" }, { status: 400 });
+  }
+  const note = body.note?.trim() ?? "";
+  if (note.length > NOTE_MAX) {
+    return NextResponse.json({ error: `요청사항은 ${NOTE_MAX}자까지 적을 수 있어요` }, { status: 400 });
   }
 
   const supabase = await createClient();
@@ -52,10 +68,16 @@ export async function POST(request: Request) {
       phone: phone.trim(),
       date,
       type,
+      preferred_time: toPreferredTime(body.preferredTime) ?? "상관없음",
+      note: note || null,
     })
     .select("id")
     .single();
   if (error) {
+    // 진행 중인 같은 신청이 이미 있음 (bookings_no_duplicate 인덱스)
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "이미 같은 날짜로 신청했어요. 내 예약에서 확인해주세요." }, { status: 409 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

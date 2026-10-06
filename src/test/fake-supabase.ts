@@ -13,6 +13,7 @@ export function fakeSupabase(opts: {
 }) {
   const calls: Call[] = [];
   const rpcCalls: { fn: string; args: unknown }[] = [];
+  let signedOut = false;
   const respond = (key: string): Result => ({ data: null, error: null, ...(opts.responses?.[key] ?? {}) });
 
   function builder(table: string) {
@@ -49,9 +50,13 @@ export function fakeSupabase(opts: {
     auth: {
       getUser: () => Promise.resolve({ data: { user: opts.user ?? null } }),
       exchangeCodeForSession: () => Promise.resolve({ error: opts.exchangeError ?? null }),
+      signOut: () => {
+        signedOut = true;
+        return Promise.resolve({ error: null });
+      },
     },
   };
-  return { client, calls, rpcCalls };
+  return { client, calls, rpcCalls, wasSignedOut: () => signedOut };
 }
 
 export function jsonRequest(url: string, body: unknown, init: RequestInit = {}) {

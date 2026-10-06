@@ -77,9 +77,21 @@ export default function LoginPage() {
         </button>
         {error && <p className="rounded-lg bg-red-500/15 px-3 py-2 text-center text-[13px] text-red-300">로그인 실패: {error}</p>}
         <p className="mt-2 text-center text-[12px] text-white/40">
-          {isSupabaseConfigured
-            ? "로그인하면 이용약관 및 개인정보처리방침에 동의하게 됩니다."
-            : "데모 모드입니다. 키 연결 전까지 가짜 로그인으로 동작합니다."}
+          {isSupabaseConfigured ? (
+            <>
+              로그인하면{" "}
+              <Link href="/terms" className="underline underline-offset-2">
+                이용약관
+              </Link>{" "}
+              및{" "}
+              <Link href="/privacy" className="underline underline-offset-2">
+                개인정보처리방침
+              </Link>
+              에 동의하게 됩니다.
+            </>
+          ) : (
+            "데모 모드입니다. 키 연결 전까지 가짜 로그인으로 동작합니다."
+          )}
         </p>
       </div>
     </main>

@@ -10,6 +10,8 @@ import { fetchProfile, saveProfile } from "@/lib/data.client";
 import { useAuth } from "@/lib/auth";
 import { fetchMyRoles } from "@/lib/partner.client";
 import { Field } from "@/components/ui/Field";
+import { LegalLinks } from "@/components/LegalLinks";
+import AccountDelete from "@/components/AccountDelete";
 
 const BELTS = ["해당 없음", "화이트", "블루", "퍼플", "브라운", "블랙"];
 
@@ -204,6 +206,8 @@ export default function CardPage() {
           </button>
         </div>
       </section>
+      <LegalLinks />
+      {user && <AccountDelete />}
     </main>
   );
 }

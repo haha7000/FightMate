@@ -6,6 +6,7 @@ import NotifyCard from "./NotifyCard";
 import { fetchGymBookings, setBookingStatus, type BookingStatus, type GymBooking } from "@/lib/partner.client";
 import { Chip } from "@/components/ui/Chip";
 import { monthDay } from "@/lib/format";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
 
 type Filter = "pending" | "confirmed" | "history";
 const FILTERS: { key: Filter; label: string }[] = [
@@ -191,13 +192,25 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
 
       {confirming && (
         <ConfirmSheet
-          pending={confirming}
+          title={
+            confirming.to === "거절"
+              ? `${confirming.booking.name}님의 신청을 거절할까요?`
+              : `${confirming.booking.name}님의 신청을 확정으로 바꿀까요?`
+          }
+          confirmLabel={confirming.to === "거절" ? "거절하기" : "확정으로 바꾸기"}
+          danger={confirming.to === "거절"}
           onCancel={() => setConfirming(null)}
           onConfirm={() => {
             change(confirming.booking.id, confirming.to);
             setConfirming(null);
           }}
-        />
+        >
+          {confirming.booking.date} · {confirming.booking.type}
+          <br />
+          {confirming.to === "거절"
+            ? "거절해도 지난 내역에 남아요. 나중에 자리가 생기면 문자를 보내고 다시 확정할 수 있어요."
+            : "손님과 연락이 된 경우에만 바꿔주세요. 손님의 내 예약 화면에 확정으로 표시돼요."}
+        </ConfirmSheet>
       )}
     </section>
   );
@@ -207,50 +220,4 @@ function inFilter(b: GymBooking, f: Filter) {
   if (f === "pending") return b.status === "신청됨";
   if (f === "confirmed") return b.status === "확정";
   return b.status === "거절" || b.status === "사용 완료" || b.status === "취소";
-}
-
-// 아래에서 올라오는 확인 시트 (브라우저 기본 confirm 대신)
-function ConfirmSheet({
-  pending: { booking: b, to },
-  onCancel,
-  onConfirm,
-}: {
-  pending: Pending;
-  onCancel: () => void;
-  onConfirm: () => void;
-}) {
-  const decline = to === "거절";
-  return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45" onClick={onCancel}>
-      <div
-        role="dialog"
-        aria-modal="true"
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[480px] rounded-t-2xl bg-white px-5 pt-5 pb-[calc(env(safe-area-inset-bottom)+1.25rem)]"
-      >
-        <h3 className="text-[18px] font-bold">
-          {decline ? `${b.name}님의 신청을 거절할까요?` : `${b.name}님의 신청을 확정으로 바꿀까요?`}
-        </h3>
-        <p className="mt-2 text-[14px] leading-relaxed text-muted">
-          {b.date} · {b.type}
-          <br />
-          {decline
-            ? "거절해도 지난 내역에 남아요. 나중에 자리가 생기면 문자를 보내고 다시 확정할 수 있어요."
-            : "손님과 연락이 된 경우에만 바꿔주세요. 손님의 내 예약 화면에 확정으로 표시돼요."}
-        </p>
-        <div className="mt-5 grid grid-cols-2 gap-2 text-[15px] font-bold">
-          <button onClick={onCancel} className="rounded-xl bg-field py-3.5">
-            취소
-          </button>
-          <button
-            onClick={onConfirm}
-            autoFocus
-            className={`rounded-xl py-3.5 text-white ${decline ? "bg-red-600" : "bg-brand"}`}
-          >
-            {decline ? "거절하기" : "확정으로 바꾸기"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 }

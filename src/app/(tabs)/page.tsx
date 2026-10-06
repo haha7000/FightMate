@@ -5,6 +5,7 @@ import EventBand from "@/components/EventBand";
 import { Wordmark } from "@/components/nav";
 import { offersDayPass } from "@/lib/gyms";
 import { getGyms, getUpcomingEvents } from "@/lib/data.server";
+import { LegalLinks } from "@/components/LegalLinks";
 
 export default async function HomePage() {
   const [gyms, events] = await Promise.all([getGyms(), getUpcomingEvents()]);
@@ -44,6 +45,8 @@ export default async function HomePage() {
       <div className="mt-10">
         <EventBand events={events} gyms={gyms} />
       </div>
+
+      <LegalLinks />
     </main>
   );
 }
