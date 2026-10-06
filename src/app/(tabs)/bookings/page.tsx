@@ -63,18 +63,39 @@ function BookingCard({ booking }: { booking: Booking }) {
             {booking.type} · {booking.date} · {booking.name}
           </p>
         </div>
-        <span className="shrink-0 rounded-md bg-brand-tint px-2 py-1 text-[12px] font-semibold text-brand">
-          {booking.status}
+        <span
+          className={`shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold ${
+            booking.status === "확정"
+              ? "bg-ink text-white"
+              : booking.status === "거절"
+                ? "bg-red-50 text-red-700"
+                : booking.status === "사용 완료"
+                  ? "bg-field text-muted"
+                  : "bg-brand-tint text-brand"
+          }`}
+        >
+          {booking.status === "신청됨" ? "확인 중" : booking.status}
         </span>
       </div>
 
-      <button
-        onClick={toggleQr}
-        className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-field py-2.5 text-[14px] font-semibold active:bg-line"
-      >
-        <QrCode size={16} />
-        {open ? "QR 접기" : "입장 QR 보기"}
-      </button>
+      {booking.status === "거절" && (
+        <div className="mt-3 rounded-lg bg-field px-3 py-3 text-[13px] leading-relaxed">
+          체육관 사정으로 이번 신청은 어려워요. 자리가 생기면 체육관에서 먼저 연락드릴 수 있어요.
+          <Link href={`/gym/${booking.gymId}`} className="mt-1 block font-semibold text-brand">
+            다른 날짜로 다시 신청하기
+          </Link>
+        </div>
+      )}
+
+      {(booking.status === "신청됨" || booking.status === "확정") && (
+        <button
+          onClick={toggleQr}
+          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-field py-2.5 text-[14px] font-semibold active:bg-line"
+        >
+          <QrCode size={16} />
+          {open ? "QR 접기" : "입장 QR 보기"}
+        </button>
+      )}
 
       {open && qr && (
         <div className="mt-3 flex flex-col items-center py-2">

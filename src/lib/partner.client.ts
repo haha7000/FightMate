@@ -14,6 +14,7 @@ export interface GymBooking {
   type: "체험" | "1일권";
   status: BookingStatus;
   createdAt: string;
+  statusChangedAt: string | null; // 거절·확정한 시각 (2026-10-06 SQL 실행 전이면 null)
 }
 
 function db() {
@@ -26,7 +27,7 @@ function db() {
 export async function fetchGymBookings(gymId: string): Promise<GymBooking[]> {
   const { data, error } = await db()
     .from("bookings")
-    .select("id, name, phone, date, type, status, created_at")
+    .select("*") // status_changed_at 컬럼이 아직 없어도 동작하도록 전체 선택
     .eq("gym_id", gymId)
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
@@ -38,6 +39,7 @@ export async function fetchGymBookings(gymId: string): Promise<GymBooking[]> {
     type: r.type,
     status: r.status,
     createdAt: r.created_at,
+    statusChangedAt: r.status_changed_at ?? null,
   }));
 }
 

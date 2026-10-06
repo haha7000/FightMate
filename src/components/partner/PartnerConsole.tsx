@@ -87,7 +87,7 @@ export default function PartnerConsole({
 
       {/* 체육관을 바꾸면 패널 상태를 새로 시작 */}
       <div key={gym.id}>
-        {tab === "bookings" && <BookingsPanel gymId={gym.id} />}
+        {tab === "bookings" && <BookingsPanel gymId={gym.id} gymName={gym.name} />}
         {tab === "events" && <EventsPanel gym={gym} />}
         {tab === "info" && <GymInfoPanel gym={gym} />}
         {tab === "promote" && <PromotePanel gym={gym} />}
