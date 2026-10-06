@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ImagePlus, Plus, Trash2, Users, X } from "lucide-react";
+import { ImagePlus, Pencil, Plus, Trash2, Users, X } from "lucide-react";
 import type { Gym } from "@/lib/gyms";
 import {
   EVENT_KINDS,
@@ -15,6 +15,7 @@ import {
   deleteEventById,
   fetchEventRoster,
   fetchGymEvents,
+  updateEvent,
   uploadEventPoster,
   type RsvpEntry,
 } from "@/lib/data.client";
@@ -22,10 +23,11 @@ import { formatWon } from "@/lib/format";
 import { Field } from "@/components/ui/Field";
 import { Chip } from "@/components/ui/Chip";
 
-// 일정 관리: 오픈매트·세미나·대회 등록 → 홈·이벤트 탭에 바로 노출
+// 일정 관리: 오픈매트·세미나·대회 등록·수정 → 홈·이벤트 탭에 바로 노출
 export default function EventsPanel({ gym }: { gym: Gym }) {
   const [events, setEvents] = useState<GymEvent[] | null>(null);
   const [formOpen, setFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -63,7 +65,7 @@ export default function EventsPanel({ gym }: { gym: Gym }) {
         <EventForm
           gym={gym}
           onCancel={() => setFormOpen(false)}
-          onCreated={(ev) => {
+          onSaved={(ev) => {
             setEvents((list) => upcoming([ev, ...(list ?? [])]));
             setFormOpen(false);
           }}
@@ -75,15 +77,29 @@ export default function EventsPanel({ gym }: { gym: Gym }) {
       {events === null && !loadError && <p className="py-10 text-center text-[14px] text-muted">불러오는 중…</p>}
       {events?.length === 0 && <p className="py-10 text-center text-[14px] text-muted">아직 올린 일정이 없어요</p>}
       <ul className="mt-2 flex flex-col gap-2">
-        {events?.map((e) => (
-          <EventItem key={e.id} event={e} onRemove={() => remove(e.id)} />
-        ))}
+        {events?.map((e) =>
+          editingId === e.id ? (
+            <li key={e.id}>
+              <EventForm
+                gym={gym}
+                initial={e}
+                onCancel={() => setEditingId(null)}
+                onSaved={(ev) => {
+                  setEvents((list) => upcoming((list ?? []).map((x) => (x.id === ev.id ? ev : x))));
+                  setEditingId(null);
+                }}
+              />
+            </li>
+          ) : (
+            <EventItem key={e.id} event={e} onEdit={() => setEditingId(e.id)} onRemove={() => remove(e.id)} />
+          )
+        )}
       </ul>
     </section>
   );
 }
 
-function EventItem({ event: e, onRemove }: { event: GymEvent; onRemove: () => void }) {
+function EventItem({ event: e, onEdit, onRemove }: { event: GymEvent; onEdit: () => void; onRemove: () => void }) {
   const [open, setOpen] = useState(false);
   const [roster, setRoster] = useState<RsvpEntry[] | null>(null);
   const p = dateParts(e.date);
@@ -111,9 +127,14 @@ function EventItem({ event: e, onRemove }: { event: GymEvent; onRemove: () => vo
             {e.capacity != null ? `/${e.capacity}명` : "명"}
           </p>
         </div>
-        <button onClick={onRemove} aria-label="삭제" className="-mr-1 shrink-0 p-1 text-muted">
-          <Trash2 size={18} />
-        </button>
+        <div className="-mr-1 flex shrink-0">
+          <button onClick={onEdit} aria-label="수정" className="p-1 text-muted">
+            <Pencil size={18} />
+          </button>
+          <button onClick={onRemove} aria-label="삭제" className="p-1 text-muted">
+            <Trash2 size={18} />
+          </button>
+        </div>
       </div>
 
       <button
@@ -144,24 +165,27 @@ function EventItem({ event: e, onRemove }: { event: GymEvent; onRemove: () => vo
   );
 }
 
+// initial이 있으면 수정, 없으면 새로 올리기
 function EventForm({
   gym,
+  initial,
   onCancel,
-  onCreated,
+  onSaved,
 }: {
   gym: Gym;
+  initial?: GymEvent;
   onCancel: () => void;
-  onCreated: (ev: GymEvent) => void;
+  onSaved: (ev: GymEvent) => void;
 }) {
-  const [kind, setKind] = useState<EventKind>("오픈매트");
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
-  const [startTime, setStartTime] = useState("14:00");
-  const [fee, setFee] = useState("0");
-  const [capacity, setCapacity] = useState("");
-  const [description, setDescription] = useState("");
-  const [openToVisitors, setOpenToVisitors] = useState(true);
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [kind, setKind] = useState<EventKind>(initial?.kind ?? "오픈매트");
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [date, setDate] = useState(initial?.date ?? "");
+  const [startTime, setStartTime] = useState(initial?.startTime ?? "14:00");
+  const [fee, setFee] = useState(String(initial?.fee ?? 0));
+  const [capacity, setCapacity] = useState(initial?.capacity != null ? String(initial.capacity) : "");
+  const [description, setDescription] = useState(initial?.description ?? "");
+  const [openToVisitors, setOpenToVisitors] = useState(initial?.openToVisitors ?? true);
+  const [posterUrl, setPosterUrl] = useState<string | null>(initial?.posterUrl ?? null);
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -182,11 +206,7 @@ function EventForm({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !date) return;
-    setSubmitting(true);
-    setErr(null);
-    const res = await createEvent({
-      gymId: gym.id,
-      gymName: gym.name,
+    const fields = {
       kind,
       title: title.trim(),
       date,
@@ -196,9 +216,24 @@ function EventForm({
       description: description.trim(),
       posterUrl,
       openToVisitors,
-    });
+    };
+    // 이미 신청한 사람보다 정원을 줄이면 명단이 꼬인다
+    if (initial && fields.capacity != null && fields.capacity < initial.attendees) {
+      setErr(`이미 ${initial.attendees}명이 신청했어요. 정원을 ${initial.attendees}명 이상으로 해주세요.`);
+      return;
+    }
+    setSubmitting(true);
+    setErr(null);
+    if (initial) {
+      const res = await updateEvent(initial.id, fields);
+      setSubmitting(false);
+      if (res.ok) onSaved({ ...initial, ...fields });
+      else setErr(`수정하지 못했어요: ${res.error}`);
+      return;
+    }
+    const res = await createEvent({ gymId: gym.id, gymName: gym.name, ...fields });
     setSubmitting(false);
-    if (res.event) onCreated(res.event);
+    if (res.event) onSaved(res.event);
     else setErr(`등록하지 못했어요: ${res.error}`);
   }
 
@@ -289,7 +324,7 @@ function EventForm({
           취소
         </button>
         <button type="submit" disabled={submitting || uploading} className="rounded-xl bg-brand py-3 text-white disabled:opacity-50">
-          {submitting ? "올리는 중…" : "일정 올리기"}
+          {submitting ? "저장 중…" : initial ? "수정 저장" : "일정 올리기"}
         </button>
       </div>
     </form>

@@ -184,6 +184,68 @@ export async function createInvite(gymId: string, role: "owner" | "coach"): Prom
   return data.token;
 }
 
+// 체육관 숨기기·다시 공개 (운영자). 숨기면 손님 화면·검색·일정에서 빠진다.
+export async function setGymPublished(gymId: string, published: boolean): Promise<void> {
+  const { error } = await db().from("gyms").update({ is_published: published }).eq("id", gymId);
+  if (error) throw new Error(error.message);
+}
+
+export interface GymMember {
+  userId: string;
+  role: string; // owner | coach
+  nickname: string | null;
+  since: string;
+}
+
+// 체육관에 연결된 관장 목록 (운영자). 닉네임은 공개 프로필에서.
+export async function fetchGymMembers(gymId: string): Promise<GymMember[]> {
+  const supabase = db();
+  const { data, error } = await supabase
+    .from("gym_members")
+    .select("user_id, role, created_at")
+    .eq("gym_id", gymId)
+    .order("created_at", { ascending: true });
+  if (error) throw new Error(error.message);
+  if (!data?.length) return [];
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, nickname")
+    .in("id", data.map((m) => m.user_id));
+  const nick = new Map((profiles ?? []).map((p) => [p.id, p.nickname]));
+  return data.map((m) => ({ userId: m.user_id, role: m.role, nickname: nick.get(m.user_id) ?? null, since: m.created_at }));
+}
+
+// 관장 연결 해제 (운영자) — 관장 그만둠·잘못 연결 등
+export async function removeGymMember(gymId: string, userId: string): Promise<void> {
+  const { error } = await db().from("gym_members").delete().eq("gym_id", gymId).eq("user_id", userId);
+  if (error) throw new Error(error.message);
+}
+
+export interface PendingInvite {
+  token: string;
+  role: string;
+  expiresAt: string;
+}
+
+// 아직 안 쓴, 기간이 남은 초대 링크 (운영자)
+export async function fetchPendingInvites(gymId: string, now = new Date()): Promise<PendingInvite[]> {
+  const { data, error } = await db()
+    .from("gym_invites")
+    .select("token, role, expires_at")
+    .eq("gym_id", gymId)
+    .is("used_at", null)
+    .gte("expires_at", now.toISOString())
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((r) => ({ token: r.token, role: r.role, expiresAt: r.expires_at }));
+}
+
+// 초대 링크 취소 (잘못 보냈을 때)
+export async function revokeInvite(token: string): Promise<void> {
+  const { error } = await db().from("gym_invites").delete().eq("token", token);
+  if (error) throw new Error(error.message);
+}
+
 export async function redeemInvite(token: string): Promise<string> {
   const { data, error } = await db().rpc("redeem_gym_invite", { invite_token: token });
   if (error) {

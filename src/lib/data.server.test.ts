@@ -29,3 +29,25 @@ describe("data.server — 실서비스에서 목업으로 조용히 대체하지
     expect(await getGymById(MOCK_GYMS[0].id)).toBeUndefined();
   });
 });
+
+describe("data.server — 숨긴 체육관", () => {
+  it("손님 화면 목록은 공개된 곳만, 운영자 화면은 전부", async () => {
+    const pub = fakeSupabase({ responses: { "gyms.select": { data: [] } } });
+    createClient.mockResolvedValue(pub.client);
+    await getGyms();
+    expect(pub.calls[0].filters).toContainEqual(["eq", ["is_published", true]]);
+
+    const all = fakeSupabase({ responses: { "gyms.select": { data: [] } } });
+    createClient.mockResolvedValue(all.client);
+    await getGyms({ includeHidden: true });
+    expect(all.calls[0].filters).not.toContainEqual(["eq", ["is_published", true]]);
+  });
+
+  it("숨긴 체육관의 일정도 목록에서 뺀다", async () => {
+    const sb = fakeSupabase({ responses: { "events.select": { data: [] } } });
+    createClient.mockResolvedValue(sb.client);
+    await getUpcomingEvents();
+    expect(sb.calls[0].args[0]).toContain("gyms!inner(is_published)");
+    expect(sb.calls[0].filters).toContainEqual(["eq", ["gyms.is_published", true]]);
+  });
+});

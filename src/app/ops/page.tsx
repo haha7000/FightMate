@@ -29,6 +29,6 @@ export default async function OpsPage() {
     );
   }
 
-  const gyms = await getGyms();
+  const gyms = await getGyms({ includeHidden: true });
   return <OpsConsole gyms={gyms} />;
 }

@@ -31,6 +31,8 @@ export function fakeSupabase(opts: {
       delete: () => ((op = call.op = "delete"), b),
       eq: (...a: unknown[]) => (call.filters.push(["eq", a]), b),
       gte: (...a: unknown[]) => (call.filters.push(["gte", a]), b),
+      is: (...a: unknown[]) => (call.filters.push(["is", a]), b),
+      in: (...a: unknown[]) => (call.filters.push(["in", a]), b),
       order: (...a: unknown[]) => (call.filters.push(["order", a]), b),
       limit: () => b,
       maybeSingle: () => Promise.resolve(respond(`${table}.${op}`)),

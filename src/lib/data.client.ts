@@ -329,6 +329,33 @@ export async function createEvent(
   return { event: data ? rowToEvent(data) : local() };
 }
 
+// 이벤트 수정 (관장). 체육관·신청 수는 그대로 두고 내용만 바꾼다.
+export async function updateEvent(
+  id: string,
+  input: Omit<GymEvent, "id" | "attendees" | "gymId" | "gymName">
+): Promise<{ ok: boolean; error?: string }> {
+  if (!isSupabaseConfigured) return { ok: true };
+  const supabase = createClient();
+  if (!supabase) return { ok: true };
+
+  const { error } = await supabase
+    .from("events")
+    .update({
+      kind: input.kind,
+      title: input.title,
+      date: input.date,
+      start_time: input.startTime,
+      fee: input.fee,
+      capacity: input.capacity,
+      description: input.description,
+      poster_url: input.posterUrl ?? null,
+      open_to_visitors: input.openToVisitors,
+    })
+    .eq("id", id);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 // 이벤트 삭제 (관장). 데모는 로컬 처리.
 export async function deleteEventById(
   id: string

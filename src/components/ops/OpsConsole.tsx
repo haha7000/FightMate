@@ -3,15 +3,24 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Home, Link2, Plus, Store } from "lucide-react";
+import { ChevronDown, Copy, EyeOff, Home, Link2, Plus, Store } from "lucide-react";
 import { DISCIPLINES, type Discipline, type Gym } from "@/lib/gyms";
 import {
   createInvite,
+  fetchGymMembers,
   fetchGymRequests,
   fetchMemberCounts,
+  fetchPendingInvites,
+  removeGymMember,
+  revokeInvite,
+  setGymPublished,
+  type GymMember,
   type GymRequestSummary,
+  type PendingInvite,
 } from "@/lib/partner.client";
 import { Chip } from "@/components/ui/Chip";
+import { ConfirmSheet } from "@/components/ui/ConfirmSheet";
+import { monthDay } from "@/lib/format";
 
 type Prefill = { name: string; address: string; kakaoPlaceId: string | null };
 
@@ -37,7 +46,8 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
         </div>
         <h1 className="mt-1 text-[22px] font-bold">체육관 관리</h1>
         <p className="mt-1 text-[13px] text-muted">
-          체육관 {gyms.length}곳 · 관장 연결 {Object.keys(counts).length}곳
+          체육관 {gyms.length}곳 · 관장 연결 {Object.values(counts).filter((n) => n > 0).length}곳
+          {gyms.some((g) => g.isPublished === false) && ` · 숨김 ${gyms.filter((g) => g.isPublished === false).length}곳`}
         </p>
       </header>
 
@@ -61,7 +71,12 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
         <h2 className="text-[15px] font-bold">체육관</h2>
         <ul className="mt-2 flex flex-col gap-2">
           {gyms.map((g) => (
-            <GymRow key={g.id} gym={g} members={counts[g.id] ?? 0} />
+            <GymRow
+              key={g.id}
+              gym={g}
+              members={counts[g.id] ?? 0}
+              onMembersChange={(n) => setCounts((c) => ({ ...c, [g.id]: n }))}
+            />
           ))}
         </ul>
       </section>
@@ -104,11 +119,23 @@ export default function OpsConsole({ gyms }: { gyms: Gym[] }) {
   );
 }
 
-function GymRow({ gym, members }: { gym: Gym; members: number }) {
+function GymRow({
+  gym,
+  members,
+  onMembersChange,
+}: {
+  gym: Gym;
+  members: number;
+  onMembersChange: (n: number) => void;
+}) {
+  const router = useRouter();
   const [link, setLink] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [published, setPublished] = useState(gym.isPublished !== false);
+  const [confirmHide, setConfirmHide] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
 
   async function invite() {
     setBusy(true);
@@ -130,8 +157,23 @@ function GymRow({ gym, members }: { gym: Gym; members: number }) {
     setTimeout(() => setCopied(false), 1800);
   }
 
+  async function togglePublished() {
+    setBusy(true);
+    setErr(null);
+    try {
+      await setGymPublished(gym.id, !published);
+      setPublished(!published);
+      setConfirmHide(false);
+      router.refresh();
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "바꾸지 못했어요");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <li className="rounded-xl border border-line bg-white p-4">
+    <li className={`rounded-xl border border-line p-4 ${published ? "bg-white" : "bg-field"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate font-semibold">{gym.name}</p>
@@ -139,21 +181,42 @@ function GymRow({ gym, members }: { gym: Gym; members: number }) {
             {gym.district} · {gym.disciplines.join("·")} · 사진 {gym.photos.length}장
           </p>
         </div>
-        <span
-          className={`shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold ${
-            members > 0 ? "bg-brand-tint text-brand" : "bg-field text-muted"
-          }`}
-        >
-          {members > 0 ? `관장 ${members}명` : "관장 없음"}
-        </span>
+        <div className="flex shrink-0 flex-col items-end gap-1">
+          <span
+            className={`rounded-md px-2 py-1 text-[12px] font-semibold ${
+              members > 0 ? "bg-brand-tint text-brand" : "bg-field text-muted"
+            }`}
+          >
+            {members > 0 ? `관장 ${members}명` : "관장 없음"}
+          </span>
+          {!published && (
+            <span className="flex items-center gap-1 rounded-md bg-ink px-2 py-1 text-[12px] font-semibold text-white">
+              <EyeOff size={12} /> 숨김
+            </span>
+          )}
+        </div>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-[13px] font-semibold">
         <button onClick={invite} disabled={busy} className="flex items-center justify-center gap-1.5 rounded-lg bg-field py-2 disabled:opacity-50">
-          <Link2 size={15} /> {busy ? "만드는 중…" : "관장 초대 링크"}
+          <Link2 size={15} /> {busy ? "처리 중…" : "관장 초대 링크"}
         </button>
         <Link href={`/partner?gym=${gym.id}`} className="flex items-center justify-center rounded-lg bg-field py-2">
           관장 모드로 보기
         </Link>
+        <button
+          onClick={() => (published ? setConfirmHide(true) : togglePublished())}
+          disabled={busy}
+          className="flex items-center justify-center rounded-lg bg-field py-2 disabled:opacity-50"
+        >
+          {published ? "손님에게 숨기기" : "다시 공개"}
+        </button>
+        <button
+          onClick={() => setManageOpen((v) => !v)}
+          aria-expanded={manageOpen}
+          className="flex items-center justify-center gap-1 rounded-lg bg-field py-2"
+        >
+          관장·초대 관리 <ChevronDown size={14} className={manageOpen ? "rotate-180" : ""} />
+        </button>
       </div>
       {err && <p className="mt-2 text-[12px] text-red-600">{err}</p>}
       {link && (
@@ -165,7 +228,125 @@ function GymRow({ gym, members }: { gym: Gym; members: number }) {
           </button>
         </div>
       )}
+      {manageOpen && <MembersAndInvites gymId={gym.id} reloadKey={link} onMembersChange={onMembersChange} />}
+      {confirmHide && (
+        <ConfirmSheet
+          title={`${gym.name}을(를) 숨길까요?`}
+          confirmLabel="숨기기"
+          danger
+          busy={busy}
+          onCancel={() => setConfirmHide(false)}
+          onConfirm={togglePublished}
+        >
+          홈·지도·이벤트 목록에서 빠지고 새 신청을 받을 수 없어요. 이미 들어온 신청과 관장 연결은 그대로 남고, 언제든 다시 공개할 수 있어요.
+        </ConfirmSheet>
+      )}
     </li>
+  );
+}
+
+// 연결된 관장(연결 해제)과 아직 안 쓴 초대 링크(취소)
+function MembersAndInvites({
+  gymId,
+  reloadKey,
+  onMembersChange,
+}: {
+  gymId: string;
+  reloadKey: string | null; // 새 초대 링크를 만들면 다시 불러온다
+  onMembersChange: (n: number) => void;
+}) {
+  const [members, setMembers] = useState<GymMember[] | null>(null);
+  const [invites, setInvites] = useState<PendingInvite[] | null>(null);
+  const [removing, setRemoving] = useState<GymMember | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    Promise.all([fetchGymMembers(gymId), fetchPendingInvites(gymId)])
+      .then(([m, i]) => {
+        setMembers(m);
+        setInvites(i);
+      })
+      .catch((e: Error) => setErr(e.message));
+  }, [gymId, reloadKey]);
+
+  async function unlink() {
+    if (!removing) return;
+    setBusy(true);
+    setErr(null);
+    try {
+      await removeGymMember(gymId, removing.userId);
+      const next = (members ?? []).filter((m) => m.userId !== removing.userId);
+      setMembers(next);
+      onMembersChange(next.length);
+      setRemoving(null);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "연결을 해제하지 못했어요");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revoke(token: string) {
+    setErr(null);
+    try {
+      await revokeInvite(token);
+      setInvites((list) => list?.filter((i) => i.token !== token) ?? null);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "초대를 취소하지 못했어요");
+    }
+  }
+
+  return (
+    <div className="mt-3 rounded-lg border border-line bg-white p-3 text-[13px]">
+      <p className="font-bold">연결된 관장</p>
+      {members === null && !err && <p className="py-2 text-muted">불러오는 중…</p>}
+      {members?.length === 0 && <p className="py-2 text-muted">아직 없어요</p>}
+      <ul className="divide-y divide-line">
+        {members?.map((m) => (
+          <li key={m.userId} className="flex items-center justify-between py-2">
+            <span>
+              <b>{m.nickname || "닉네임 없음"}</b>
+              <span className="ml-1.5 text-[12px] text-muted">
+                {m.role === "coach" ? "코치" : "관장"} · {monthDay(m.since.slice(0, 10))}부터
+              </span>
+            </span>
+            <button onClick={() => setRemoving(m)} className="font-semibold text-red-600">
+              연결 해제
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <p className="mt-3 font-bold">사용 전 초대 링크</p>
+      {invites?.length === 0 && <p className="py-2 text-muted">없어요</p>}
+      <ul className="divide-y divide-line">
+        {invites?.map((i) => (
+          <li key={i.token} className="flex items-center justify-between py-2">
+            <span className="text-muted">
+              …{i.token.slice(-6)} · {monthDay(i.expiresAt.slice(0, 10))}까지
+            </span>
+            <button onClick={() => revoke(i.token)} className="font-semibold text-red-600">
+              초대 취소
+            </button>
+          </li>
+        ))}
+      </ul>
+      {err && <p className="mt-2 text-[12px] text-red-600">{err}</p>}
+
+      {removing && (
+        <ConfirmSheet
+          title="관장 연결을 해제할까요?"
+          confirmLabel="연결 해제"
+          danger
+          busy={busy}
+          onCancel={() => setRemoving(null)}
+          onConfirm={unlink}
+        >
+          {removing.nickname || "이 회원"}님은 더 이상 관장 모드에서 이 체육관을 관리할 수 없어요. 다시 연결하려면 새 초대 링크를 보내주세요.
+        </ConfirmSheet>
+      )}
+    </div>
   );
 }
 

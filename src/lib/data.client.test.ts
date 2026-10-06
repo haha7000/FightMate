@@ -4,7 +4,7 @@ import { fakeSupabase } from "@/test/fake-supabase";
 let sb = fakeSupabase({});
 vi.mock("@/lib/supabase/config", () => ({ isSupabaseConfigured: true }));
 vi.mock("@/lib/supabase/client", () => ({ createClient: () => sb.client }));
-const { cancelBooking, fetchCanReview, fetchMyEvents, submitReview } = await import("./data.client");
+const { cancelBooking, fetchCanReview, fetchMyEvents, submitReview, updateEvent } = await import("./data.client");
 
 const input = { gymId: "g1", author: "홍길동", rating: 5, text: "좋아요" };
 
@@ -68,5 +68,28 @@ describe("내가 신청한 이벤트", () => {
   it("비로그인이면 빈 목록", async () => {
     sb = fakeSupabase({ user: null });
     expect(await fetchMyEvents()).toEqual([]);
+  });
+});
+
+describe("일정 수정 (관장)", () => {
+  const fields = {
+    kind: "세미나" as const, title: "노기 세미나", date: "2026-10-20", startTime: "19:00", fee: 10000,
+    capacity: 20, description: "안내", posterUrl: null, openToVisitors: false,
+  };
+
+  it("내용만 바꾸고 체육관·신청 수는 건드리지 않는다", async () => {
+    sb = fakeSupabase({});
+    expect(await updateEvent("ev1", fields)).toEqual({ ok: true });
+    const call = sb.calls[0];
+    expect(call).toMatchObject({ table: "events", op: "update", filters: [["eq", ["id", "ev1"]]] });
+    expect(call.args[0]).toEqual({
+      kind: "세미나", title: "노기 세미나", date: "2026-10-20", start_time: "19:00", fee: 10000,
+      capacity: 20, description: "안내", poster_url: null, open_to_visitors: false,
+    });
+  });
+
+  it("권한이 없으면 이유를 돌려준다", async () => {
+    sb = fakeSupabase({ responses: { "events.update": { error: { message: "permission denied" } } } });
+    expect(await updateEvent("ev1", fields)).toEqual({ ok: false, error: "permission denied" });
   });
 });

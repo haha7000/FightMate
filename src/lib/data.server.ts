@@ -16,11 +16,15 @@ class DataError extends Error {
   }
 }
 
-export async function getGyms(): Promise<Gym[]> {
+// 손님 화면은 공개된 체육관만. 운영자 화면은 숨긴 곳까지 (includeHidden).
+// (RLS도 숨긴 곳을 손님에게 막지만, 관장·운영자가 홈을 볼 때 섞여 보이지 않게 여기서도 거른다)
+export async function getGyms({ includeHidden = false } = {}): Promise<Gym[]> {
   const supabase = await createClient();
   if (!supabase) return MOCK_GYMS;
 
-  const { data, error } = await supabase.from("gyms").select("*").order("rating", { ascending: false });
+  let q = supabase.from("gyms").select("*");
+  if (!includeHidden) q = q.eq("is_published", true);
+  const { data, error } = await q.order("rating", { ascending: false });
   if (error) throw new DataError("체육관 목록", error);
   return data.map(rowToGym);
 }
@@ -39,9 +43,11 @@ export async function getUpcomingEvents(): Promise<GymEvent[]> {
   const supabase = await createClient();
   if (!supabase) return upcoming(MOCK_EVENTS);
 
+  // 숨긴 체육관의 일정은 빼고
   const { data, error } = await supabase
     .from("events")
-    .select("*")
+    .select("*, gyms!inner(is_published)")
+    .eq("gyms.is_published", true)
     .gte("date", todayKST())
     .order("date", { ascending: true })
     .order("start_time", { ascending: true });
