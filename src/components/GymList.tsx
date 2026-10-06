@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Star, Ticket } from "lucide-react";
-import { DISCIPLINES, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
+import { DISCIPLINES, hasReviews, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
 import { dateParts, type GymEvent } from "@/lib/events";
 import { Chip } from "@/components/ui/Chip";
 
@@ -69,9 +69,15 @@ export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEven
                 </div>
                 <h3 className="mt-2 truncate text-[15px] font-semibold">{g.name}</h3>
                 <p className="mt-0.5 flex items-center gap-1 truncate text-[12px] text-muted">
-                  <Star size={12} className="shrink-0 fill-star stroke-star" />
-                  <b className="font-semibold text-ink">{g.rating}</b>({g.reviewCount}) ·{" "}
-                  {g.district.split(" ").at(-1)}
+                  {hasReviews(g) ? (
+                    <>
+                      <Star size={12} className="shrink-0 fill-star stroke-star" />
+                      <b className="font-semibold text-ink">{g.rating}</b>({g.reviewCount})
+                    </>
+                  ) : (
+                    <b className="font-semibold text-brand">새로 입점</b>
+                  )}{" "}
+                  · {g.district.split(" ").at(-1)}
                 </p>
                 <p className="mt-1 text-[13px] tabular-nums">
                   {offersDayPass(g) ? (

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CalendarDays, Check, MapPin, Shirt, Star, X } from "lucide-react";
-import { AMENITIES, isHandsFree, offersDayPass } from "@/lib/gyms";
+import { AMENITIES, hasReviews, isHandsFree, offersDayPass } from "@/lib/gyms";
 import { dateParts } from "@/lib/events";
 import { getEventsByGym, getGymById } from "@/lib/data.server";
 import GymPhotoCarousel from "@/components/GymPhotoCarousel";
@@ -51,8 +51,15 @@ export default async function GymDetailPage({ params }: Props) {
         <p className="text-[13px] font-semibold text-brand">{gym.disciplines.join(" · ")}</p>
         <h1 className="mt-1 text-[22px] font-bold leading-snug">{gym.name}</h1>
         <p className="mt-1 flex items-center gap-1 text-[13px] text-muted">
-          <Star size={13} className="fill-star stroke-star" />
-          <b className="text-ink">{gym.rating}</b> · 리뷰 {gym.reviewCount}개 · {gym.district}
+          {hasReviews(gym) ? (
+            <>
+              <Star size={13} className="fill-star stroke-star" />
+              <b className="text-ink">{gym.rating}</b> · 리뷰 {gym.reviewCount}개
+            </>
+          ) : (
+            <b className="text-brand">새로 입점</b>
+          )}{" "}
+          · {gym.district}
         </p>
 
         <ul className="mt-5 space-y-3 text-[14px]">

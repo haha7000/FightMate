@@ -79,26 +79,46 @@ export async function submitReview(input: {
   author: string;
   rating: number;
   text: string;
-}): Promise<void> {
-  if (!isSupabaseConfigured) {
-    addReviewLocal(input);
-    return;
-  }
-  const supabase = createClient();
+}): Promise<{ error?: string }> {
+  const supabase = isSupabaseConfigured ? createClient() : null;
   if (!supabase) {
     addReviewLocal(input);
-    return;
+    return {};
   }
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  await supabase.from("reviews").insert({
+  const { error } = await supabase.from("reviews").insert({
     gym_id: input.gymId,
     user_id: user?.id ?? null,
     author: input.author,
     rating: input.rating,
     text: input.text,
   });
+  if (!error) return {};
+  // DB 정책상 방문 완료한 체육관에만 쓸 수 있다 (RLS 거부)
+  if (error.code === "42501" || /row-level security/i.test(error.message)) {
+    return { error: "방문을 마친 체육관에만 리뷰를 쓸 수 있어요" };
+  }
+  return { error: "리뷰를 저장하지 못했어요. 잠시 후 다시 시도해주세요." };
+}
+
+// 이 체육관에 리뷰를 쓸 수 있는지 = 관장이 "방문 완료" 처리한 내 신청이 있는지
+export async function fetchCanReview(gymId: string): Promise<boolean> {
+  const supabase = isSupabaseConfigured ? createClient() : null;
+  if (!supabase) return true; // 데모 모드
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from("bookings")
+    .select("id")
+    .eq("gym_id", gymId)
+    .eq("user_id", user.id)
+    .eq("status", "사용 완료")
+    .limit(1);
+  return (data?.length ?? 0) > 0;
 }
 
 // ── 이벤트 RSVP ───────────────────────────────

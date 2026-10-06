@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ExternalLink, Map as MapIcon, Navigation, Phone, X } from "lucide-react";
-import { offersDayPass, type Gym } from "@/lib/gyms";
+import { hasReviews, offersDayPass, type Gym } from "@/lib/gyms";
 import { formatDistance, type Place } from "@/lib/places";
 import { formatWon } from "@/lib/format";
 
@@ -48,7 +48,9 @@ export function GymSheet({ gym, distance, onClose }: { gym: Gym; distance: numbe
       </p>
       <SheetHeader
         title={gym.name}
-        sub={[distance != null && formatDistance(distance), gym.district, `★ ${gym.rating}`].filter(Boolean).join(" · ")}
+        sub={[distance != null && formatDistance(distance), gym.district, hasReviews(gym) ? `★ ${gym.rating}` : "새로 입점"]
+          .filter(Boolean)
+          .join(" · ")}
         onClose={onClose}
       />
       <Tags items={gym.disciplines} />

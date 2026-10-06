@@ -66,6 +66,11 @@ export function offersDayPass(gym: Gym): boolean {
   return gym.dayPassPrice != null;
 }
 
+// 리뷰가 있어야 평점을 보여준다 (0개면 "★ 0" 대신 "새로 입점")
+export function hasReviews(gym: Gym): boolean {
+  return gym.reviewCount > 0;
+}
+
 // 운동복 + 수건이 다 되면 빈손으로 가도 되는 체육관
 export function isHandsFree(gym: Gym): boolean {
   return gym.amenities.includes("운동복 대여") && gym.amenities.includes("수건 제공");

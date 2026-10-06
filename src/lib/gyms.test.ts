@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Tables } from "./database.types";
-import { isHandsFree, offersDayPass, rowToGym } from "./gyms";
+import { hasReviews, isHandsFree, offersDayPass, rowToGym } from "./gyms";
 
 const row: Tables<"gyms"> = {
   id: "g1",
@@ -56,5 +56,12 @@ describe("rowToGym — DB 행 변환", () => {
   it("운동복+수건 제공이면 몸만 와도 OK", () => {
     expect(isHandsFree(gym)).toBe(true);
     expect(isHandsFree(rowToGym({ ...row, amenities: ["운동복 대여"] }))).toBe(false);
+  });
+});
+
+describe("평점 표시", () => {
+  it("리뷰가 0개면 평점 대신 '새로 입점'", () => {
+    expect(hasReviews(rowToGym({ ...row, review_count: 0, rating: 0 }))).toBe(false);
+    expect(hasReviews(rowToGym({ ...row, review_count: 3, rating: 4.7 }))).toBe(true);
   });
 });
