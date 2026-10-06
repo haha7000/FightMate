@@ -1,8 +1,10 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
-// 순수 로직 단위 테스트 (날짜·검증·변환). 화면 테스트가 필요해지면 jsdom + Testing Library 추가.
+// 단위 테스트: 로직·API는 node 환경, 화면 부품(*.test.tsx)은 파일 맨 위에 jsdom 환경을 지정
 export default defineConfig({
+  plugins: [react()],
   resolve: {
     tsconfigPaths: true, // tsconfig의 @/ 경로 별칭 (Vite 내장)
     alias: {
@@ -12,12 +14,12 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}"],
     coverage: {
       provider: "v8",
       // 서버 로직·API·데이터 계층 기준 (화면 컴포넌트는 E2E로 볼 영역이라 제외)
       include: ["src/lib/**/*.ts", "src/app/**/route.ts", "src/proxy.ts"],
-      exclude: ["src/**/*.test.ts", "src/lib/database.types.ts", "src/lib/mock-data.ts", "src/lib/supabase/**"],
+      exclude: ["src/**/*.test.{ts,tsx}", "src/lib/database.types.ts", "src/lib/mock-data.ts", "src/lib/supabase/**"],
       reporter: ["text-summary", "text"],
     },
   },
