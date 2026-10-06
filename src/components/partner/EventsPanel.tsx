@@ -206,8 +206,8 @@ function EventForm({
     <form onSubmit={submit} className="mt-3 flex flex-col gap-4 rounded-xl border border-line bg-white p-4">
       <div className="no-scrollbar flex gap-1.5 overflow-x-auto">
         {EVENT_KINDS.map((k) => (
-          <Chip key={k.key} active={kind === k.key} onClick={() => setKind(k.key)}>
-            {k.key}
+          <Chip key={k} active={kind === k} onClick={() => setKind(k)}>
+            {k}
           </Chip>
         ))}
       </div>

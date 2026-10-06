@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ImagePlus, X } from "lucide-react";
-import { AMENITIES, DISCIPLINES, type Amenity, type Discipline, type Gym } from "@/lib/gyms";
+import { AMENITIES, DISCIPLINES, type Discipline, type Gym } from "@/lib/gyms";
 import { saveGym, uploadGymPhoto } from "@/lib/partner.client";
 import { Field } from "@/components/ui/Field";
 import { Chip } from "@/components/ui/Chip";
@@ -213,7 +213,7 @@ export default function GymInfoPanel({ gym: initial }: { gym: Gym }) {
       <div>
         <p className="text-[14px] font-semibold">시설·제공</p>
         <div className="mt-2 grid grid-cols-2 gap-2">
-          {AMENITIES.map(({ key }: { key: Amenity }) => {
+          {AMENITIES.map((key) => {
             const on = gym.amenities.includes(key);
             return (
               <button

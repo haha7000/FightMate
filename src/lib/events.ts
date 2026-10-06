@@ -1,20 +1,6 @@
 export type EventKind = "오픈매트" | "세미나" | "대회" | "특별수업" | "행사";
 
-export const EVENT_KINDS: { key: EventKind; emoji: string; color: string }[] = [
-  { key: "오픈매트", emoji: "🤼", color: "text-sky-700 bg-sky-100" },
-  { key: "세미나", emoji: "🎓", color: "text-purple-700 bg-purple-100" },
-  { key: "대회", emoji: "🏆", color: "text-amber-700 bg-amber-100" },
-  { key: "특별수업", emoji: "🔥", color: "text-orange-700 bg-orange-100" },
-  { key: "행사", emoji: "🎉", color: "text-emerald-700 bg-emerald-100" },
-];
-
-export function eventKindStyle(kind: EventKind): string {
-  return EVENT_KINDS.find((k) => k.key === kind)?.color ?? "text-neutral-600 bg-neutral-100";
-}
-
-export function eventKindEmoji(kind: EventKind): string {
-  return EVENT_KINDS.find((k) => k.key === kind)?.emoji ?? "📌";
-}
+export const EVENT_KINDS: EventKind[] = ["오픈매트", "세미나", "대회", "특별수업", "행사"];
 
 export interface GymEvent {
   id: string;
@@ -42,12 +28,6 @@ export function seatsLeft(e: GymEvent): number | null {
 export function isFull(e: GymEvent): boolean {
   const left = seatsLeft(e);
   return left !== null && left <= 0;
-}
-
-// 마감 임박 (남은 자리 5 이하). 무제한·마감은 false.
-export function isAlmostFull(e: GymEvent): boolean {
-  const left = seatsLeft(e);
-  return left !== null && left > 0 && left <= 5;
 }
 
 // DB row(snake_case) → GymEvent. 표시 인원 = 베이스라인(attendees) + 실제 RSVP 수(rsvp_count).

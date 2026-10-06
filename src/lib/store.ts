@@ -60,7 +60,6 @@ function write(key: string, value: unknown) {
   window.localStorage.setItem(key, JSON.stringify(value));
 }
 
-export const getSession = () => read<Session>(KEYS.session);
 export const setSession = (s: Session) => write(KEYS.session, s);
 export const clearSession = () => window.localStorage.removeItem(KEYS.session);
 
@@ -80,7 +79,7 @@ export const getProfile = () => read<FighterProfile>(KEYS.profile);
 export const setProfile = (p: FighterProfile) => write(KEYS.profile, p);
 
 // 시드 리뷰 — DB 연결 전까지 모든 방문자에게 동일하게 보이는 데모 데이터
-export const SEED_REVIEWS: Review[] = [
+const SEED_REVIEWS: Review[] = [
   {
     id: "sr-1",
     gymId: "gracie-yeoksam",

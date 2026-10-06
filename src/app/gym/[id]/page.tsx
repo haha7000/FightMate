@@ -109,7 +109,7 @@ export default async function GymDetailPage({ params }: Props) {
       <section className="mt-2 bg-white px-4 py-5">
         <h2 className="text-[16px] font-bold">시설·제공</h2>
         <ul className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2.5 text-[14px]">
-          {AMENITIES.map(({ key }) => {
+          {AMENITIES.map((key) => {
             const has = gym.amenities.includes(key);
             return (
               <li key={key} className={`flex items-center gap-2 ${has ? "" : "text-muted/70 line-through"}`}>

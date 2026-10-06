@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { rowToGym, type Gym } from "@/lib/gyms";
 import { displayName } from "@/lib/user";
 
-export type GymRole = "owner" | "coach";
+type GymRole = "owner" | "coach";
 
 export interface Viewer {
   userId: string;

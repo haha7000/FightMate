@@ -71,8 +71,8 @@ export default function EventsBoard({
             전체
           </Chip>
           {EVENT_KINDS.map((k) => (
-            <Chip key={k.key} tone="dark" active={kind === k.key} onClick={() => setKind(k.key)}>
-              {k.key}
+            <Chip key={k} tone="dark" active={kind === k} onClick={() => setKind(k)}>
+              {k}
             </Chip>
           ))}
           <span className="mx-0.5 w-px shrink-0 self-stretch bg-white/15" aria-hidden />

@@ -20,13 +20,13 @@ export type Amenity =
   | "글러브·장비 대여"
   | "주차 가능";
 
-export const AMENITIES: { key: Amenity; emoji: string }[] = [
-  { key: "운동복 대여", emoji: "👕" },
-  { key: "수건 제공", emoji: "🧺" },
-  { key: "샤워실", emoji: "🚿" },
-  { key: "개인 락커", emoji: "🔐" },
-  { key: "글러브·장비 대여", emoji: "🥊" },
-  { key: "주차 가능", emoji: "🚗" },
+export const AMENITIES: Amenity[] = [
+  "운동복 대여",
+  "수건 제공",
+  "샤워실",
+  "개인 락커",
+  "글러브·장비 대여",
+  "주차 가능",
 ];
 
 export interface Gym {
@@ -89,9 +89,3 @@ export function rowToGym(r: Record<string, unknown>): Gym {
 
 
 
-// 카드용 짧은 가격: 0 → "무료", 20000 → "2만원", 15000 → "1.5만원"
-export function formatPriceShort(price: number): string {
-  if (price === 0) return "무료";
-  if (price >= 10000) return `${Number((price / 10000).toFixed(1))}만원`;
-  return `${price.toLocaleString("ko-KR")}원`;
-}
