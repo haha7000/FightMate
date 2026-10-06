@@ -36,8 +36,10 @@ export interface Review {
   date: string; // YYYY-MM-DD
 }
 
+export const SESSION_STORAGE_KEY = "fm_session";
+
 const KEYS = {
-  session: "fm_session",
+  session: SESSION_STORAGE_KEY,
   bookings: "fm_bookings",
   profile: "fm_profile",
   reviews: "fm_reviews",

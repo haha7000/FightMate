@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { rowToGym, type Gym } from "@/lib/gyms";
+import { displayName } from "@/lib/user";
 
 export type GymRole = "owner" | "coach";
 
@@ -25,9 +26,7 @@ export async function getViewer(): Promise<Viewer | null> {
     supabase.from("gym_members").select("role, gyms(*)").eq("user_id", user.id),
   ]);
 
-  const meta = user.user_metadata ?? {};
-  const name =
-    (meta.name as string) || (meta.full_name as string) || (meta.nickname as string) || "회원";
+  const name = displayName(user.user_metadata, "회원");
 
   const memberships = (memberRes.data ?? [])
     .filter((r) => r.gyms)
