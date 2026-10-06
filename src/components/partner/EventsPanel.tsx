@@ -25,11 +25,15 @@ export default function EventsPanel({ gym }: { gym: Gym }) {
   const [events, setEvents] = useState<GymEvent[] | null>(null);
   const [formOpen, setFormOpen] = useState(false);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchGymEvents(gym.id).then((list) => {
-      setEvents(list);
-      if (list.length === 0) setFormOpen(true);
-    });
+    fetchGymEvents(gym.id)
+      .then((list) => {
+        setEvents(list);
+        if (list.length === 0) setFormOpen(true);
+      })
+      .catch((e: Error) => setLoadError(e.message));
   }, [gym.id]);
 
   async function remove(id: string) {
@@ -65,7 +69,8 @@ export default function EventsPanel({ gym }: { gym: Gym }) {
       )}
 
       <h2 className="mt-6 text-[15px] font-bold">다가오는 일정</h2>
-      {events === null && <p className="py-10 text-center text-[14px] text-muted">불러오는 중…</p>}
+      {loadError && <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-[13px] text-red-700">{loadError}</p>}
+      {events === null && !loadError && <p className="py-10 text-center text-[14px] text-muted">불러오는 중…</p>}
       {events?.length === 0 && <p className="py-10 text-center text-[14px] text-muted">아직 올린 일정이 없어요</p>}
       <ul className="mt-2 flex flex-col gap-2">
         {events?.map((e) => (

@@ -2,8 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { MOCK_EVENTS } from "@/lib/mock-data";
 import {
-  MOCK_EVENTS,
   rowToEvent,
   todayKST,
   upcoming,
@@ -203,23 +203,18 @@ export async function fetchEventRoster(eventId: string): Promise<RsvpEntry[]> {
   }));
 }
 
-// 특정 체육관의 다가오는 이벤트 (관장 어드민용 — 실제 RSVP 수 포함)
+// 특정 체육관의 다가오는 이벤트 (관장 모드 일정 탭 — 실제 RSVP 수 포함)
 export async function fetchGymEvents(gymId: string): Promise<GymEvent[]> {
-  const fallback = () => upcoming(MOCK_EVENTS.filter((e) => e.gymId === gymId));
-  if (!isSupabaseConfigured) return fallback();
+  const supabase = isSupabaseConfigured ? createClient() : null;
+  if (!supabase) return upcoming(MOCK_EVENTS.filter((e) => e.gymId === gymId));
 
-  const supabase = createClient();
-  if (!supabase) return fallback();
-
-  const today = todayKST();
   const { data, error } = await supabase
     .from("events")
     .select("*")
     .eq("gym_id", gymId)
-    .gte("date", today)
+    .gte("date", todayKST())
     .order("date", { ascending: true });
-
-  if (error || !data) return fallback();
+  if (error) throw new Error(`일정을 불러오지 못했어요: ${error.message}`);
   return data.map(rowToEvent);
 }
 

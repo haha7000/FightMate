@@ -50,128 +50,6 @@ export function isAlmostFull(e: GymEvent): boolean {
   return left !== null && left > 0 && left <= 5;
 }
 
-// "YYYY-MM-DD" (로컬 날짜)
-export function toYmd(d: Date): string {
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
-
-// 내일 이후 첫 번째 해당 요일(0=일 … 6=토) + weeksAhead주
-function nextWeekday(dow: number, weeksAhead = 0): string {
-  const d = new Date();
-  d.setDate(d.getDate() + 1);
-  while (d.getDay() !== dow) d.setDate(d.getDate() + 1);
-  d.setDate(d.getDate() + weeksAhead * 7);
-  return toYmd(d);
-}
-
-// TODO(M2): Supabase `events` 테이블로 교체
-// 데모 일정은 언제 열어도 "다가오는 이벤트"로 보이도록 오늘 기준 요일로 계산한다.
-export const MOCK_EVENTS: GymEvent[] = [
-  {
-    id: "ev-gracie-openmat-0621",
-    gymId: "gracie-yeoksam",
-    gymName: "그레이시 주짓수 역삼",
-    kind: "오픈매트",
-    title: "토요 오픈매트 (초보 환영)",
-    date: nextWeekday(6),
-    startTime: "14:00",
-    fee: 0,
-    capacity: 30,
-    attendees: 22,
-    description:
-      "매주 토요일 열리는 오픈매트입니다. 화이트벨트도 부담 없이 참여하세요. 가벼운 롤링 위주, 타 체육관 방문 환영.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-topteam-seminar-0628",
-    gymId: "topteam-seolleung",
-    gymName: "탑팀 MMA 선릉",
-    kind: "세미나",
-    title: "레슬링 테이크다운 세미나 (게스트 코치)",
-    date: nextWeekday(0, 1),
-    startTime: "11:00",
-    fee: 30000,
-    capacity: 24,
-    attendees: 24,
-    description:
-      "국가대표 출신 게스트 코치의 테이크다운 세미나. MMA·그래플러 모두 환영. 노기 복장 권장.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-checkmat-openmat-0620",
-    gymId: "checkmat-apgujeong",
-    gymName: "체크매트 압구정",
-    kind: "오픈매트",
-    title: "노기 오픈매트",
-    date: nextWeekday(5),
-    startTime: "19:00",
-    fee: 10000,
-    capacity: null,
-    attendees: 0,
-    description: "금요일 저녁 노기 오픈매트. 외국인 회원 다수, 다양한 스타일과 롤링 가능.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-ironfist-class-0619",
-    gymId: "ironfist-gangnam",
-    gymName: "아이언피스트 복싱 강남",
-    kind: "특별수업",
-    title: "초보 복싱 입문 원데이 클래스",
-    date: nextWeekday(4),
-    startTime: "20:00",
-    fee: 20000,
-    capacity: 12,
-    attendees: 11,
-    description: "스텝·잽·원투 기본기를 하루에 배우는 입문 클래스. 장비 무료 대여.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-muaythai-event-0627",
-    gymId: "muay-thai-sinsa",
-    gymName: "싸바이 무에타이 신사",
-    kind: "행사",
-    title: "와이크루 데이 + 회원 친선 스파링",
-    date: nextWeekday(6, 1),
-    startTime: "18:00",
-    fee: 0,
-    capacity: 40,
-    attendees: 18,
-    description: "무에타이 전통 의식 와이크루 시연과 회원 친선 스파링. 관람·체험 모두 환영.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-topteam-comp-0712",
-    gymId: "topteam-seolleung",
-    gymName: "탑팀 MMA 선릉",
-    kind: "대회",
-    title: "강남 아마추어 그래플링 오픈 (체급별)",
-    date: nextWeekday(0, 3),
-    startTime: "10:00",
-    fee: 50000,
-    capacity: 128,
-    attendees: 47,
-    description:
-      "체급·벨트별 브래킷으로 진행되는 아마추어 그래플링 대회. 검증된 전적으로 기록됩니다.",
-    openToVisitors: true,
-  },
-  {
-    id: "ev-gracie-openmat-0628",
-    gymId: "gracie-yeoksam",
-    gymName: "그레이시 주짓수 역삼",
-    kind: "오픈매트",
-    title: "토요 오픈매트 (초보 환영)",
-    date: nextWeekday(6, 1),
-    startTime: "14:00",
-    fee: 0,
-    capacity: 30,
-    attendees: 9,
-    description: "매주 토요일 오픈매트. 화이트벨트 환영, 타 체육관 방문 환영.",
-    openToVisitors: true,
-  },
-];
-
 // DB row(snake_case) → GymEvent. 표시 인원 = 베이스라인(attendees) + 실제 RSVP 수(rsvp_count).
 export function rowToEvent(r: Record<string, unknown>): GymEvent {
   return {
@@ -208,13 +86,7 @@ export function upcoming(events: GymEvent[]): GymEvent[] {
     .sort((a, b) => (a.date + a.startTime).localeCompare(b.date + b.startTime));
 }
 
-export function eventsForGym(gymId: string, events: GymEvent[] = MOCK_EVENTS): GymEvent[] {
-  return upcoming(events.filter((e) => e.gymId === gymId));
-}
 
-export function getEvent(id: string, events: GymEvent[] = MOCK_EVENTS): GymEvent | undefined {
-  return events.find((e) => e.id === id);
-}
 
 export function formatEventDate(date: string): string {
   // "2026-06-21" → "6/21 (토)"

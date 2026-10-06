@@ -1,3 +1,4 @@
+import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { rowToGym, type Gym } from "@/lib/gyms";
 import { displayName } from "@/lib/user";

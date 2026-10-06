@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { CalendarDays, Check, MapPin, Shirt, Star, X } from "lucide-react";
-import { AMENITIES, MOCK_GYMS, formatPrice, isHandsFree, offersDayPass } from "@/lib/gyms";
+import { AMENITIES, formatPrice, isHandsFree, offersDayPass } from "@/lib/gyms";
 import { dateParts } from "@/lib/events";
 import { getEventsByGym, getGymById } from "@/lib/data.server";
 import GymPhotoCarousel from "@/components/GymPhotoCarousel";
@@ -13,10 +13,6 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-// 빌드 시점 정적 경로는 목데이터 기준. DB에만 있는 체육관은 요청 시 렌더(dynamicParams 기본 true).
-export function generateStaticParams() {
-  return MOCK_GYMS.map((g) => ({ id: g.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;

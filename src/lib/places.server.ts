@@ -1,3 +1,4 @@
+import "server-only";
 import { DISCIPLINES, type Discipline } from "@/lib/gyms";
 import { detectDisciplines, type Place } from "@/lib/places";
 

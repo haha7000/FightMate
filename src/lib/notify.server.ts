@@ -1,3 +1,4 @@
+import "server-only";
 import { SolapiMessageService } from "solapi";
 
 // 문자 발송 (솔라피). 키가 없으면 실제로 보내지 않고 로그만 남긴다 — 개발 중 안전장치.

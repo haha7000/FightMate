@@ -5,7 +5,6 @@ import { ChevronLeft } from "lucide-react";
 import { getEventById, getGymById } from "@/lib/data.server";
 import {
   EVENT_KIND_EN,
-  MOCK_EVENTS,
   dateParts,
   eventGiType,
   eventLevel,
@@ -20,9 +19,6 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-export function generateStaticParams() {
-  return MOCK_EVENTS.map((e) => ({ id: e.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
