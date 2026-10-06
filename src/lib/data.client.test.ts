@@ -4,7 +4,7 @@ import { fakeSupabase } from "@/test/fake-supabase";
 let sb = fakeSupabase({});
 vi.mock("@/lib/supabase/config", () => ({ isSupabaseConfigured: true }));
 vi.mock("@/lib/supabase/client", () => ({ createClient: () => sb.client }));
-const { cancelBooking, fetchCanReview, fetchMyEvents, submitReview, updateEvent } = await import("./data.client");
+const { cancelBooking, fetchCanReview, fetchMyEvents, fetchMyFighterPath, submitReview, updateEvent } = await import("./data.client");
 
 const input = { gymId: "g1", author: "홍길동", rating: 5, text: "좋아요" };
 
@@ -91,5 +91,14 @@ describe("일정 수정 (관장)", () => {
   it("권한이 없으면 이유를 돌려준다", async () => {
     sb = fakeSupabase({ responses: { "events.update": { error: { message: "permission denied" } } } });
     expect(await updateEvent("ev1", fields)).toEqual({ ok: false, error: "permission denied" });
+  });
+});
+
+describe("내 공개 프로필 주소", () => {
+  it("로그인했으면 /fighter/내ID, 아니면 null", async () => {
+    sb = fakeSupabase({ user: { id: "u1" } });
+    expect(await fetchMyFighterPath()).toBe("/fighter/u1");
+    sb = fakeSupabase({ user: null });
+    expect(await fetchMyFighterPath()).toBeNull();
   });
 });

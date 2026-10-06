@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { toBookingStatus, toBookingType } from "./bookings";
-import { publicOrigin } from "./origin";
+import { publicOrigin, siteUrl } from "./origin";
 import { displayName } from "./user";
 import { newBookingText } from "./notify.server";
 
@@ -52,5 +52,15 @@ describe("관장님 새 신청 문자", () => {
       link: "https://x.app/partner?gym=g1",
     });
     expect(text).toBe("[FightMate] 그레이시 주짓수 역삼 새 체험 신청\n홍길동님 · 10/10(토)\n확인·확정: https://x.app/partner?gym=g1");
+  });
+});
+
+describe("siteUrl — 사이트맵·공유 링크의 기준 주소", () => {
+  it("직접 지정한 주소가 먼저 (끝 / 제거)", () => {
+    expect(siteUrl({ NEXT_PUBLIC_SITE_URL: "https://fightmate.kr/", VERCEL_PROJECT_PRODUCTION_URL: "x.vercel.app" })).toBe("https://fightmate.kr");
+  });
+  it("없으면 Vercel 운영 도메인, 그것도 없으면 로컬", () => {
+    expect(siteUrl({ VERCEL_PROJECT_PRODUCTION_URL: "fightmate-livid.vercel.app" })).toBe("https://fightmate-livid.vercel.app");
+    expect(siteUrl({})).toBe("http://localhost:3000");
   });
 });

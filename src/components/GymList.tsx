@@ -2,23 +2,30 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Star, Ticket } from "lucide-react";
-import { DISCIPLINES, hasReviews, offersDayPass, type Discipline, type Gym } from "@/lib/gyms";
+import { CalendarDays, Search, Star, Ticket, X } from "lucide-react";
+import { DISCIPLINES, filterGyms, hasReviews, offersDayPass, regionsOf, type Discipline, type Gym } from "@/lib/gyms";
 import { dateParts, type GymEvent } from "@/lib/events";
 import { Chip } from "@/components/ui/Chip";
 
-// 홈 체육관 목록: 필터 칩 + 폰 2열 카드. 카드마다 "다음 일정" 칩 (캐치테이블의 예약 가능 시간 칩처럼)
+// 홈 체육관 목록: 검색 + 지역 + 필터 칩 + 폰 2열 카드. 카드마다 "다음 일정" 칩 (캐치테이블의 예약 가능 시간 칩처럼)
 export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEvent[] }) {
+  const [query, setQuery] = useState("");
+  const [region, setRegion] = useState<string | null>(null);
   const [discipline, setDiscipline] = useState<Discipline | null>(null);
   const [dayPassOnly, setDayPassOnly] = useState(false);
   const [freeTrialOnly, setFreeTrialOnly] = useState(false);
 
-  const visible = gyms.filter(
-    (g) =>
-      (!discipline || g.disciplines.includes(discipline)) &&
-      (!dayPassOnly || offersDayPass(g)) &&
-      (!freeTrialOnly || g.trialPrice === 0)
-  );
+  const regions = regionsOf(gyms);
+  const visible = filterGyms(gyms, { query, region, discipline, dayPassOnly, freeTrialOnly });
+  const filtered = !!(query || region || discipline || dayPassOnly || freeTrialOnly);
+
+  function reset() {
+    setQuery("");
+    setRegion(null);
+    setDiscipline(null);
+    setDayPassOnly(false);
+    setFreeTrialOnly(false);
+  }
 
   return (
     <section className="pt-6">
@@ -27,7 +34,37 @@ export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEven
         <span className="text-[13px] text-muted">{visible.length}곳</span>
       </div>
 
-      <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto px-4 pb-1">
+      <label className="mx-4 mt-3 flex items-center gap-2 rounded-xl bg-white px-3.5 py-2.5 ring-1 ring-line focus-within:ring-brand">
+        <Search size={17} className="shrink-0 text-muted" />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="체육관 이름, 동네, 종목 검색"
+          aria-label="체육관 검색"
+          className="min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted"
+        />
+        {query && (
+          <button type="button" onClick={() => setQuery("")} aria-label="검색어 지우기" className="text-muted">
+            <X size={16} />
+          </button>
+        )}
+      </label>
+
+      {regions.length > 1 && (
+        <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto px-4" role="group" aria-label="지역">
+          <Chip active={region === null} onClick={() => setRegion(null)}>
+            모든 지역
+          </Chip>
+          {regions.map((r) => (
+            <Chip key={r} active={region === r} onClick={() => setRegion(region === r ? null : r)}>
+              {r}
+            </Chip>
+          ))}
+        </div>
+      )}
+
+      <div className="no-scrollbar mt-2 flex gap-1.5 overflow-x-auto px-4 pb-1">
         <Chip active={dayPassOnly} onClick={() => setDayPassOnly((v) => !v)}>
           <Ticket size={14} strokeWidth={2} />
           1일권 가능
@@ -101,7 +138,17 @@ export default function GymList({ gyms, events }: { gyms: Gym[]; events: GymEven
       </ul>
 
       {visible.length === 0 && (
-        <p className="px-4 py-16 text-center text-[14px] text-muted">조건에 맞는 체육관이 아직 없어요</p>
+        <div className="px-4 py-16 text-center text-[14px] text-muted">
+          <p>{query ? `"${query}"에 맞는 체육관이 없어요` : "조건에 맞는 체육관이 아직 없어요"}</p>
+          {filtered && (
+            <button onClick={reset} className="mt-3 rounded-lg bg-field px-4 py-2 text-[13px] font-semibold text-ink">
+              조건 초기화
+            </button>
+          )}
+          <Link href="/map" className="mt-2 block text-[13px] font-semibold text-brand">
+            지도에서 주변 체육관 찾아보기
+          </Link>
+        </div>
       )}
     </section>
   );

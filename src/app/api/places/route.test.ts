@@ -4,7 +4,8 @@ const searchGymPlaces = vi.fn(async (_opts: unknown) => [] as unknown[]);
 vi.mock("@/lib/places.server", () => ({ searchGymPlaces: (o: unknown) => searchGymPlaces(o) }));
 const { GET } = await import("./route");
 
-const get = (qs: string) => GET(new Request(`http://localhost:3000/api/places?${qs}`));
+const get = (qs: string, ip = "1.1.1.1") =>
+  GET(new Request(`http://localhost:3000/api/places?${qs}`, { headers: { "x-forwarded-for": ip } }));
 
 beforeEach(() => searchGymPlaces.mockClear());
 
@@ -14,6 +15,8 @@ describe("GET /api/places — 지도 주변 체육관 검색", () => {
     ["경도 없음", "lat=37.5"],
     ["숫자 아님", "lat=abc&lng=127"],
     ["범위 밖", "lat=91&lng=127"],
+    ["해외 좌표 (도쿄)", "lat=35.68&lng=139.76"],
+    ["(0, 0)", "lat=0&lng=0"],
   ])("%s → 400, 카카오 호출 안 함", async (_, qs) => {
     expect((await get(qs)).status).toBe(400);
     expect(searchGymPlaces).not.toHaveBeenCalled();
@@ -35,5 +38,15 @@ describe("GET /api/places — 지도 주변 체육관 검색", () => {
     const res = await get("lat=37.5&lng=127");
     expect(res.status).toBe(502);
     expect(JSON.stringify(await res.json())).not.toContain("secret");
+  });
+});
+
+describe("GET /api/places — 남용 방지", () => {
+  it("한 IP가 분당 40회를 넘기면 429 + Retry-After, 다른 IP는 영향 없음", async () => {
+    for (let i = 0; i < 40; i++) expect((await get("lat=37.5&lng=127", "9.9.9.9")).status).toBe(200);
+    const blocked = await get("lat=37.5&lng=127", "9.9.9.9");
+    expect(blocked.status).toBe(429);
+    expect(Number(blocked.headers.get("Retry-After"))).toBeGreaterThan(0);
+    expect((await get("lat=37.5&lng=127", "8.8.8.8")).status).toBe(200);
   });
 });

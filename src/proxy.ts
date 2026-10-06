@@ -48,5 +48,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // 정적 자산·이미지 제외 (auth 로직이 CSS/JS/이미지 로딩을 막지 않도록)
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|gyms/|.*\\.svg$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon|apple-icon|manifest.webmanifest|robots.txt|sitemap.xml|gyms/|.*\\.svg$).*)"],
 };

@@ -49,3 +49,11 @@ export function distanceM(aLat: number, aLng: number, bLat: number, bLng: number
 export function formatDistance(m: number): string {
   return m < 1000 ? `${Math.round(m)}m` : `${(m / 1000).toFixed(1)}km`;
 }
+
+// 서비스 지역(대한민국) 대략 범위. 이 밖의 좌표는 검색하지 않는다 (쿼터 낭비·남용 방지).
+export const KOREA_BOUNDS = { minLat: 33, maxLat: 39, minLng: 124, maxLng: 132 };
+
+export function isInKorea(lat: number, lng: number): boolean {
+  const b = KOREA_BOUNDS;
+  return lat >= b.minLat && lat <= b.maxLat && lng >= b.minLng && lng <= b.maxLng;
+}

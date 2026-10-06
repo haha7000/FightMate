@@ -2,16 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
+import QRCode from "qrcode";
 import Link from "next/link";
 import { ChevronRight, Download, ShieldCheck, Store } from "lucide-react";
-import { DISCIPLINES, DISCIPLINE_EN, type Discipline } from "@/lib/gyms";
+import { DISCIPLINES } from "@/lib/gyms";
 import { type FighterProfile } from "@/lib/store";
-import { fetchProfile, saveProfile } from "@/lib/data.client";
+import { fetchMyFighterPath, fetchProfile, saveProfile } from "@/lib/data.client";
 import { useAuth } from "@/lib/auth";
 import { fetchMyRoles } from "@/lib/partner.client";
 import { Field } from "@/components/ui/Field";
 import { LegalLinks } from "@/components/LegalLinks";
 import AccountDelete from "@/components/AccountDelete";
+import { FighterCardView } from "@/components/FighterCardView";
 
 const BELTS = ["해당 없음", "화이트", "블루", "퍼플", "브라운", "블랙"];
 
@@ -31,10 +33,13 @@ export default function CardPage() {
   const cardRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
   const [roles, setRoles] = useState<{ isAdmin: boolean; gymCount: number }>({ isAdmin: false, gymCount: 0 });
+  const [publicUrl, setPublicUrl] = useState<string | null>(null); // 공개 프로필 주소 (저장된 프로필이 있을 때만)
+  const [qr, setQr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchProfile().then((stored) => {
+    Promise.all([fetchProfile(), fetchMyFighterPath()]).then(([stored, path]) => {
       if (stored) setProfileState(stored);
+      if (stored?.nickname.trim() && path) setPublicUrl(`${window.location.origin}${path}`);
     });
     fetchMyRoles()
       .then(setRoles)
@@ -46,9 +51,19 @@ export default function CardPage() {
     setSaved(false);
   }
 
+  // 공개 프로필 주소가 생기면 카드에 넣을 QR을 만든다
+  useEffect(() => {
+    if (!publicUrl) return;
+    QRCode.toDataURL(publicUrl, { margin: 0, width: 192 })
+      .then(setQr)
+      .catch(() => setQr(null));
+  }, [publicUrl]);
+
   async function save() {
     await saveProfile(profile);
     setSaved(true);
+    const path = profile.nickname.trim() ? await fetchMyFighterPath() : null;
+    setPublicUrl(path ? `${window.location.origin}${path}` : null);
   }
 
   async function downloadCard() {
@@ -108,27 +123,8 @@ export default function CardPage() {
 
       <div className="px-4 pt-5">
         {/* 카드 미리보기 — 이미지로 저장되는 영역 */}
-        <div ref={cardRef} className="grain overflow-hidden bg-night p-6 text-white">
-          <div className="flex items-center justify-between">
-            <p className="font-num text-[13px] tracking-[0.18em]">
-              FIGHT<span className="text-brand-bright">MATE</span>
-            </p>
-            <p className="font-num text-[11px] tracking-[0.24em] text-white/45">FIGHTER CARD</p>
-          </div>
-
-          <p className="mt-8 font-num text-[12px] tracking-[0.24em] text-brand-bright">
-            {DISCIPLINE_EN[profile.discipline as Discipline] ?? profile.discipline}
-          </p>
-          <p className="mt-1 font-display text-[44px] leading-[1.05]">{profile.nickname || "닉네임"}</p>
-          <p className="mt-2 text-[14px] text-white/60">{profile.gymName || "소속 체육관"}</p>
-
-          <dl className="mt-8 grid grid-cols-3 border-y border-white/15">
-            <Stat label="체급" value={profile.weightClass || "—"} />
-            <Stat label="수련" value={profile.years ? `${profile.years}Y` : "—"} />
-            <Stat label="벨트" value={profile.belt === "해당 없음" ? "—" : profile.belt} last />
-          </dl>
-
-          <p className="mt-6 font-num text-[11px] tracking-[0.24em] text-white/40">FIGHTMATE.KR</p>
+        <div ref={cardRef}>
+          <FighterCardView profile={profile} qr={qr} />
         </div>
 
         <button
@@ -140,6 +136,17 @@ export default function CardPage() {
           이미지로 저장
         </button>
         {!ready && <p className="mt-2 text-center text-[12px] text-muted">닉네임을 입력하면 저장할 수 있어요</p>}
+        {publicUrl ? (
+          <p className="mt-2 text-center text-[12px] text-muted">
+            카드의 QR을 찍으면{" "}
+            <a href={publicUrl} className="font-semibold text-brand underline underline-offset-2">
+              내 공개 프로필
+            </a>
+            로 가요 (닉네임·종목·소속·체급·수련 기간·벨트만 보여요)
+          </p>
+        ) : (
+          user && ready && <p className="mt-2 text-center text-[12px] text-muted">프로필을 저장하면 카드에 내 프로필 QR이 들어가요</p>
+        )}
       </div>
 
       <section className="mt-6 bg-white px-4 py-5">
@@ -211,13 +218,3 @@ export default function CardPage() {
     </main>
   );
 }
-
-function Stat({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
-  return (
-    <div className={`py-3 ${last ? "" : "border-r border-white/15"} ${label === "체급" ? "pr-3" : "px-3"}`}>
-      <dd className="truncate font-num text-[22px] leading-none">{value}</dd>
-      <dt className="mt-1.5 text-[11px] text-white/50">{label}</dt>
-    </div>
-  );
-}
-

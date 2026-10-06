@@ -3,7 +3,7 @@ import { MapPin, Search } from "lucide-react";
 import GymList from "@/components/GymList";
 import EventBand from "@/components/EventBand";
 import { Wordmark } from "@/components/nav";
-import { offersDayPass } from "@/lib/gyms";
+import { offersDayPass, regionsOf } from "@/lib/gyms";
 import { getGyms, getUpcomingEvents } from "@/lib/data.server";
 import { LegalLinks } from "@/components/LegalLinks";
 
@@ -11,6 +11,10 @@ export default async function HomePage() {
   const [gyms, events] = await Promise.all([getGyms(), getUpcomingEvents()]);
   const freeTrials = gyms.filter((g) => g.trialPrice === 0).length;
   const dayPass = gyms.filter(offersDayPass).length;
+  // 입점한 지역을 많은 순으로 (예: "강남구·서초구") — 지역이 늘면 "외 N곳"
+  const regions = regionsOf(gyms);
+  const regionLabel =
+    regions.length === 0 ? "서울" : regions.slice(0, 2).join("·") + (regions.length > 2 ? ` 외 ${regions.length - 2}곳` : "");
 
   return (
     <main>
@@ -19,7 +23,7 @@ export default async function HomePage() {
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-1 text-[17px] font-bold">
             <MapPin size={18} strokeWidth={2.25} className="text-brand" />
-            강남·서초
+            {regionLabel}
           </span>
           <Wordmark />
         </div>

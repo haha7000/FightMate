@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Black_Han_Sans } from "next/font/google";
 import "./globals.css";
+import { siteUrl } from "@/lib/origin";
 
 // 제목용 굵은 한글(Black Han Sans) + 날짜·숫자용 압축체(Anton). 본문은 Pretendard.
 const anton = Anton({ weight: "400", subsets: ["latin"], variable: "--font-anton" });
@@ -12,6 +13,8 @@ const blackHanSans = Black_Han_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl()), // 공유 미리보기(OG)·사이트맵의 절대 주소 기준
+  appleWebApp: { capable: true, title: "FightMate", statusBarStyle: "default" },
   title: "FightMate — 내 근처 격투기 체육관, 전화 없이 체험 예약",
   description:
     "주짓수·복싱·MMA·무에타이 체육관을 찾고, 전화 없이 체험과 1일권을 예약하세요. 이번 주 오픈매트 일정까지.",

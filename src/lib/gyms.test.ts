@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Tables } from "./database.types";
-import { hasReviews, isHandsFree, offersDayPass, rowToGym } from "./gyms";
+import { MOCK_GYMS } from "./mock-data";
+import { filterGyms, hasReviews, isHandsFree, offersDayPass, regionOf, regionsOf, rowToGym, type Gym } from "./gyms";
 
 const row: Tables<"gyms"> = {
   id: "g1",
@@ -63,5 +64,37 @@ describe("평점 표시", () => {
   it("리뷰가 0개면 평점 대신 '새로 입점'", () => {
     expect(hasReviews(rowToGym({ ...row, review_count: 0, rating: 0 }))).toBe(false);
     expect(hasReviews(rowToGym({ ...row, review_count: 3, rating: 4.7 }))).toBe(true);
+  });
+});
+
+describe("홈 검색·지역", () => {
+  const g = (id: string, over: Partial<Gym>) => ({ ...MOCK_GYMS[0], id, ...over }) as Gym;
+  const list = [
+    g("a", { name: "그레이시 주짓수 역삼", district: "강남구 역삼동", address: "서울 강남구 테헤란로 1", disciplines: ["주짓수"] }),
+    g("b", { name: "선릉 복싱클럽", district: "강남구 대치동", address: "서울 강남구 선릉로 2", disciplines: ["복싱"], trialPrice: 10000 }),
+    g("c", { name: "양재 MMA", district: "서초구 양재동", address: "서울 서초구 양재대로 3", disciplines: ["MMA"], dayPassPrice: null }),
+  ];
+  const ids = (gs: Gym[]) => gs.map((x) => x.id);
+
+  it("지역은 구 단위, 체육관 많은 순", () => {
+    expect(regionOf(list[0])).toBe("강남구");
+    expect(regionsOf(list)).toEqual(["강남구", "서초구"]);
+  });
+
+  it("이름·동네·주소·종목 어디로든 찾고, 띄어쓰기·대소문자 무시", () => {
+    expect(ids(filterGyms(list, { query: "역삼" }))).toEqual(["a"]);
+    expect(ids(filterGyms(list, { query: "선릉로" }))).toEqual(["b"]);
+    expect(ids(filterGyms(list, { query: "복싱 클럽" }))).toEqual(["b"]);
+    expect(ids(filterGyms(list, { query: "mma" }))).toEqual(["c"]);
+    expect(ids(filterGyms(list, { query: "  " }))).toEqual(["a", "b", "c"]);
+  });
+
+  it("검색어·지역·종목·필터는 모두 함께 적용", () => {
+    expect(ids(filterGyms(list, { region: "강남구" }))).toEqual(["a", "b"]);
+    expect(ids(filterGyms(list, { region: "강남구", freeTrialOnly: true }))).toEqual(
+      ids(list.filter((x) => regionOf(x) === "강남구" && x.trialPrice === 0))
+    );
+    expect(ids(filterGyms(list, { query: "서울", dayPassOnly: true }))).not.toContain("c");
+    expect(ids(filterGyms(list, { region: "서초구", discipline: "주짓수" }))).toEqual([]);
   });
 });

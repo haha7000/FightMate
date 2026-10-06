@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { fighterPath, rowToProfile } from "@/lib/profile";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { MOCK_EVENTS } from "@/lib/mock-data";
 import {
@@ -385,16 +386,18 @@ export async function fetchProfile(): Promise<FighterProfile | null> {
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
-  if (!data) return null;
+  return data ? rowToProfile(data) : null;
+}
 
-  return {
-    nickname: data.nickname ?? "",
-    discipline: data.discipline ?? "주짓수",
-    weightClass: data.weight_class ?? "",
-    gymName: data.gym_name ?? "",
-    years: data.years ?? "",
-    belt: data.belt ?? "해당 없음",
-  };
+// 내 공개 프로필 주소 (파이터 카드 QR). 로그인 안 했거나 데모 모드면 null.
+export async function fetchMyFighterPath(): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
+  const supabase = createClient();
+  if (!supabase) return null;
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user ? fighterPath(user.id) : null;
 }
 
 export async function saveProfile(p: FighterProfile): Promise<void> {

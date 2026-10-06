@@ -4,7 +4,7 @@ import { MOCK_GYMS } from "./mock-data";
 
 const createClient = vi.fn();
 vi.mock("@/lib/supabase/server", () => ({ createClient: () => createClient() }));
-const { getGymById, getGyms, getUpcomingEvents } = await import("./data.server");
+const { getFighterProfile, getGymById, getGyms, getUpcomingEvents } = await import("./data.server");
 
 describe("data.server — 실서비스에서 목업으로 조용히 대체하지 않기", () => {
   it("데모 모드(키 없음)에선 목업", async () => {
@@ -49,5 +49,23 @@ describe("data.server — 숨긴 체육관", () => {
     await getUpcomingEvents();
     expect(sb.calls[0].args[0]).toContain("gyms!inner(is_published)");
     expect(sb.calls[0].filters).toContainEqual(["eq", ["gyms.is_published", true]]);
+  });
+});
+
+describe("data.server — 공개 파이터 프로필", () => {
+  const uid = "3f2b8c1e-1d2a-4b5c-9d8e-0f1a2b3c4d5e";
+  const row = { id: uid, nickname: "철수", discipline: "복싱", weight_class: "-70kg", gym_name: "선릉 복싱", years: "2", belt: null, updated_at: "" };
+
+  it("이상한 주소는 DB를 조회하지 않고 null", async () => {
+    createClient.mockClear();
+    expect(await getFighterProfile("not-a-uuid")).toBeNull();
+    expect(createClient).not.toHaveBeenCalled();
+  });
+
+  it("닉네임이 있어야 공개", async () => {
+    createClient.mockResolvedValue(fakeSupabase({ responses: { "profiles.select": { data: row } } }).client);
+    expect(await getFighterProfile(uid)).toMatchObject({ nickname: "철수", discipline: "복싱", belt: "해당 없음" });
+    createClient.mockResolvedValue(fakeSupabase({ responses: { "profiles.select": { data: { ...row, nickname: "  " } } } }).client);
+    expect(await getFighterProfile(uid)).toBeNull();
   });
 });

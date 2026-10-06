@@ -66,6 +66,42 @@ export function offersDayPass(gym: Gym): boolean {
   return gym.dayPassPrice != null;
 }
 
+// 지역 = 구 단위 ("강남구 역삼동" → "강남구"). 체육관이 있는 구만, 많은 순.
+export function regionOf(gym: Gym): string {
+  return gym.district.trim().split(/\s+/)[0] ?? "";
+}
+
+export function regionsOf(gyms: Gym[]): string[] {
+  const count = new Map<string, number>();
+  for (const g of gyms) {
+    const r = regionOf(g);
+    if (r) count.set(r, (count.get(r) ?? 0) + 1);
+  }
+  return [...count.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "ko")).map(([r]) => r);
+}
+
+export interface GymFilter {
+  query?: string; // 이름·동네·주소·종목 검색 (띄어쓰기 무시)
+  region?: string | null;
+  discipline?: Discipline | null;
+  dayPassOnly?: boolean;
+  freeTrialOnly?: boolean;
+}
+
+const squash = (s: string) => s.replace(/\s+/g, "").toLowerCase();
+
+export function filterGyms(gyms: Gym[], f: GymFilter): Gym[] {
+  const q = squash(f.query ?? "");
+  return gyms.filter(
+    (g) =>
+      (!q || squash([g.name, g.district, g.address, ...g.disciplines].join(" ")).includes(q)) &&
+      (!f.region || regionOf(g) === f.region) &&
+      (!f.discipline || g.disciplines.includes(f.discipline)) &&
+      (!f.dayPassOnly || offersDayPass(g)) &&
+      (!f.freeTrialOnly || g.trialPrice === 0)
+  );
+}
+
 // 리뷰가 있어야 평점을 보여준다 (0개면 "★ 0" 대신 "새로 입점")
 export function hasReviews(gym: Gym): boolean {
   return gym.reviewCount > 0;

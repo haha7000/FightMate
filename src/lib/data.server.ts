@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { rowToGym, type Gym } from "@/lib/gyms";
 import { rowToEvent, todayKST, upcoming, type GymEvent } from "@/lib/events";
 import { MOCK_EVENTS, MOCK_GYMS } from "@/lib/mock-data";
+import { isUserId, rowToProfile } from "@/lib/profile";
+import type { FighterProfile } from "@/lib/store";
 
 // 서버 컴포넌트용 조회 함수.
 // - 데모 모드(Supabase 키 없음): 목데이터
@@ -78,4 +80,16 @@ export async function getEventById(id: string): Promise<GymEvent | undefined> {
   const { data, error } = await supabase.from("events").select("*").eq("id", id).maybeSingle();
   if (error) throw new DataError("이벤트", error);
   return data ? rowToEvent(data) : undefined;
+}
+
+// 공개 파이터 프로필 (카드 QR로 들어오는 페이지). 닉네임이 없으면 공개할 게 없으니 null.
+export async function getFighterProfile(userId: string): Promise<FighterProfile | null> {
+  if (!isUserId(userId)) return null;
+  const supabase = await createClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  if (error) throw new DataError("파이터 프로필", error);
+  if (!data?.nickname?.trim()) return null;
+  return rowToProfile(data);
 }
