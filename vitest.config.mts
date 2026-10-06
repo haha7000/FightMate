@@ -13,5 +13,12 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    coverage: {
+      provider: "v8",
+      // 서버 로직·API·데이터 계층 기준 (화면 컴포넌트는 E2E로 볼 영역이라 제외)
+      include: ["src/lib/**/*.ts", "src/app/**/route.ts", "src/proxy.ts"],
+      exclude: ["src/**/*.test.ts", "src/lib/database.types.ts", "src/lib/mock-data.ts", "src/lib/supabase/**"],
+      reporter: ["text-summary", "text"],
+    },
   },
 });
