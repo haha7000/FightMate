@@ -7,9 +7,14 @@ import { searchGymPlaces } from "@/lib/places.server";
 // GET /api/places?lat=37.49&lng=127.02&radius=3000&d=주짓수
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get("lat"));
-  const lng = Number(searchParams.get("lng"));
-  const radius = Number(searchParams.get("radius") ?? 3000);
+  // 값이 없을 때 Number(null) = 0 이 되어 (0, 0)을 검색하지 않도록 빈 값은 NaN으로
+  const num = (key: string) => {
+    const v = searchParams.get(key);
+    return v === null || v.trim() === "" ? NaN : Number(v);
+  };
+  const lat = num("lat");
+  const lng = num("lng");
+  const radius = num("radius");
   const d = searchParams.get("d");
 
   if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
