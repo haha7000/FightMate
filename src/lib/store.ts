@@ -18,6 +18,8 @@ export interface Booking {
   type: BookingType;
   status: BookingStatus;
   createdAt: string;
+  preferredTime?: string | null; // 오전 | 오후 | 저녁 | 상관없음
+  note?: string | null;
 }
 
 export interface FighterProfile {
@@ -75,6 +77,13 @@ export function addBooking(b: Omit<Booking, "id" | "createdAt" | "status">) {
   };
   write(KEYS.bookings, [booking, ...getBookings()]);
   return booking;
+}
+
+export function cancelBooking(id: string) {
+  write(
+    KEYS.bookings,
+    getBookings().map((b) => (b.id === id ? { ...b, status: "취소" as const } : b))
+  );
 }
 
 export const getProfile = () => read<FighterProfile>(KEYS.profile);

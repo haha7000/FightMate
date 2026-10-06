@@ -11,6 +11,7 @@ import {
 } from "@/lib/events";
 import {
   addReview as addReviewLocal,
+  cancelBooking as cancelBookingLocal,
   getBookings as getBookingsLocal,
   getProfile as getProfileLocal,
   getReviews as getReviewsLocal,
@@ -49,7 +50,35 @@ export async function fetchBookings(): Promise<Booking[]> {
     type: toBookingType(r.type),
     status: toBookingStatus(r.status),
     createdAt: r.created_at,
+    preferredTime: r.preferred_time,
+    note: r.note,
   }));
+}
+
+// 손님 본인 신청 취소 (진행 중인 신청만 — DB 함수가 최종 판단)
+export async function cancelBooking(id: string): Promise<{ error?: string }> {
+  const supabase = isSupabaseConfigured ? createClient() : null;
+  if (!supabase) {
+    cancelBookingLocal(id);
+    return {};
+  }
+  const { error } = await supabase.rpc("cancel_my_booking", { bid: id });
+  if (!error) return {};
+  if (error.message.includes("cannot_cancel")) return { error: "이미 처리된 신청이라 취소할 수 없어요" };
+  return { error: "취소하지 못했어요. 잠시 후 다시 시도해주세요." };
+}
+
+// 내가 참가 신청한 다가오는 이벤트 (내 예약 탭)
+export async function fetchMyEvents(): Promise<GymEvent[]> {
+  const supabase = isSupabaseConfigured ? createClient() : null;
+  if (!supabase) return [];
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await supabase.from("event_rsvps").select("events(*)").eq("user_id", user.id);
+  if (error) throw new Error(`신청한 이벤트를 불러오지 못했어요: ${error.message}`);
+  return upcoming(data.flatMap((r) => (r.events ? [rowToEvent(r.events)] : [])));
 }
 
 // ── 리뷰 ──────────────────────────────────────

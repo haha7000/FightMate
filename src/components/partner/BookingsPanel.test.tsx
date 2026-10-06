@@ -16,7 +16,7 @@ const { default: BookingsPanel } = await import("./BookingsPanel");
 
 const booking = (over: Partial<GymBooking>): GymBooking => ({
   id: "b1", name: "홍길동", phone: "010-1234-5678", date: "2026-10-10", type: "체험",
-  status: "신청됨", createdAt: "2026-10-06T01:00:00Z", statusChangedAt: null, ...over,
+  status: "신청됨", createdAt: "2026-10-06T01:00:00Z", statusChangedAt: null, preferredTime: null, note: null, ...over,
 });
 
 beforeEach(() => {
@@ -79,5 +79,18 @@ describe("관장 모드 신청 탭", () => {
     await user.click(screen.getByRole("button", { name: "확정하기" }));
     expect(await screen.findByText("권한이 없어요")).toBeTruthy();
     expect(screen.getByRole("button", { name: "확정하기" })).toBeTruthy(); // 여전히 새 신청에 있음
+  });
+
+  it("손님이 고른 시간대와 요청사항을 보여준다", async () => {
+    await setup([booking({ preferredTime: "저녁", note: "복싱 6개월 했어요\n주차 되나요?" })]);
+    expect(screen.getByText("저녁")).toBeTruthy();
+    expect(screen.getByText(/복싱 6개월 했어요/)).toBeTruthy();
+  });
+
+  it("손님이 취소한 신청은 지난 내역에", async () => {
+    const user = await setup([booking({ status: "취소" })]);
+    expect(screen.getByText("새로 들어온 신청이 없어요")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /지난 내역/ }));
+    expect(screen.getByText("홍길동")).toBeTruthy();
   });
 });

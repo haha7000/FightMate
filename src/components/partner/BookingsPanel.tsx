@@ -116,7 +116,9 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
                     {b.name} <span className="text-[13px] font-medium text-muted">· {b.type}</span>
                   </p>
                   <p className="mt-0.5 text-[13px] text-muted tabular-nums">
-                    희망일 <b className="text-ink">{b.date}</b> · 신청 {monthDay(b.createdAt)}
+                    희망일 <b className="text-ink">{b.date}</b>
+                    {b.preferredTime && b.preferredTime !== "상관없음" && <b className="text-ink"> {b.preferredTime}</b>} · 신청{" "}
+                    {monthDay(b.createdAt)}
                     {b.statusChangedAt && b.status !== "신청됨" && ` · ${monthDay(b.statusChangedAt)} ${b.status}`}
                   </p>
                 </div>
@@ -124,6 +126,13 @@ export default function BookingsPanel({ gymId, gymName }: { gymId: string; gymNa
                   {b.status}
                 </span>
               </div>
+
+              {b.note && (
+                <p className="mt-2 whitespace-pre-line rounded-lg bg-field px-3 py-2 text-[13px] leading-relaxed">
+                  <span className="mr-1 font-semibold text-muted">요청사항</span>
+                  {b.note}
+                </p>
+              )}
 
               {b.status === "거절" ? (
                 // 거절했던 신청: 자리가 나면 먼저 연락하고, 손님이 오겠다면 다시 확정

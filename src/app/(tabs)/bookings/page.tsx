@@ -2,17 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import QRCode from "qrcode";
-import { QrCode, Ticket } from "lucide-react";
+import { CalendarDays, Ticket } from "lucide-react";
 import { type Booking } from "@/lib/store";
-import { fetchBookings } from "@/lib/data.client";
+import { dateParts, type GymEvent } from "@/lib/events";
+import { fetchBookings, fetchMyEvents } from "@/lib/data.client";
+import BookingCard from "@/components/BookingCard";
 
 export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[] | null>(null);
+  const [events, setEvents] = useState<GymEvent[]>([]);
 
   useEffect(() => {
     fetchBookings().then(setBookings);
+    fetchMyEvents()
+      .then(setEvents)
+      .catch(() => setEvents([]));
   }, []);
+
+  const empty = bookings !== null && bookings.length === 0 && events.length === 0;
 
   return (
     <main className="min-h-dvh">
@@ -20,7 +27,7 @@ export default function BookingsPage() {
         <h1 className="text-[22px] font-bold">내 예약</h1>
       </header>
 
-      {bookings === null ? null : bookings.length === 0 ? (
+      {empty && (
         <div className="flex flex-col items-center px-6 pt-24 text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-full bg-field">
             <Ticket size={28} className="text-muted" />
@@ -31,79 +38,47 @@ export default function BookingsPage() {
             체육관 둘러보기
           </Link>
         </div>
-      ) : (
-        <ul className="flex flex-col gap-2 p-4">
-          {bookings.map((b) => (
-            <BookingCard key={b.id} booking={b} />
-          ))}
-        </ul>
+      )}
+
+      {events.length > 0 && (
+        <section className="px-4 pt-5">
+          <h2 className="text-[15px] font-bold">신청한 이벤트</h2>
+          <ul className="mt-2 flex flex-col gap-2">
+            {events.map((e) => {
+              const p = dateParts(e.date);
+              return (
+                <li key={e.id}>
+                  <Link href={`/event/${e.id}`} className="flex items-center gap-3 rounded-xl border border-line bg-white p-3 active:bg-field">
+                    <span className="w-12 shrink-0 rounded-lg bg-night py-1.5 text-center text-white">
+                      <span className="block font-num text-[18px] leading-tight">
+                        {p.m}.{p.d}
+                      </span>
+                      <span className="block font-num text-[10px] tracking-[0.15em] text-brand-bright">{p.en}</span>
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[15px] font-semibold">{e.title}</span>
+                      <span className="flex items-center gap-1 text-[12px] text-muted">
+                        <CalendarDays size={12} /> {e.kind} · {e.startTime} · {e.gymName}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {bookings && bookings.length > 0 && (
+        <section className="px-4 pt-5 pb-4">
+          {events.length > 0 && <h2 className="text-[15px] font-bold">체험·1일권</h2>}
+          <ul className="mt-2 flex flex-col gap-2">
+            {bookings.map((b) => (
+              <BookingCard key={b.id} booking={b} />
+            ))}
+          </ul>
+        </section>
       )}
     </main>
-  );
-}
-
-function BookingCard({ booking }: { booking: Booking }) {
-  const [qr, setQr] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-
-  async function toggleQr() {
-    if (!qr) {
-      // TODO(M2): 서버 서명된 입장 토큰으로 교체
-      setQr(await QRCode.toDataURL(`fightmate:${booking.id}`, { width: 360, margin: 1 }));
-    }
-    setOpen((v) => !v);
-  }
-
-  return (
-    <li className="rounded-xl border border-line bg-white p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-[16px] font-semibold">{booking.gymName}</p>
-          <p className="mt-1 text-[13px] text-muted tabular-nums">
-            {booking.type} · {booking.date} · {booking.name}
-          </p>
-        </div>
-        <span
-          className={`shrink-0 rounded-md px-2 py-1 text-[12px] font-semibold ${
-            booking.status === "확정"
-              ? "bg-ink text-white"
-              : booking.status === "거절"
-                ? "bg-red-50 text-red-700"
-                : booking.status === "사용 완료"
-                  ? "bg-field text-muted"
-                  : "bg-brand-tint text-brand"
-          }`}
-        >
-          {booking.status === "신청됨" ? "확인 중" : booking.status}
-        </span>
-      </div>
-
-      {booking.status === "거절" && (
-        <div className="mt-3 rounded-lg bg-field px-3 py-3 text-[13px] leading-relaxed">
-          체육관 사정으로 이번 신청은 어려워요. 자리가 생기면 체육관에서 먼저 연락드릴 수 있어요.
-          <Link href={`/gym/${booking.gymId}`} className="mt-1 block font-semibold text-brand">
-            다른 날짜로 다시 신청하기
-          </Link>
-        </div>
-      )}
-
-      {(booking.status === "신청됨" || booking.status === "확정") && (
-        <button
-          onClick={toggleQr}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-lg bg-field py-2.5 text-[14px] font-semibold active:bg-line"
-        >
-          <QrCode size={16} />
-          {open ? "QR 접기" : "입장 QR 보기"}
-        </button>
-      )}
-
-      {open && qr && (
-        <div className="mt-3 flex flex-col items-center py-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={qr} alt="입장 QR" className="h-48 w-48" />
-          <p className="mt-2 text-[12px] text-muted">입장 시 직원에게 보여주세요</p>
-        </div>
-      )}
-    </li>
   );
 }

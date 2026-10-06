@@ -17,6 +17,8 @@ export interface GymBooking {
   status: BookingStatus;
   createdAt: string;
   statusChangedAt: string | null; // 거절·확정한 시각 (2026-10-06 SQL 실행 전이면 null)
+  preferredTime: string | null;
+  note: string | null;
 }
 
 function db() {
@@ -42,6 +44,8 @@ export async function fetchGymBookings(gymId: string): Promise<GymBooking[]> {
     status: toBookingStatus(r.status),
     createdAt: r.created_at,
     statusChangedAt: r.status_changed_at ?? null,
+    preferredTime: r.preferred_time ?? null,
+    note: r.note ?? null,
   }));
 }
 
